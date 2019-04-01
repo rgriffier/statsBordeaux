@@ -1,0 +1,356 @@
+---
+title: "Stats bordeaux package"
+output: html_notebook
+author: Romain GRIFFIER
+date: 01/04/2019
+---
+
+# Package pour réaliser les statistiques descriptives et comparatives ainsi que le reporting
+L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.
+Ce package repose sur les fonctions de base de R.
+
+## Installation
+```{r, eval = F}
+# install.packages("devtools")
+devtools::install_github("rgriffier/statsBordeaux")
+```
+
+## Chargement du paquet
+```{r}
+library(statsBordeaux)
+```
+
+## Chargement des données
+### Chargement du jeu de données
+Ce tutoriel se base sur le dataset `mtcars` inclu dans R.  
+Dans ce jeu de données, les variables qualitatives ('vs' et 'am') sont codées en 0/1.
+```{r}
+## chargement du jeu de donnée
+data(mtcars)
+
+## affichage de la structure du data.frame
+str(mtcars)
+```
+
+### Chargement des labels des modalitées des différentes variables qualitatives
+Pour les variables qualitatives, on charge un data.frame de 3 colonnes :  
+- `Variable` : nom de la variable, tel que renseigné dans le dataset.  
+- `Modality` : nombre représentant la modalité, tel que renseigné dans le dataset.  
+- `Label` : label de la modalité, tel que souhaité pour le rendu des résultats.
+```{r}
+## création du data.frame contenant les labels des différentes modalitées des variables qualitatives
+labels <- data.frame(Variable = c("vs", "vs", "am", "am"), 
+                     Modality = c(0, 1, 0, 1),
+                     Label = c("V-shaped", "Straight", "Automatic", "Manual"))
+labels
+```
+
+## Data management
+### ÉTAPE 1 : vérification du contenu du data.frame contenant les données à analyser
+On vérifie que le data.frame contenant le jeu de donnée contient uniquement des chiffres grace à la fonction `checkNotDigitInDataframe()`.  
+Dans le cas où la fonction `checkNotDigitInDataframe()` renvoie `FALSE`, il est possible de récupérer un data.frame contenant la position des cellules contenant des éléments non-numériques en ajoutant le paramètre `returnError = TRUE`. La position de ces cellules est donnée au format Excel (ex : A2).
+```{r, eval = FALSE}
+## vérification que le jeu de donnée ne contient que des chiffres
+statsBordeaux::checkNotDigitInDataframe(mtcars)
+```
+
+### ÉTAPE 2 : labélisation des modalité des variables qualiatives
+Comme le data.frame d'entrée ne contient que des nombre, il faut labéliser les modalités des variables qualitatives.  
+On effectue cette labélisation grâce à la fonction `labellisationDataFrame()` à partir du data.frame `labels` créé précédemment.  
+Cette fonction gère à la fois :
+
+- La conversion des variables présentes dans le data.frame `labels` en tant que `factors`.
+- La labélisation des différentes modalitées de ces variables.
+```{r}
+## association à chaque modalité des variables qualitatives du label correspondant
+## et conversion de ces variables en factor
+labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
+head(labelledData)
+```
+
+### ÉTAPE 3 (optionnelle) : labélisation des variables
+Il est possible d'associer à chaque variable du data.frame contenant le jeu de donnée un label (afin d'améliorer la sortie des résultats) grace à la fonction `setLabelToVariable()`.
+Le label des variables est contenu dans un attribut `var_label`.
+```{r}
+## création du data.frame contenant le label de chaques variables
+labelVariable <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt",
+                                         "qsec", "vs", "am", "gear", "carb"),
+                            Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)",
+                                      "Gross horsepower ", "Rear axle ratio", "Weight (1000 lbs)",
+                                      "1/4 mile time", "Engine", "Transmission", "Number of forward gears",
+                                      "Number of carburetors"),
+                            stringsAsFactors = FALSE)
+
+## labélisation des variables du data.frame
+labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
+
+## fonction pour récupérer les labels d'un data.frame labelliséé
+statsBordeaux::getLabelFromVariable(labelledData)
+
+## attribut stockant le label d'une variable
+nomVariable <- attributes(labelledData[, 1])$var_label
+```
+
+
+### ÉTAPE 4 : vérification de la structure finale du fichier à analyser
+On vérifie la structure du data.frame contenant le dataset.  
+Toutes les variables à analyser doivent être de classe  `numeric` (`integer` ou `double`) ou de classe `factor`.
+```{r}
+## description des méta-données
+list_variableFormat <- do.call(rbind, (lapply(colnames(labelledData), function(x){
+  data.frame(VAR = x,
+             VAR_LABEL = attributes(labelledData[, x])$var_label,
+             CLASS = class(labelledData[, x]),
+             LEVELS = paste0(levels(labelledData[, x]), collapse = ", "))
+})))
+list_variableFormat
+```
+
+## Statistiques descriptives
+### ÉTAPE 1 : statistiques descriptives de toute la population
+On créé un tableau de sortie vierge à partir de la fonction `createOutput()`. C'est ce dernier quiva contenir la description de nos variables.  
+On réalise les statistiques descriptives des données avec les fonctions `statsQT()` et `statsQL()` (en fonction de la nature quantitative ou qualitative de la variable à décrire).
+```{r}
+## création du tableau de sortie vierge
+description <-  statsBordeaux::createOutput()
+
+## boucle qui va traiter chaque colonne du data.frame les unes après les autres
+for(i in 1:ncol(labelledData)){
+  # cas où la colonne en cours est de type quantitative
+  if(is.numeric(labelledData[, i])){
+    description <- statsBordeaux::statsQT(output = description,
+                                          input = labelledData,
+                                          variable = colnames(labelledData)[i])
+  }
+  # cas où la colonne en cours est de type qualitative
+  else if(is.factor(labelledData[, i])){
+    description <- statsBordeaux::statsQL(output = description,
+                                          input = labelledData,
+                                          variable = colnames(labelledData)[i])
+  }
+  # autre cas non pris en charge
+  else {
+    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
+  }
+}
+
+head(description, n = 5)
+```
+
+### ÉTAPE 2 : statistiques descriptives en fonction d'une variable qualitative de groupe
+On réalise les statistiques descriptives des données en fonction d'une variable qualitative de comparaison en rajoutant un paramètre `group` aux fonction `statsQL()` et `statsQT()`.
+On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher une description globale des variable.
+```{r}
+## création du tableau de sortie vierge
+comparaison <-  statsBordeaux::createOutput()
+
+## on défini la variable de groupe
+group <- "vs"
+
+## boucle qui va traiter chaque colonne du data.frame les unes après les autres
+for(i in 1:ncol(labelledData)){
+  # on ne réalise pas la comparaison de la variable group avec elle-même
+  if(colnames(labelledData)[i] != group){
+    # cas où la colonne en cours est de type quantitative
+    if(is.numeric(labelledData[, i])){
+      comparaison <- statsBordeaux::statsQT(output = comparaison,
+                                            input = labelledData,
+                                            variable = colnames(labelledData)[i],
+                                            group = group,
+                                            all = TRUE)
+    }
+    # cas où la colonne en cours est de type qualitative
+    else if(is.factor(labelledData[, i])){
+      comparaison <- statsBordeaux::statsQL(output = comparaison,
+                                            input = labelledData,
+                                            variable = colnames(labelledData)[i],
+                                            group = group,
+                                            all = TRUE)
+    }
+    # autre cas non pris en charge
+    else {
+      print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
+    }
+  }
+}
+
+head(comparaison, n = 5)
+```
+
+### ÉTAPE 3 : statistiques comparatives en fonction d'une variable qualitative de groupe
+On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsQL()` et `statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests :  
+
+- Comparaison de fréquences :
+    * Si tous les effectifs théoriques sont supérieurs ou égaux à 5, un Chi² est réalisé.
+    * Si un des effectifs théoriques est inférieur à 5 mais qu'ils sont tous supérieurs ou égaux à 3, un Chi² avec correction de Yates est réalisé.
+    * Sinon un test de Fisher est réalisé.
+- Comparaison de paramètre quantitatifs :
+    * Cas où la variable de groupe est composée de deux modalitées :
+        + Si tous les effectifs sont supérieurs ou égaux à 30, l'hypothèse de normalité est considérée comme vraie. Un test de Student (ou un test de Welsh en fonction de l'égalité des variance entre les groupes) est réalisé. Dans le cas d'absence de variabilité au sein d'un ou des deux groupes, aucun test n'est réalisé.
+        + Si un des effectifs est inférieur à 30, l'hypothèse de normalité n'est pas considérée comme vraie. Un test de Wilcoxon est réalisé.
+    * Cas où la variable de groupe est composée de plus de deux modalitées :
+        + Si tous les effectifs sont supérieurs ou égaux à 30, l'hypothèse de normalité est considérée vraie. Un test d'ANOVA est réalisé.
+        + Si un des effectifs est inférieur à 30, l'hypothèse de normalité n'est pas considérée vraie. Un test non-paramétrique de Kruskal-Wallis est réalisé.
+```{r}
+## création du tableau de sortie vierge
+statsComparatives <-  statsBordeaux::createOutput()
+
+## on défini la variable de groupe
+group <- "vs"
+
+## boucle qui va traiter chaque colonne du data.frame les unes après les autres
+for(i in 1:ncol(labelledData)){
+  # on ne réalise pas la comparaison de la variable group avec elle-même
+  if(colnames(labelledData)[i] != group){
+    # cas où la colonne en cours est de type quantitative
+    if(is.numeric(labelledData[, i])){
+      statsComparatives <- statsBordeaux::statsQT(output = statsComparatives,
+                                                  input = labelledData,
+                                                  variable = colnames(labelledData)[i],
+                                                  group = group,
+                                                  p_value = TRUE)
+    }
+    # cas où la colonne en cours est de type qualitative
+    else if(is.factor(labelledData[, i])){
+      statsComparatives <- statsBordeaux::statsQL(output = statsComparatives,
+                                                  input = labelledData,
+                                                  variable = colnames(labelledData)[i],
+                                                  group = group,
+                                                  p_value = TRUE)
+    }
+    # autre cas non pris en charge
+    else {
+      paste0(colnames(labelledData)[i], " n'a pas été décrite du fait de son type (", class(labelledData[, i]), ")")
+    }
+  }
+}
+
+head(statsComparatives)
+```
+
+### ÉTAPE 4 : reporting
+Le reporting utilise le package `officier`.  
+Le reporting se base sur un template (document Word). Ce dernier peut contenir une page de garde et des styles. Ce sont les styles qui sont utilisées dans les différentes fonctions ci-dessous pour gérer la mise en page.  
+Les styles sont disponibles via la fonction `styles_info(doc)` dans la colonne `style_name` et dépendent du template utilisé.
+```{r, eval = FALSE}
+## chargement du package officier
+library(officer)
+
+## création d'un document vierge
+doc <- officer::read_docx()
+
+## ajout d'une table des matières puis d'un saut de page
+doc <- statsBordeaux::addTableOfContent(doc, title = "Table des matières", style = "Normal", level = 3)
+doc <- statsBordeaux::addBreak(doc)
+
+## ajout d'un titre et d'un sous-titre
+doc <- statsBordeaux::addTextElement(doc, title = "Statistiques descriptives", style = "heading 1")
+doc <- statsBordeaux::addTextElement(doc, title = "Statistiques descriptives du dataset mtcars ", style = "heading 2")
+## ajout d'un tableau de sortie puis d'un saut de page
+doc <- statsBordeaux::addTable(doc, table = description, title = "Description du dataset mtcars",
+                               displayTestName = FALSE, modalitySize = 2, valueSize = 1.5)
+doc <- statsBordeaux::addBreak(doc)
+
+## ajout sous-titre puis d'un tableau de sortie
+doc <- statsBordeaux::addTextElement(doc, title = "Statistiques descriptives du dataset mtcars en fonction de engine",
+                                     style = "heading 2")
+doc <- statsBordeaux::addTable(doc, table = comparaison, title = "Description du dataset mtcars en fonction de engine",
+                               displayTestName = FALSE, modalitySize = 2, valueSize = 1.5)
+## section en cours au format paysage
+doc <- statsBordeaux::setLandscape(doc, add_break = TRUE)
+
+## ajout titre puis d'un sous-titre puis d'un tableau de sortie (le tout au format paysage)
+doc <- statsBordeaux::addTextElement(doc, title = "Statistiques comparatives", style = "heading 1")
+doc <- statsBordeaux::addTextElement(doc, title = "Statistiques comparatives du dataset mtcars en fonction de engine",
+                                     style = "heading 2")
+doc <- statsBordeaux::addTable(doc, table = statsComparatives,
+                               title = "Comparaison du dataset mtcars en fonction de engine",
+                               displayTestName = TRUE, modalitySize = 2, valueSize = 1.5)
+doc <- statsBordeaux::setLandscape(doc, add_break = FALSE)
+
+## ajout d'une table des tableaux
+doc <- statsBordeaux::addTableOfTables(doc, title = "Table des tableaux", style = "Normal")
+## ajout d'une table des graphiques
+doc <- statsBordeaux::addTableOfGraphics(doc, title = "Table des graphiques", style = "Normal")
+
+## on sauvegarde le document dans le workspace
+print(doc, target = 'stat.docx')
+```
+
+## CAS PARTICULIERS
+### Gestion des 'non-applicables'
+La gestion des 'non-applicables' fait intervenir la fonction `manageNotApplicable()`.  
+Cette fonction renvoie une liste de deux éléments :
+
+1. Le data.frame d'entrée duquel ont été ôtés les 'non-applicable'
+2. Une liste de vecteurs logiques :
+    - `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
+    - `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
+```{r}
+data(mtcars)
+
+## on créé une colonne qui contient le nombre de vitesse dans le cas d'une transmission manuelle, sinon qui contient "NonApp"
+mtcars$nSpeed <- c(5, 6, 5, "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
+                   "NonApp", "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
+                   "NonApp", "NonApp", "NonApp", 6, 6, 6, "NonApp", "NonApp",
+                   "NonApp", "NonApp", "NonApp", 5, NA, 6, 5, 6, 6, 5)
+
+## on utilise la fonction manageNotApplicable() pour gérer les non-applicable,
+## représentés ici par des 'NonApp'
+notApplicable <- statsBordeaux::manageNotApplicable(mtcars, "NonApp")
+
+## on récupère le data.frame sans les 'non-applicables'
+mtcars <- notApplicable[[1]]
+
+## on récupère la liste de vecteurs logiques contenant les lignes qui doivent être analysées.
+applicable <- notApplicable[[2]]
+
+## vérification que le jeu de donnée ne contient que des chiffres
+onlyDigit <- statsBordeaux::checkNotDigitInDataframe(mtcars)
+
+## labellisation des modalitées des variables qualitatives
+# on rajoute les labels des modalités de la nouvelle variable qualitative
+labels <- rbind(labels, data.frame(Variable = c("nSpeed", "nSpeed"),
+                                   Modality = c(5, 6),
+                                   Label = c("5 vitesses", "6 vitesses")))
+# labellisation des modalitées des variables qualitatives
+labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
+
+## labélisation des variables du data.frame
+labelVariable <- rbind(labelVariable,
+                       data.frame(Variable = "nSpeed",
+                                  Label = "Nombre de vitesses (boite manuelle)"))
+labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
+
+##----------------
+
+## création du tableau de sortie vierge
+description <-  statsBordeaux::createOutput()
+
+## boucle qui va traiter chaque colonne du data.frame les unes après les autres
+for(i in 1:ncol(labelledData)){
+  # cas où la colonne en cours est de type quantitative
+  if(is.numeric(labelledData[, i])){
+    description <- statsBordeaux::statsQT(output = description,
+                                          input = statsBordeaux::subset_withAttributes(
+                                            labelledData,
+                                            applicable[[colnames(labelledData)[i]]]),
+                                          variable = colnames(labelledData)[i])
+  }
+  # cas où la colonne en cours est de type qualitative
+  else if(is.factor(labelledData[, i])){
+    description <- statsBordeaux::statsQL(output = description,
+                                          input = statsBordeaux::subset_withAttributes(
+                                            labelledData,
+                                            applicable[[colnames(labelledData)[i]]]),
+                                          variable = colnames(labelledData)[i])
+  }
+  # autre cas non pris en charge
+  else {
+    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
+  }
+}
+
+description[c(40:44, 55:57), ]
+
+```

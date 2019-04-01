@@ -1,0 +1,16 @@
+Package: statsBordeaux
+Type: Package
+Title: Helpful tool to describe dataset
+Version: 0.1.0
+Author: @R: person("Romain", "GRIFFIER", role=c("aut", "cre"), email="romain.griffier@chu-bordeaux.fr")
+Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
+Description: Method to describe numeric and qualitative variable from a dataset and generate the reporting.
+Imports:
+    devEMF,
+    flextable,
+    magrittr,
+    officer
+License: MIT
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 6.1.1
