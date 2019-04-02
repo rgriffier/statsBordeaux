@@ -29,7 +29,7 @@ Chargement des données
 ### Chargement du jeu de données
 
 Ce tutoriel se base sur le dataset `mtcars` inclu dans R.
-Dans ce jeu de données, les variables qualitatives ('vs' et 'am') sont codées en 0/1.
+Dans ce jeu de données, les variables qualitatives (`vs` et `am`) sont codées en 0/1.
 
 ``` r
 ## chargement du jeu de donnée
@@ -88,11 +88,11 @@ statsBordeaux::checkNotDigitInDataframe(mtcars)
 
 ### ÉTAPE 2 : labélisation des modalité des variables qualiatives
 
-Comme le data.frame d'entrée ne contient que des nombre, il faut labéliser les modalités des variables qualitatives.
+Comme le data.frame d'entrée ne contient que des nombres, il faut labéliser les modalités des variables qualitatives.
 On effectue cette labélisation grâce à la fonction `labellisationDataFrame()` à partir du data.frame `labels` créé précédemment.
 Cette fonction gère à la fois :
 
--   La conversion des variables présentes dans le data.frame `labels` en tant que `factors`.
+-   La conversion des variables présentes dans le data.frame `labels` en tant que `factor`.
 -   La labélisation des différentes modalitées de ces variables.
 
 ``` r
@@ -158,10 +158,15 @@ Toutes les variables à analyser doivent être de classe `numeric` (`integer` ou
 ``` r
 ## description des méta-données
 list_variableFormat <- do.call(rbind, (lapply(colnames(labelledData), function(x){
-  data.frame(VAR = x,
-             VAR_LABEL = attributes(labelledData[, x])$var_label,
-             CLASS = class(labelledData[, x]),
-             LEVELS = paste0(levels(labelledData[, x]), collapse = ", "))
+  varLabel <- attributes(labelledData[, x])$var_label
+  if(is.null(varLabel)){
+    varLabel <- NA
+  }
+  descVariable <- data.frame(VAR = x,
+                             VAR_LABEL = varLabel,
+                             CLASS = class(labelledData[, x]),
+                             LEVELS = paste0(levels(labelledData[, x]), collapse = ", "))
+  return(descVariable)
 })))
 list_variableFormat
 ```
@@ -406,13 +411,18 @@ CAS PARTICULIERS
 
 ### Gestion des 'non-applicables'
 
-La gestion des 'non-applicables' fait intervenir la fonction `manageNotApplicable()`.
+La gestion des 'non-applicables' fait intervenir la fonction `manageNotApplicable()`. Cette fonction prend 2 paramètres d'entrée :
+
+-   `df`, un data.frame, contenant le jeu de donnée à décrire.
+-   `notApplicableChar`, un vecteur de longueur 1 contenant la façon dont sont représentés les 'non-applicables' dans les données.
+
 Cette fonction renvoie une liste de deux éléments :
 
 1.  Le data.frame d'entrée duquel ont été ôtés les 'non-applicable'
 2.  Une liste de vecteurs logiques :
-    -   `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
-    -   `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
+
+-   `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
+-   `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
 
 ``` r
 data(mtcars)
@@ -453,25 +463,25 @@ labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
 ##----------------
 
 ## création du tableau de sortie vierge
-description <-  statsBordeaux::createOutput()
+descriptionNonAvailable <-  statsBordeaux::createOutput()
 
 ## boucle qui va traiter chaque colonne du data.frame les unes après les autres
 for(i in 1:ncol(labelledData)){
   # cas où la colonne en cours est de type quantitative
   if(is.numeric(labelledData[, i])){
-    description <- statsBordeaux::statsQT(output = description,
-                                          input = statsBordeaux::subset_withAttributes(
-                                            labelledData,
-                                            applicable[[colnames(labelledData)[i]]]),
-                                          variable = colnames(labelledData)[i])
+    descriptionNonAvailable <- statsBordeaux::statsQT(output = descriptionNonAvailable,
+                                                      input = statsBordeaux::subset_withAttributes(
+                                                        labelledData,
+                                                        applicable[[colnames(labelledData)[i]]]),
+                                                      variable = colnames(labelledData)[i])
   }
   # cas où la colonne en cours est de type qualitative
   else if(is.factor(labelledData[, i])){
-    description <- statsBordeaux::statsQL(output = description,
-                                          input = statsBordeaux::subset_withAttributes(
-                                            labelledData,
-                                            applicable[[colnames(labelledData)[i]]]),
-                                          variable = colnames(labelledData)[i])
+    descriptionNonAvailable <- statsBordeaux::statsQL(output = descriptionNonAvailable,
+                                                      input = statsBordeaux::subset_withAttributes(
+                                                        labelledData,
+                                                        applicable[[colnames(labelledData)[i]]]),
+                                                      variable = colnames(labelledData)[i])
   }
   # autre cas non pris en charge
   else {
@@ -479,7 +489,7 @@ for(i in 1:ncol(labelledData)){
   }
 }
 
-description[c(40:44, 55:57), ]
+descriptionNonAvailable[c(40:44, 55:57), ]
 ```
 
     ##                   Variable       Modality  Description            All
