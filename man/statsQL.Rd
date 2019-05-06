@@ -6,7 +6,7 @@
 \usage{
 statsQL(output, input, variable, group = NULL, group_str = NULL,
   p_value = FALSE, forcedTest = NULL, all = NA_asModality,
-  round = 3, NA_asModality = FALSE, NA_group_AsModality = TRUE)
+  round = 3, NA_asModality = FALSE, NA_group_AsModality = FALSE)
 }
 \arguments{
 \item{output}{a data.frame, containing a previously generated data.frame or a new data.frame.
