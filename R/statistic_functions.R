@@ -1102,7 +1102,7 @@ Generate a nex output with createOutput() function.")
 #'                   variable = "vs",
 #'                   group = "am")
 statsQL <- function(output, input, variable, group = NULL, group_str = NULL, p_value = FALSE, forcedTest = NULL,
-                    all = NA_asModality, round = 3, NA_asModality = FALSE, NA_group_AsModality = TRUE) {
+                    all = NA_asModality, round = 3, NA_asModality = FALSE, NA_group_AsModality = FALSE) {
 
   if(!is.data.frame(output)){
     stop("output must be a data.frame")
@@ -1390,14 +1390,14 @@ statsQL <- function(output, input, variable, group = NULL, group_str = NULL, p_v
             if(!is.null(group_str)){
               fisherTest <- fisher.test(x = inputSubData[, variable],
                                         y = inputSubData[, group],
-                                        simulate.p.value = TRUE)
+                                        simulate.p.value = FALSE)
             }
             # Cas où l'on affiche les statistiques de test entre l'ensemble des sous-groupes, la colonne p-value
             # correspond aux tests faits sur l'ensemble des sous-groupes
             else {
               fisherTest <- fisher.test(x = input[, variable],
                                         y = input[, group],
-                                        simulate.p.value = TRUE)
+                                        simulate.p.value = FALSE)
             }
             # Sauvegarde des résultats du Fisher
             currentResult[1, 1] <- trimws(gsub('\n\t', '', fisherTest$method))
@@ -1496,14 +1496,14 @@ statsQL <- function(output, input, variable, group = NULL, group_str = NULL, p_v
           if(!is.null(group_str)){
             fisherTest <- fisher.test(x = inputSubData[, variable],
                                       y = inputSubData[, group],
-                                      simulate.p.value = TRUE)
+                                      simulate.p.value = FALSE)
           }
           # Cas où l'on affiche les statistiques de test entre l'ensemble des sous-groupes, la colonne p-value
           # correspond aux tests faits sur l'ensemble des sous-groupes
           else {
             fisherTest <- fisher.test(x = input[, variable],
                                       y = input[, group],
-                                      simulate.p.value = TRUE)
+                                      simulate.p.value = FALSE)
           }
 
           # Sauvegarde des résultats du Fisher
