@@ -1388,16 +1388,32 @@ statsQL <- function(output, input, variable, group = NULL, group_str = NULL, p_v
             # Cas où l'on affiche les statistiques de test entre certains sous-groupes, la colonne p-value
             # correspond aux tests faits sur les sous-modalités affichées
             if(!is.null(group_str)){
-              fisherTest <- fisher.test(x = inputSubData[, variable],
-                                        y = inputSubData[, group],
-                                        simulate.p.value = FALSE)
+
+              fisherTest <- tryCatch({
+                fisher.test(x = inputSubData[, variable],
+                            y = inputSubData[, group],
+                            simulate.p.value = FALSE)
+              }, error = function(e) {
+                fisher.test(x = inputSubData[, variable],
+                            y = inputSubData[, group],
+                            simulate.p.value = TRUE)
+              })
+
             }
             # Cas où l'on affiche les statistiques de test entre l'ensemble des sous-groupes, la colonne p-value
             # correspond aux tests faits sur l'ensemble des sous-groupes
             else {
-              fisherTest <- fisher.test(x = input[, variable],
-                                        y = input[, group],
-                                        simulate.p.value = FALSE)
+
+              fisherTest <- tryCatch({
+                fisher.test(x = input[, variable],
+                            y = input[, group],
+                            simulate.p.value = FALSE)
+              }, error = function(e) {
+                fisher.test(x = input[, variable],
+                            y = input[, group],
+                            simulate.p.value = TRUE)
+              })
+
             }
             # Sauvegarde des résultats du Fisher
             currentResult[1, 1] <- trimws(gsub('\n\t', '', fisherTest$method))
@@ -1494,16 +1510,28 @@ statsQL <- function(output, input, variable, group = NULL, group_str = NULL, p_v
           # Cas où l'on affiche les statistiques de test entre certains sous-groupes, la colonne p-value
           # correspond aux tests faits sur les sous-modalités affichées
           if(!is.null(group_str)){
-            fisherTest <- fisher.test(x = inputSubData[, variable],
-                                      y = inputSubData[, group],
-                                      simulate.p.value = FALSE)
+            fisherTest <- tryCatch({
+              fisher.test(x = inputSubData[, variable],
+                          y = inputSubData[, group],
+                          simulate.p.value = FALSE)
+            }, error = function(e) {
+              fisher.test(x = inputSubData[, variable],
+                          y = inputSubData[, group],
+                          simulate.p.value = TRUE)
+            })
           }
           # Cas où l'on affiche les statistiques de test entre l'ensemble des sous-groupes, la colonne p-value
           # correspond aux tests faits sur l'ensemble des sous-groupes
           else {
-            fisherTest <- fisher.test(x = input[, variable],
-                                      y = input[, group],
-                                      simulate.p.value = FALSE)
+            fisherTest <- tryCatch({
+              fisher.test(x = input[, variable],
+                          y = input[, group],
+                          simulate.p.value = FALSE)
+            }, error = function(e) {
+              fisher.test(x = input[, variable],
+                          y = input[, group],
+                          simulate.p.value = TRUE)
+            })
           }
 
           # Sauvegarde des résultats du Fisher
