@@ -54,6 +54,31 @@ getSubGroupFromDataFrame <- function(df, variable, group, NA_group_AsModality = 
 }
 
 
+
+#' @title A conveinient method to check if data.frame contain only factor or numeric variable
+#' @description A conveinient metho to check if data.frame contain only factor or numeric variable
+#' @param data a data.frame
+#' @return a boolean vector of length one
+#' @noRd
+#' @examples
+#' df <- data.frame(X1 = c(0, 1, 2, 1, 2, 1, 2),
+#'                  X2 = c(0, 1, 0, 1, 1, 0, 0))
+#' checkIfNumericOrFactor(df)
+checkIfNumericOrFactor <- function(data){
+  result <- lapply(data, function(x){
+    any(c(is.numeric(x), is.factor(x)))
+  })
+  if(any(!unlist(result))){
+    errorVariable <- unlist(result)[!unlist(result)]
+    warning(paste0(names(errorVariable), " is not factor or numeric", collapse = "\n"), call. = FALSE)
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
+}
+
+
+
 #' @title format some float in the french p-value format for display usage
 #' @description manage the display of p-value format in french format
 #' @param pvalues a numeric, witch need to be formated
@@ -360,3 +385,6 @@ statQL <- function(input, variable, round = 3, NA_asModality = FALSE) {
 
   return(output)
 }
+
+
+

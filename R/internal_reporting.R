@@ -176,6 +176,90 @@ displayTable <- function(table, displayTestName, modalitySize, descriptionSize, 
 }
 
 
+#' @title An internal method to generate a regular table based on data.frame generate by regression function from statsBordeaux package
+#' @description An internal method to generate a regular table based on data.frame generate by regression function from statsBordeaux package
+#' @param table a data.frame containing regression data generate by statsBordeaux package
+#' @param modalitySize double, size in inch of the modality column
+#' @param sampleSize double, size in inch of the sample size column
+#' @param parameterSize double, size in inch of the parameter column
+#' @param confintSize double, size in inch of the confidnece interval column
+#' @return a regularTable
+#' @noRd
+displayRegressionTable <- function(table, modalitySize, sampleSize, parameterSize, confintSize) {
+  for(i in which(table[1] != '')){
+    varName <- table[i, 1]
+    successive <- TRUE
+    for(j in 2 : ncol(table[i, ])){
+      if(is.na(table[i, j]) & successive == TRUE){
+        table[i, j] <- varName
+      } else {
+        successive <- FALSE
+      }
+    }
+  }
+
+  # Les NA sont remplacées par des ''
+  table[is.na(table)] <- ''
+  table[table == 'NaN (NA)'] <- ''
+  table[table == 'NA [NA ; NA]'] <- ''
+  table[table == 'NA ; NA'] <- ''
+  table[table == '0 (NaN)'] <- ''
+
+  # Compute regulartable
+  outputRT <- flextable::regulartable(table)
+  outputRT <- flextable::border_remove(outputRT)
+  outputRT <- flextable::font(outputRT, fontname = "Calibri", part = 'all')
+  big_border <- officer::fp_border(color='black', width = 1)
+
+  # Header
+  outputRT <- flextable::set_header_labels(outputRT, Variable = NA, Modality = NA)
+  outputRT <- flextable::align(outputRT, align = 'right', part = 'header')
+  outputRT <- flextable::bold(outputRT, part = 'header')
+  outputRT <- flextable::hline_top(outputRT, border = big_border, part = 'header')
+  outputRT <- flextable::hline_bottom(outputRT, border = big_border, part = 'header')
+  outputRT <- flextable::fontsize(outputRT, size = 11, part = 'header')
+  outputRT <- flextable::font(outputRT, fontname = 'Calibri', part = 'header')
+
+  # Body
+  outputRT <- flextable::align(outputRT, j = c(grep('Variable', colnames(table)):grep('N', colnames(table))),
+                               align = 'left', part = 'body')
+  outputRT <- flextable::align(outputRT, j = c(grep('N', colnames(table)):length(colnames(table))),
+                               align = 'right', part = 'body')
+  outputRT <- flextable::bg(outputRT, i = which(table[1] != ''), bg = '#f2f2f2', part = 'body')
+  outputRT <- flextable::merge_h(outputRT, i = which(table[1] != ''))
+  outputRT <- flextable::bold(outputRT, i = which(table[1] != ''), j = 1, part = 'body')
+  outputRT <- flextable::hline_bottom(outputRT, border = big_border, part = 'body' )
+  outputRT <- flextable::fontsize(outputRT, size = 10, part = 'body')
+
+  # Autofit
+  outputRT <- flextable::width(outputRT, width = 2)
+  outputRT <- flextable::width(outputRT, j = 1, width = 0.2)
+
+  if(length((grep('Modality', colnames(table)))) != 0){
+    outputRT <- flextable::width(outputRT, j = c(grep('Modality', colnames(table))), width = modalitySize)
+  }
+
+  if(length((grep('N', colnames(table)))) != 0){
+    outputRT <- flextable::width(outputRT, j = c(grep('Modality', colnames(table))), width = sampleSize)
+  }
+
+  if(length((grep('(Beta)|(OR)', colnames(table)))) != 0){
+    outputRT <- flextable::width(outputRT, j = c(grep('Modality', colnames(table))), width = parameterSize)
+  }
+
+  if(length((grep('95%CI', colnames(table)))) != 0){
+    outputRT <- flextable::width(outputRT, j = c(grep('Modality', colnames(table))), width = confintSize)
+  }
+
+  if(length((grep('p-value', colnames(table)))) != 0){
+    outputRT <- flextable::width(outputRT, j = c(grep('p-value', colnames(table))), width = 1)
+  }
+
+  outputRT <- flextable::height(outputRT, height = 0.2)
+
+  return(outputRT)
+}
+
 #' @title An internal method to generate a regular table based on data.frame containing description of i2b2data
 #' @description An internal method to generate a regular table based on data.frame containing description of i2b2data
 #' @param table a data.table
@@ -271,43 +355,3 @@ displayDataDescriptionTable <- function(table) {
 
   return(outputRT)
 }
-
-
-
-# setCoverPage <- function(doc, typeAnalyse, codeEtude, titreEtude, acronymeEtude, investigateur,
-#                          methodologiste, biostatisticien, dataManager, informaticien,
-#                          mailMethodologiste, mailBiostatisticien, mailDataManager, mailInformaticien,
-#                          date){
-#   doc <- doc %>% body_replace_all_text("type_analyse", iconv(toupper(typeAnalyse), to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("code_etude", iconv(codeEtude, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("titre_etude", iconv(titreEtude, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("acronyme_etude", iconv(acronymeEtude, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("investigateur_principal", iconv(investigateur, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("methodologiste", iconv(methodologiste, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("biostatisticien", iconv(biostatisticien, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("datamanager", iconv(dataManager, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("informaticien", iconv(informaticien, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("mail_methodo", iconv(mailMethodologiste, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("mail_biostat", iconv(mailBiostatisticien, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("mail_data", iconv(mailDataManager, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("mail_info", iconv(mailInformaticien, to = 'utf-8'))
-#   doc <- doc %>% body_replace_all_text("date_rapport", iconv(date, to = 'utf-8'))
-#
-#   return(doc)
-#
-# }
-#
-#
-# setHeader <- function(acronymeEtude, version, date){
-#   doc <- doc %>% headers_replace_all_text("date_rapport", iconv(date, to = 'utf-8'))
-#   doc <- doc %>% headers_replace_all_text("version", iconv(version, to = 'utf-8'))
-#   doc <- doc %>% headers_replace_all_text("acronyme_etude", iconv(acronymeEtude, to = 'utf-8'))
-#
-#   return(doc)
-# }
-#
-# setFooter <- function(biostatisticien, typeAnalyse){
-#   doc <- doc %>% footers_replace_all_text("biostatisticien", iconv(biostatisticien, to = 'utf-8'))
-#   doc <- doc %>% footers_replace_all_text("type_analyse", iconv(typeAnalyse, to = 'utf-8'))
-#   return(doc)
-# }

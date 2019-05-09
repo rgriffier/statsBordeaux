@@ -1,10 +1,10 @@
 Package: statsBordeaux
 Type: Package
 Title: Helpful tool to describe dataset
-Version: 0.1.0
+Version: 0.1.1
 Author: @R: person("Romain", "GRIFFIER", role=c("aut", "cre"), email="romain.griffier@chu-bordeaux.fr")
 Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
-Description: Method to describe numeric and qualitative variable from a dataset and generate the reporting.
+Description: Method to describe numeric and qualitative variable from a dataset and generate reporting.
 Imports:
     devEMF,
     flextable,
