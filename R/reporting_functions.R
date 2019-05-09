@@ -85,8 +85,11 @@ addRegressionTable <- function(doc, table, title, modalitySize = 1, sampleSize =
     slip_in_seqfield(str = sprintf("STYLEREF %.0f \\s", 1),
                      style = 'Default Paragraph Font', pos = "before") %>%
     slip_in_text('Tableau ', style = 'Default Paragraph Font', pos = 'before') %>%
-    body_add_flextable(displayRegressionTable(table = table, modalitySize = modalitySize, sampleSize = sampleSize,
-                                              parameterSize = parameterSize, confintSize = confintSize))  %>%
+    body_add_flextable(displayRegressionTable(table = table,
+                                              modalitySize = modalitySize,
+                                              sampleSize = sampleSize,
+                                              parameterSize = parameterSize,
+                                              confintSize = confintSize))  %>%
     body_add_par(value = '', style = 'Normal')
   return(doc)
 }
