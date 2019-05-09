@@ -44,7 +44,8 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
                                  N = NA,
                                  Beta = NA,
                                  IC95_Beta = NA,
-                                 p_value = confint)
+                                 p_value = confint,
+                                 stringsAsFactors = FALSE)
     colnames(summaryFitData) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
     return(summaryFitData)
   }
@@ -73,7 +74,8 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
                                  N = N,
                                  Beta = Beta,
                                  IC95_Beta = IC95_Beta,
-                                 p_value = p_value)
+                                 p_value = p_value,
+                                 stringsAsFactors = FALSE)
 
   }
   ## case where independentVariable is numeric
@@ -84,7 +86,8 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
                                  Beta = numberFormat(summaryFitData$Estimate),
                                  IC95_Beta = paste0("[", numberFormat(round(summaryFitData$`2.5 %`, round)), " ; " ,
                                                     numberFormat(round(summaryFitData$`97.5 %`, round)), "]"),
-                                 p_value =  pvalFormat(anova(fit)$'Pr(>F)'[1], round = round))
+                                 p_value =  pvalFormat(anova(fit)$'Pr(>F)'[1], round = round),
+                                 stringsAsFactors = FALSE)
   }
 
   colnames(summaryFitData) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
@@ -124,7 +127,8 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
                                  N = NA,
                                  OR = NA,
                                  IC95_OR = NA,
-                                 p_value = confint)
+                                 p_value = confint,
+                                 stringsAsFactors = FALSE)
     colnames(summaryFitData) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
     return(summaryFitData)
   }
@@ -155,7 +159,8 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
                                  N = N,
                                  OR = OR,
                                  IC95_OR = IC95_OR,
-                                 p_value = p_value)
+                                 p_value = p_value,
+                                 stringsAsFactors = FALSE)
 
   }
   ## case where independentVariable is numeric
@@ -168,7 +173,8 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
                                                   numberFormat(round(summaryFitData$`97.5 %`, round)), "]"),
                                  p_value =  pvalFormat(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
                                                                             length(fit$coef) - 1),
-                                                       round = round))
+                                                       round = round),
+                                 stringsAsFactors = FALSE)
   }
 
   colnames(summaryFitData) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
@@ -211,7 +217,8 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
           N = NA,
           OR = NA,
           IC95_OR = NA,
-          p_value = "Convergence issue"
+          p_value = "Convergence issue",
+          stringsAsFactors = FALSE
         )
         colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
         return(fitUnivariable)
@@ -225,7 +232,8 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
         N = NA,
         OR = NA,
         IC95_OR = NA,
-        p_value = "Not enougth modality to perform regression"
+        p_value = "Not enougth modality to perform regression",
+        stringsAsFactors = FALSE
       )
       colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
     }
@@ -248,7 +256,8 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
         N = NA,
         OR = NA,
         IC95_OR = NA,
-        p_value = "Convergence issue"
+        p_value = "Convergence issue",
+        stringsAsFactors = FALSE
       )
       colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
       return(fitUnivariable)
@@ -302,7 +311,8 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
           N = NA,
           Beta = NA,
           IC95_Beta = NA,
-          p_value = "Convergence issue"
+          p_value = "Convergence issue",
+          stringsAsFactors = FALSE
         )
         colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
       })
@@ -316,7 +326,8 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
         N = NA,
         Beta = NA,
         IC95_Beta = NA,
-        p_value = "Not enougth modality to perform regression"
+        p_value = "Not enougth modality to perform regression",
+        stringsAsFactors = FALSE
       )
       colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
     }
@@ -337,7 +348,8 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
         N = NA,
         Beta = NA,
         IC95_Beta = NA,
-        p_value = "Convergence issue"
+        p_value = "Convergence issue",
+        stringsAsFactors = FALSE
       )
       colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
     })
