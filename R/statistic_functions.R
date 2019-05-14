@@ -1321,10 +1321,18 @@ statsQL <- function(output, input, variable, group = NULL, group_str = NULL, p_v
 
     # On créé une colonne ALL vide
     else {
-      if (NA_asModality == TRUE) {
-        currentResult <- createOutput(ncol = 4, nrow = length(levels(input[, variable])) + 3)
-      } else {
-        currentResult <- createOutput(ncol = 4, nrow = length(levels(input[, variable])) + 2)
+      if(is.null(group_str)){
+        if (NA_asModality == TRUE) {
+          currentResult <- createOutput(ncol = 4, nrow = length(levels(input[, variable])) + 3)
+        } else {
+          currentResult <- createOutput(ncol = 4, nrow = length(levels(input[, variable])) + 2)
+        }
+      } else{
+        if (NA_asModality == TRUE) {
+          currentResult <- createOutput(ncol = 4, nrow = length(levels(inputSubData[, variable])) + 3)
+        } else {
+          currentResult <- createOutput(ncol = 4, nrow = length(levels(inputSubData[, variable])) + 2)
+        }
       }
     }
     colnames(currentResult) <- c('Variable', 'Modality', 'Description', 'All')
