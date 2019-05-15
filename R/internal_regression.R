@@ -28,12 +28,16 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
     summary(fit)
   }, warning = function(w) {
     "Convergence issue"
+  }, error = function(e) {
+    "Convergence issue"
   })
 
   ## get confint
   confint <- tryCatch({
     as.data.frame(confint(fit))
   }, warning = function(w) {
+    "Convergence issue"
+  }, error = function(e) {
     "Convergence issue"
   })
 
@@ -111,12 +115,16 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
     summary(fit)
   }, warning = function(w) {
     "Convergence issue"
+  }, error = function(e) {
+    "Convergence issue"
   })
 
   ## get confint
   confint <- tryCatch({
     as.data.frame(exp((suppressMessages(confint(fit)))))
   }, warning = function(w) {
+    "Convergence issue"
+  }, error = function(e) {
     "Convergence issue"
   })
 
@@ -210,7 +218,8 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
             independentVariables = independentVariable),
           data = data,
           family = binomial())
-      }, warning = function(w){
+      },
+      warning = function(w){
         fitUnivariable <- data.frame(
           Variable = independentVariableName,
           Modality = NA,
@@ -218,6 +227,19 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
           OR = NA,
           IC95_OR = NA,
           p_value = "Convergence issue",
+          stringsAsFactors = FALSE
+        )
+        colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
+        return(fitUnivariable)
+      },
+      error = function(e){
+        fitUnivariable <- data.frame(
+          Variable = independentVariableName,
+          Modality = NA,
+          N = NA,
+          OR = NA,
+          IC95_OR = NA,
+          p_value = "Regression not possible",
           stringsAsFactors = FALSE
         )
         colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
@@ -249,7 +271,8 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
           independentVariables = independentVariable),
         data = data,
         family = binomial())
-    }, warning = function(w){
+    },
+    warning = function(w){
       fitUnivariable <- data.frame(
         Variable = independentVariableName,
         Modality = NA,
@@ -257,6 +280,19 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
         OR = NA,
         IC95_OR = NA,
         p_value = "Convergence issue",
+        stringsAsFactors = FALSE
+      )
+      colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
+      return(fitUnivariable)
+    },
+    error = function(e){
+      fitUnivariable <- data.frame(
+        Variable = independentVariableName,
+        Modality = NA,
+        N = NA,
+        OR = NA,
+        IC95_OR = NA,
+        p_value = "Regression not possible",
         stringsAsFactors = FALSE
       )
       colnames(fitUnivariable) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
@@ -304,7 +340,8 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
           dependentVariable = dependentVariable,
           independentVariables = independentVariable),
           data = data)
-      }, warning = function(w){
+      },
+      warning = function(w){
         fitUnivariable <- data.frame(
           Variable = independentVariableName,
           Modality = NA,
@@ -312,6 +349,18 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
           Beta = NA,
           IC95_Beta = NA,
           p_value = "Convergence issue",
+          stringsAsFactors = FALSE
+        )
+        colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
+      },
+      error = function(e){
+        fitUnivariable <- data.frame(
+          Variable = independentVariableName,
+          Modality = NA,
+          N = NA,
+          Beta = NA,
+          IC95_Beta = NA,
+          p_value = "Regression non possible",
           stringsAsFactors = FALSE
         )
         colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
@@ -341,7 +390,8 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
         dependentVariable = dependentVariable,
         independentVariables = independentVariable),
         data = data)
-    }, warning = function(w){
+    },
+    warning = function(w){
       fitUnivariable <- data.frame(
         Variable = independentVariableName,
         Modality = NA,
@@ -349,6 +399,18 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
         Beta = NA,
         IC95_Beta = NA,
         p_value = "Convergence issue",
+        stringsAsFactors = FALSE
+      )
+      colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
+    },
+    error = function(e){
+      fitUnivariable <- data.frame(
+        Variable = independentVariableName,
+        Modality = NA,
+        N = NA,
+        Beta = NA,
+        IC95_Beta = NA,
+        p_value = "Regression not possible",
         stringsAsFactors = FALSE
       )
       colnames(fitUnivariable) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
