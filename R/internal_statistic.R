@@ -54,7 +54,6 @@ getSubGroupFromDataFrame <- function(df, variable, group, NA_group_AsModality = 
 }
 
 
-
 #' @title A conveinient method to check if data.frame contain only factor or numeric variable
 #' @description A conveinient metho to check if data.frame contain only factor or numeric variable
 #' @param data a data.frame
@@ -76,7 +75,6 @@ checkIfNumericOrFactor <- function(data){
     return(TRUE)
   }
 }
-
 
 
 #' @title format some float in the french p-value format for display usage
@@ -115,8 +113,6 @@ pvalFormat <- function(pvalue, round = 3){
 }
 
 
-
-
 #' @title format some numeric for display usage
 #' @description format numeric with comma as decimal separator and space as big-mark
 #' @param num a digit, witch need to be formated
@@ -140,8 +136,6 @@ numberFormat <- function(num, round = 3){
 }
 
 
-
-
 #' @title Get the mod of numeric vector
 #' @description  Get the most represented value (mod) of numeric vector
 #' @param data a numeric vector
@@ -158,11 +152,6 @@ getMode <- function(data) {
   mode <- uniqData[which.max(tabulate(match(data, uniqData)))]
   return(mode)
 }
-
-
-
-
-
 
 
 #' @title an internal function to do the description of quantitative variable from a data.frame
@@ -279,9 +268,6 @@ statQT <- function(input, variable, round = 3, confint = FALSE, desc = c("Mean",
 }
 
 
-
-
-
 #' @title an internal function to do the description of factor from a data.frame
 #' @description an internal function to do the description of factor from a data.frame
 #' @param input a data.frame
@@ -387,4 +373,18 @@ statQL <- function(input, variable, round = 3, NA_asModality = FALSE) {
 }
 
 
-
+#' @title A convenient that remove rows with same id_paired in case of missing data
+#' @description A convenient that remove rows with same id_paired in case of missing data
+#' @param df a data.frame, containing the paired data to analyse
+#' @param variable a character vector of length one, containing the colname of the variable to analyse
+#' @param group a character vector of length one, containing the colname of the group variable
+#' @param id_paired a character vector of length one, containing the colname of the id_paired
+#' @return a data.frame, containing paired data ready to be analyzed
+#' @noRd
+#' @examples
+manageDataBeforePairedTest <- function(df, variable, group, id_paired){
+  result <- df[, c(id_paired, variable, group)]
+  result <- result[complete.cases(result), ]
+  result <- result[result[, id_paired] %in% names(which(table(result[, id_paired]) == 2)), ]
+  return(result)
+}

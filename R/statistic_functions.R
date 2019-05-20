@@ -1589,3 +1589,121 @@ Generate a nex output with createOutput() function.")
     return(output)
   }
 }
+
+
+#' @title A convenient method that merge two data.frame of paired data
+#' @description A convenient method than merge two data.frame of paired data and return a data.frame
+#' in the good format to be analyzed
+#' @param dataA a data.frame, containing some data to analyse
+#' @param dataB a data.frame, containing some data to analyse
+#' @param byA a character vector of length one, containing the name of the column in dataA used in the merge
+#' @param byB a character vector of length one, containing the name of the column in dataB used in the merge
+#' @param nameA a character vector of length one, containing the name of the group of dataA
+#' @param nameB a character vector of length one, containing the name of the group of dataB
+#' @return a data.frame containing the paired data to analyze
+#' @export
+#' @examples
+mergePairedDataFrame <- function(dataA, dataB, byA, byB, nameA, nameB){
+
+  if(!is.data.frame(dataA) | !is.data.frame(dataB)){
+    stop("dataA and dataB must be a data.frame")
+  }
+  if(!is.vector(byA) | !is.character(byA) | length(byA) != 1){
+    stop("byA must be a character vector of length 1")
+  }
+  if(!is.vector(byB) | !is.character(byB) | length(byB) != 1){
+    stop("byB must be a character vector of length 1")
+  }
+  if(!is.vector(nameA) | !is.character(nameA) | length(nameA) != 1){
+    stop("nameA must be a character vector of length 1")
+  }
+  if(!is.vector(nameB) | !is.character(nameB) | length(nameB) != 1){
+    stop("nameB must be a character vector of length 1")
+  }
+  if(!byA %in% colnames(dataA)){
+    stop("byA must be a column name of dataA")
+  }
+  if(!byB %in% colnames(dataB)){
+    stop("byB must be a column name of dataB")
+  }
+
+  ## add prefix to each column of dataA
+  ## to avoid exact match colname betwween data.frame
+  prefixA <- "A_"
+  colnamesA <- colnames(dataA)
+  loc_byA <- which(colnamesA == byA)
+  colnamesA <- paste0(prefixA, colnamesA)
+  colnamesA[loc_byA] <- byA
+  colnames(dataA) <- colnamesA
+  dataA$groupPaired_ <- nameA
+
+  ## add prefix to each column of dataB
+  ## to avoid exact match colname betwween data.frame
+  prefixB <- "B_"
+  colnamesB <- colnames(dataB)
+  loc_byB <- which(colnamesB == byB)
+  colnamesB <- paste0(prefixB, colnamesB)
+  colnamesB[loc_byA] <- byB
+  colnames(dataB) <- colnamesB
+  dataB$groupPaired_ <- nameB
+
+  ## merge dataA and dataB as mergeData by groupPaired_ and byA/byB parameter
+  mergeData <- merge(x = dataA,
+                     y = dataB,
+                     by.x = c(byA, "groupPaired_"),
+                     by.y = c(byB, "groupPaired_"),
+                     all = TRUE)
+
+  ## get colnames of merge data
+  colnamesMergeData <- colnames(mergeData)
+
+  ## initialisation of vector containing treated columns
+  treatedColumn <- NULL
+
+  ## for each colnames of merge data
+  lapply(colnamesMergeData, function(currentColname){
+
+    ## get the origin name of current colname
+    currentColnameOrigin <- gsub(pattern = paste0("^(", prefixA, "|", prefixB, ")"),
+                                 replacement = "",
+                                 x = currentColname)
+
+    ## if currentColnameOrigin already is in treatedColumn
+    if(currentColnameOrigin %in% treatedColumn){
+      ## get the position of column identical to currentColnameOrigin
+      currentSameColumnPos <- which(gsub(pattern = paste0("^(", prefixA, "|", prefixB, ")"),
+                                         replacement = "",
+                                         x = colnamesMergeData) == currentColnameOrigin)
+      ## already treated column
+      columnA <- mergeData[currentSameColumnPos[1]]
+      ## current column
+      columnB <- mergeData[currentSameColumnPos[2]]
+      ## merge already treated column and current column in already treated column
+      mergeData[is.na(columnA), currentSameColumnPos[1]] <<- columnB[is.na(columnA)]
+      ## set current colnames as NA
+      mergeData[, currentSameColumnPos[2]] <<- NA
+    }
+    ## if currentColnameOrigin not already in treatedColumn
+    else {
+      ## add current colnames into treatedColumn vector
+      treatedColumn <<- c(treatedColumn, currentColnameOrigin)
+    }
+    return(NULL)
+  })
+
+  ## manage the mergeData colnames
+  colnamesMergeData <- gsub(pattern = paste0("^(", prefixA, "|", prefixB, ")"),
+                            replacement = "",
+                            x = colnamesMergeData)
+  colnames(mergeData) <- colnamesMergeData
+
+  ## remove full NA columns
+  mergeData <- mergeData[,colSums(is.na(mergeData)) < nrow(mergeData)]
+  ## keep only row corresponding as paired data
+  mergeData <- mergeData[mergeData[, byA] %in% names(which(table(mergeData[, byA]) == 2)), ]
+  ## order df by groupPaired_ and byA
+  mergeData <- mergeData[order(mergeData$groupPaired_, mergeData[, byA]), ]
+  ## set groupPaired_ as.factor()
+  mergeData$groupPaired_ <- as.factor(mergeData$groupPaired_)
+  return(mergeData)
+}
