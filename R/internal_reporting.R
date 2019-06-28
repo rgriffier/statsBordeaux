@@ -70,11 +70,11 @@ displayVarNameInHeaderTable <- function(table, group, displayTestName) {
 displayTable <- function(table, displayTestName, modalitySize, descriptionSize, valueSize, testSize) {
   # Prétraitement
   # Suppression de la colonne modality si vide
-  if(is.element('Modality', colnames(table))){
-    if(sum(!is.na(table['Modality'])) == 0){
-      table['Modality'] <- NULL
-    }
-  }
+  # if(is.element('Modality', colnames(table))){
+  #   if(sum(!is.na(table['Modality'])) == 0){
+  #     table['Modality'] <- NULL
+  #   }
+  # }
   if(is.element('Test', colnames(table))){
     if(!displayTestName){
       table['Test'] <- NULL

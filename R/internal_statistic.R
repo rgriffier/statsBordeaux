@@ -28,7 +28,7 @@ getSubGroupFromDataFrame <- function(df, variable, group, NA_group_AsModality = 
   # Pour chaque modalité de la variable 'group', on génère un sub.data.frame
   for (i in 1:length(levels(df[, group]))) {
     # On génère le sub.data.frame basé sur la variable 'group'
-    subData <- subset(df, df[group] == levels(df[, group])[i])[variable]
+    subData <- subset(df, df[,group] == levels(df[, group])[i])[variable]
     colnames(subData) <- variable
     # Gestion des attributs
     attributes(subData[, 1]) <- attr
