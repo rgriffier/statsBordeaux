@@ -1,13 +1,13 @@
 ---
-title: "Stats bordeaux package"
+title: "*statsBordeaux* package"
 output: html_notebook
 author: Romain GRIFFIER
-date: 01/04/2019
+date: 16/07/2019
 ---
-
-# Package pour réaliser les statistiques descriptives et comparatives ainsi que le reporting
+  
+  
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.
-Ce package repose sur les fonctions de base de R.
+Ce package repose sur les fonctions de base de R (en dehors du reporting).
 
 ## Installation
 ```{r, eval = F}
@@ -17,7 +17,7 @@ devtools::install_github("rgriffier/statsBordeaux")
 
 ## Chargement du paquet
 ```{r}
-library(statsBordeaux)
+library(statsBordeaux, warn.conflicts = FALSE)
 ```
 
 ## Chargement des données
@@ -118,7 +118,7 @@ list_variableFormat
 ```
 
 ## Statistiques descriptives
-### ÉTAPE 1 : statistiques descriptives de toute la population
+### Statistique descriptive de l'ensemble de la population
 On créé un tableau de sortie vierge à partir de la fonction `createOutput()`. C'est ce dernier quiva contenir la description de nos variables.  
 On réalise les statistiques descriptives des données avec les fonctions `statsQT()` et `statsQL()` (en fonction de la nature quantitative ou qualitative de la variable à décrire).
 
@@ -149,7 +149,7 @@ for(i in 1:ncol(labelledData)){
 head(description, n = 5)
 ```
 
-### ÉTAPE 2 : statistiques descriptives en fonction d'une variable qualitative de groupe
+### Statistiques descriptives en fonction d'une variable qualitative de groupe
 On réalise les statistiques descriptives des données en fonction d'une variable qualitative de comparaison en rajoutant un paramètre `group` aux fonction `statsQL()` et `statsQT()`.
 On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher une description globale des variable.
 
@@ -190,7 +190,8 @@ for(i in 1:ncol(labelledData)){
 head(comparaison, n = 5)
 ```
 
-### ÉTAPE 3 : statistiques comparatives en fonction d'une variable qualitative de groupe
+## Statistiques comparatives
+### Statistiques comparatives en fonction d'une variable qualitative de groupe
 On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsQL()` et `statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests :  
 
 - Comparaison de fréquences :
@@ -242,7 +243,18 @@ for(i in 1:ncol(labelledData)){
 head(statsComparatives)
 ```
 
-### ÉTAPE 4 : reporting
+## Reporting
+### Reporting avec `R MARKDOWN`
+
+Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `addKable()`. Cette dernière génère un __tableau HTML__.   
+La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `addKable()`. 
+
+```{r, eval = FALSE}
+statsBordeaux::addKable(description)
+```
+
+### Reporting avec `OFFICIER`
+
 Le reporting utilise le package `officier`.  
 Le reporting se base sur un template (document Word). Ce dernier peut contenir une page de garde et des styles. Ce sont les styles qui sont utilisées dans les différentes fonctions ci-dessous pour gérer la mise en page.  
 Les styles sont disponibles via la fonction `styles_info(doc)` dans la colonne `style_name` et dépendent du template utilisé.
@@ -294,6 +306,7 @@ print(doc, target = 'stat.docx')
 
 ## CAS PARTICULIERS
 ### Gestion des 'non-applicables'
+
 La gestion des 'non-applicables' fait intervenir la fonction `manageNotApplicable()`.
 Cette fonction prend 2 paramètres d'entrée :
 

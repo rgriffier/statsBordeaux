@@ -3,9 +3,9 @@
 #' @param data_frame a data.frame, containing the data to add
 #' @return a knitr::kable
 #' @export
+#' @import dplyr
 #' @import knitr
 #' @import kableExtra
-#' @import dplyr
 #' @examples
 #' data(mtcars)
 #' output <- createOutput()
