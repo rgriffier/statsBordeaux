@@ -432,8 +432,8 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
 }
 
 
-#' @title
-#' @description
+#' @title A convenient method to extract data from multivariable logistic model.
+#' @description A convenient method to extract data from multivariable logistic model.
 #' @param data a data.frame, containing the data to be used in the regression
 #' @param dependentVariable a character vector of length one, containing the names of the dependant variable
 #' @param independentVariables a character vector containing the names of the independant variables
@@ -536,8 +536,8 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
 }
 
 
-#' @title
-#' @description
+#' @title A convenient method to extract data from multivariable linear model.
+#' @description A convenient method to extract data from multivariable linear model.
 #' @param data a data.frame, containing the data to be used in the regression
 #' @param dependentVariable a character vector of length one, containing the names of the dependant variable
 #' @param independentVariables a character vector containing the names of the independant variables

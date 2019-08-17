@@ -77,42 +77,6 @@ checkIfNumericOrFactor <- function(data){
 }
 
 
-#' @title format some float in the french p-value format for display usage
-#' @description manage the display of p-value format in french format
-#' @param pvalues a numeric, witch need to be formated
-#' @param round an integer, the number of digit after the decimal separator. Default to 3
-#' @return a formated character
-#' @noRd
-#' @examples
-#' pvalue <- 0.00028
-#' pvalue_f <- pvalFormat(pvalue)
-#' pvalue_f
-pvalFormat <- function(pvalue, round = 3){
-
-  if(!is.vector(pvalue) | !is.numeric(pvalue) | length(pvalue) !=1){
-    stop("pvalue must be a numeric vector of length 1")
-  }
-
-  if(!is.vector(round) | !is.numeric(round) | length(round) !=1){
-    stop("round must be a integer vector of length 1")
-  }
-
-  pv <- format.pval(
-    # P-value à formater
-    pv = pvalue,
-    # Nombre de chiffre significatif après la virgule
-    digits = round,
-    # Valeur à partir de laquelle on affiche < 0,00...
-    eps = 0.001,
-    # Nombre de chiffre au minimum après la virgule
-    nsmall = 3
-  )
-  # Permet de remplacer le pointpar une virgule comme séparateur décimal
-  pv <- gsub('\\.', ',', pv)
-  return(pv)
-}
-
-
 #' @title format some numeric for display usage
 #' @description format numeric with comma as decimal separator and space as big-mark
 #' @param num a digit, witch need to be formated

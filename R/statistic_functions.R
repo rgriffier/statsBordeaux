@@ -68,6 +68,186 @@ checkNotDigitInDataframe <- function(df, returnError = FALSE){
 }
 
 
+#' @title Format some float in the french p-value format for display usage
+#' @description Manage the display of p-value format in french format
+#' @param pvalues a numeric, witch need to be formated
+#' @param round an integer, the number of digit after the decimal separator. Default to 3
+#' @return a formated character
+#' @export
+#' @examples
+#' pvalue <- 0.00028
+#' pvalue_f <- pvalFormat(pvalue)
+#' pvalue_f
+pvalFormat <- function(pvalue, round = 3){
+
+  if(!is.vector(pvalue) | !is.numeric(pvalue) | length(pvalue) !=1){
+    stop("pvalue must be a numeric vector of length 1")
+  }
+
+  if(!is.vector(round) | !is.numeric(round) | length(round) !=1){
+    stop("round must be a integer vector of length 1")
+  }
+
+  pv <- format.pval(
+    # P-value à formater
+    pv = pvalue,
+    # Nombre de chiffre significatif après la virgule
+    digits = round,
+    # Valeur à partir de laquelle on affiche < 0,00...
+    eps = 0.001,
+    # Nombre de chiffre au minimum après la virgule
+    nsmall = 3
+  )
+  # Permet de remplacer le pointpar une virgule comme séparateur décimal
+  pv <- gsub('\\.', ',', pv)
+  return(pv)
+}
+
+
+
+#' @title Test normality of numeric variable based on graphic and statistc methods
+#' @description Test normality of numeric variable based on graphic and statistc methods
+#' @param data a data.frace conteting the numeric data witch normality need to be evaluate
+#' @param variable a character vector of length 1. The name of the numeric column to describe.
+#' @param group a character vector of length 1. The name of the factor column to use as commparaison group. Default to NULL.
+#' @param p_value a boolean. If TRUE, comparaison test to normality are performed. Default to FALSE.
+#' @param method a character vector of length 1. The name og the statistic method to use : 'Kolmogorov' or 'Shapiro'
+#' @return a plot
+#' @importFrom ggpubr ggtexttable ggparagraph ggarrange
+#' @import ggplot2
+#' @export
+#' @examples
+#' data(mtcars)
+#' checkNormality(mtcars, "wt", p_value = TRUE)
+checkNormality <- function(data, variable, group = NULL, p_value = FALSE, method = 'Kolmogorov') {
+
+  if(!is.data.frame(data)){
+    stop("data must be a data.frame.")
+  }
+  if(!is.vector(variable) | !is.character(variable) | length(variable) != 1){
+    stop("variable must be a character vector of length one.")
+  }
+  if(!variable %in% colnames(data)){
+    stop("variable must be the name of one column in data.")
+  }
+  if(!is.numeric(data[, variable])){
+    stop("variable must be a numerical variable in data.")
+  }
+  if(!is.vector(group) | !is.character(group) | length(group) != 1){
+    stop("group must be a character vector of length one.")
+  }
+  if(!is.null(group)){
+    if(!group %in% colnames(data)){
+      stop("group must be the name of one column in data.")
+    }
+  }
+  if(!is.vector(p_value) | !is.logical(p_value) | length(p_value) != 1){
+    stop("p_value must be a boolean vector of length one.")
+  }
+  if(isTRUE(p_value)){
+    if(!is.vector(method) | !is.character(method) | length(method) != 1 | !method %in% c('Kolmogorov', 'Shapiro')){
+      stop("method must be a character vector of length one in 'Kolmogorov' or 'Shapiro'.")
+    }
+  }
+
+  currentData <- colnames(data[variable])
+  if(p_value){
+    dataStatistic <- as.data.frame(matrix(nrow = 0, ncol = 4))
+    colnames(dataStatistic) <- c("Groupe", "Effectif", "Test", "p-value")
+
+    if(method == "Kolmogorov"){
+      ## Kolmogorov-Smirnov normality test
+      if(!is.null(group)){
+        j <- 0
+        for(grp in levels(data[, group])){
+          j <- j + 1
+          dataKolmogorov <- subset(data[, variable], data[group] == grp)
+          dataStatistic[j, 1] <- grp
+          dataStatistic[j, 2] <- sum(!is.na(dataKolmogorov))
+          if(sum(!is.na(dataKolmogorov)) >= 2 & sum(!is.na(unique(dataKolmogorov))) > 1){
+            kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
+                                                    sd(dataKolmogorov, na.rm = TRUE)))
+            dataStatistic[j, 3] <- kolmogorov$method
+            dataStatistic[j, 4] <- statsBordeaux::pvalFormat(kolmogorov$p.value)
+          } else {
+            dataStatistic[j, 3] <- "-"
+            dataStatistic[j, 4] <- "-"
+          }
+        }
+      } else {
+        dataKolmogorov <- data[, variable]
+        dataStatistic[1, 1] <- ""
+        dataStatistic[1, 2] <- sum(!is.na(dataKolmogorov))
+        if(sum(!is.na(dataKolmogorov)) >= 2 & sum(!is.na(unique(dataKolmogorov))) > 1){
+          kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
+                                                  sd(dataKolmogorov, na.rm = TRUE)) )
+          dataStatistic[1, 3] <- kolmogorov$method
+          dataStatistic[1, 4] <- statsBordeaux::pvalFormat(kolmogorov$p.value)
+        } else {
+          dataStatistic[1, 3] <- "-"
+          dataStatistic[1, 4] <- "-"
+        }
+      }
+    } else if(method == "Shapiro"){
+      ## Shapiro-Wilk normality test
+      if(!is.null(group)){
+        j <- 0
+        for(grp in levels(data[, group])){
+          j <- j+1
+          dataShapiro <- subset(data[, variable], data[group] == grp)
+          dataStatistic[j, 1] <- grp
+          dataStatistic[j, 2] <- sum(!is.na(dataShapiro))
+          if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
+            shapiro <- shapiro.test(dataShapiro)
+            dataStatistic[j, 3] <- shapiro$method
+            dataStatistic[j, 4] <- statsBordeaux::pvalFormat(shapiro$p.value)
+          } else {
+            dataStatistic[j, 3] <- "-"
+            dataStatistic[j, 4] <- "-"
+          }
+        }
+      } else {
+        dataShapiro <- data[, variable]
+        dataStatistic[1, 1] <- ""
+        dataStatistic[1, 2] <- sum(!is.na(dataShapiro))
+        if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
+          shapiro <- shapiro.test(dataShapiro)
+          dataStatistic[1, 3] <- shapiro$method
+          dataStatistic[1, 4] <- statsBordeaux::pvalFormat(shapiro$p.value)
+        } else {
+          dataStatistic[1, 3] <- "-"
+          dataStatistic[1, 4] <- "-"
+        }
+      }
+
+      if(is.null(group)){
+        dataStatistic$Groupe <- NULL
+      }
+    }
+  }
+
+  ## plot
+  plot <- ggplot2::ggplot(data, ggplot2::aes(x = get(currentData))) +
+    ggplot2::geom_histogram(alpha = 0.8, fill = "lightblue", color = "black", bins = 30) +
+    ggplot2::xlab(attr(data[, variable], "var_label")) +
+    ggplot2::ylab("Effectif") +
+    ggplot2::theme_minimal()
+
+  if(!is.null(group)){
+    plot <- plot + ggplot2::facet_grid(get(group) ~ .)
+  }
+
+  if(p_value){
+    table <- ggpubr::ggtexttable(dataStatistic, rows = NULL)
+    paragraph <- ggpubr::ggparagraph(text = "H0 : la variable suit une loi normale.\nH1 : la variable ne suit pas une loi normale.\np-value < 0,05 : on rejette H0, la variable ne suit pas une loi normale", face = "italic", size = 11, color = "black")
+    plot <- suppressWarnings(
+      ggpubr::ggarrange(plot, table, paragraph,
+                        ncol = 1, nrow = 3,
+                        heights = c(0.7, 0.3, 0.3), align = "hv"))
+  }
+  return(plot)
+}
+
 
 
 #' @title set label to qualitative variable into a data.frame based on dictionnary.
@@ -77,6 +257,7 @@ checkNotDigitInDataframe <- function(df, returnError = FALSE){
 #' @param labelTable a data.frame containing three columns : 1) the variable names, 2) one
 #' modality as digit, 3) the label of the modality.
 #' @return a data.frame with qualitative variable in the labelTable convert as factor with clean label
+#' @importFrom plyr revalue
 #' @export
 #' @examples
 #' df <- data.frame(X1 = c(0, 1, 2, 1, 2, 1, 2),
@@ -131,8 +312,8 @@ labellisationDataFrame <- function(df, labelTable){
 
   # convert character variable composed only by digit as numeric
   tabNotQL[] <- lapply(tabNotQL, function(x){
-    if(is.character(x) | class(x) == "difftime"){
-      isDigit <- grepl("^-*\\d+(\\.\\d+)*$", x)
+    if(any(class(x) %in% c("character", "difftime"))){
+      isDigit <- grepl("^-*\\d+((\\.|,)\\d+)*$", x)
       isNa <- is.na(x)
       if(!any(!as.logical(isDigit + isNa))){
         x <- as.numeric(x)
@@ -198,7 +379,7 @@ setLabelToVariable <- function(df, label){
   for(i in 1:nrow(label)){
     indexVarInData <- which(colnames(df) == label[i, 1])
     if(length(indexVarInData) != 0) {
-      attr(df[, indexVarInData], "var_label") <- label[i, 2]
+      attr(df[, indexVarInData], "var_label") <- as.character(label[i, 2])
     }
   }
   return(df)
