@@ -161,7 +161,7 @@ getBarPlot <- function(data, variable, group = NULL, legend.position = 'right'){
                          stat = "count", vjust = -.5, na.rm = TRUE) +
       ggplot2::theme_minimal() +
       ggplot2::ylab("Percent") +
-      ggplot2::xlab(labs) +
+      ggplot2::xlab(xlab) +
       ggplot2::theme(legend.position = "none",
                      axis.text.x = ggplot2::element_text(face = "bold"),
                      axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 0, b = 0, l = 0), face = "bold"),
