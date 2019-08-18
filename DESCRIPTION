@@ -7,9 +7,15 @@ Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
 Description: Method to describe numeric and qualitative variable from a dataset and generate reporting.
 Imports:
     devEMF,
-    flextable,
-    magrittr,
-    officer
+	dplyr,
+	flextable,
+	ggplot2,
+	kableExtra,
+	knitr,
+	magrittr,
+	officer,
+	ggpubr,
+	plyr
 License: MIT
 Encoding: UTF-8
 LazyData: true

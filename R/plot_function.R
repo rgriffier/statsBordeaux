@@ -48,10 +48,12 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
 
   ylab <- attr(data[, variable], "var_label")
   ylab <- ifelse(!is.null(ylab), ylab, variable)
-  labs <- attr(data[, group], "var_label")
-  labs <- ifelse(!is.null(labs), labs, group)
 
   if(!is.null(group)){
+
+    labs <- attr(data[, group], "var_label")
+    labs <- ifelse(!is.null(labs), labs, group)
+
     plot <- ggplot2::ggplot(data) +
       ggplot2::geom_boxplot(ggplot2::aes(y = get(variable), fill = get(group))) +
       ggplot2::theme_minimal() +
@@ -61,7 +63,7 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
       ggplot2::scale_fill_discrete(drop = FALSE) +
       ggplot2::scale_x_discrete(drop = FALSE) +
       ggplot2::theme(legend.position = legend.position,
-                     legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "dotted"),
+                     legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "blank"),
                      legend.title = ggplot2::element_text(face = "bold"),
                      axis.title.x = ggplot2::element_blank(),
                      axis.text.x = ggplot2::element_blank(),
@@ -93,6 +95,8 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
 #' group which need to be used to describe the qualitative variable. Depault to NULL
 #' @param legend.position a characher vector of length one, containing the legend position.
 #' Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.
+#' @param na.rm a boolean vector of length one. If TRUE, missig value of variable will be remove.
+#' Default to TRUE
 #' @return a ggplot2 plot
 #' @import ggplot2
 #' @export
@@ -101,7 +105,7 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
 #' mtcars$am <- as.factor(mtcars$am)
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' getBarPlot(data = mtcars, variable = "vs", group = "am")
-getBarPlot <- function(data, variable, group = NULL, legend.position = 'right'){
+getBarPlot <- function(data, variable, group = NULL, legend.position = 'right', na.rm = TRUE){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -132,39 +136,61 @@ getBarPlot <- function(data, variable, group = NULL, legend.position = 'right'){
   if(!legend.position %in% c('right', 'left', 'top', 'bottom', 'none')){
     stop("legend.position must be in 'right', 'left', 'top', 'bottom' or 'none'.")
   }
+  if(!is.vector(na.rm) | !is.logical(na.rm) | length(na.rm) != 1){
+    stop("na.rm must be a boolean vector of length one.")
+  }
+
+  dataPlot <- data
+  if(!is.null(group)){
+    dataPlot <- subset(data, !is.na(get(group)))
+    dataPlot[, group] <- as.factor(as.character(dataPlot[, group]))
+  }
+
+  if(na.rm){
+    dataPlot <- subset(dataPlot, !is.na(get(variable)))
+    dataPlot[, variable] <- as.factor(as.character(dataPlot[, variable]))
+  }
+
+  labs <- attr(data[, variable], "var_label")
+  labs <- ifelse(!is.null(labs), labs, variable)
 
   if(!is.null(group)){
     xlab <- attr(data[, group], "var_label")
     xlab <- ifelse(!is.null(xlab), xlab, group)
 
-    plot <- ggplot2::ggplot(data = subset(data, !is.na(get(variable))), ggplot2::aes(x = get(variable), group = get(group), na.rm = TRUE)) +
-      ggplot2::geom_bar(aes(y = ..prop.., fill = factor(..x..)), stat="count", na.rm = TRUE) +
-      ggplot2::geom_text(aes(label = scales::percent(..prop..), y = ..prop.. ),
-                stat = "count", vjust = -.5, na.rm = TRUE) +
+    plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), group = get(group), na.rm = TRUE)) +
+      ggplot2::geom_bar(ggplot2::aes(y = ..prop.., fill = factor(..x..)), stat="count", na.rm = TRUE) +
+      ggplot2::geom_text(ggplot2::aes(label = scales::percent(..prop..), y = ..prop.. ),
+                         stat = "count", vjust = -.5, na.rm = TRUE) +
       ggplot2::ylab("Percent") +
+      ggplot2::labs(fill = labs) +
       ggplot2::xlab(xlab) +
+      ggplot2::scale_fill_discrete(labels = levels(dataPlot[, variable])) +
       ggplot2::facet_grid(~get(group)) +
       ggplot2::scale_y_continuous(labels = scales::percent) +
-      ggplot2::theme(legend.position = "none",
-                     legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "dotted"),
+      ggplot2::theme(legend.position = legend.position,
                      legend.title = ggplot2::element_text(face = "bold"),
                      axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face = "bold"),
-                     axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 0, b = 0, l = 0), face = "bold"),
-                     axis.text.x = ggplot2::element_text(face = "bold"))
+                     axis.text.x = ggplot2::element_blank(),
+                     axis.title.x = ggplot2::element_text(face = "bold"),
+                     axis.ticks.x = ggplot2::element_blank(),
+                     legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "blank"),
+                     strip.text.x = ggplot2::element_text(face = "bold"))
   } else {
-    xlab <- attr(data[, variable], "var_label")
-    xlab <- ifelse(!is.null(variable), variable, group)
-
-    plot <- ggplot2::ggplot(data = subset(data, !is.na(get(variable))), ggplot2::aes(x = get(variable), group = 1, na.rm = TRUE)) +
+    plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), group = 1, na.rm = TRUE)) +
       ggplot2::geom_bar(ggplot2::aes(y = ..prop.., fill = factor(..x..)), stat = "count", na.rm = TRUE) +
       ggplot2::geom_text(ggplot2::aes(label = scales::percent(..prop..), y = ..prop.. ),
                          stat = "count", vjust = -.5, na.rm = TRUE) +
       ggplot2::theme_minimal() +
       ggplot2::ylab("Percent") +
-      ggplot2::xlab(xlab) +
-      ggplot2::theme(legend.position = "none",
-                     axis.text.x = ggplot2::element_text(face = "bold"),
-                     axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 0, b = 0, l = 0), face = "bold"),
+      ggplot2::scale_fill_discrete(labels = levels(dataPlot[, variable])) +
+      ggplot2::labs(fill = labs) +
+      ggplot2::theme(legend.position = legend.position,
+                     legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "blank"),
+                     legend.title = ggplot2::element_text(face = "bold"),
+                     axis.title.x = ggplot2::element_blank(),
+                     axis.text.x = ggplot2::element_blank(),
+                     axis.ticks.x = ggplot2::element_blank(),
                      axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face = "bold"))
   }
   return(plot)

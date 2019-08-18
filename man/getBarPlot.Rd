@@ -4,7 +4,8 @@
 \alias{getBarPlot}
 \title{A convenient method to get bar plot from qualitative variable.}
 \usage{
-getBarPlot(data, variable, group = NULL, legend.position = "right")
+getBarPlot(data, variable, group = NULL, legend.position = "right",
+  na.rm = TRUE)
 }
 \arguments{
 \item{data}{a data.frame, containing the qualitative variable to describe with barplot}
@@ -17,6 +18,9 @@ group which need to be used to describe the qualitative variable. Depault to NUL
 
 \item{legend.position}{a characher vector of length one, containing the legend position.
 Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.}
+
+\item{na.rm}{a boolean vector of length one. If TRUE, missig value of variable will be remove.
+Default to TRUE}
 }
 \value{
 a ggplot2 plot
