@@ -145,12 +145,12 @@ getBarPlot <- function(data, variable, group = NULL, legend.position = 'right'){
       ggplot2::xlab(xlab) +
       ggplot2::facet_grid(~get(group)) +
       ggplot2::scale_y_continuous(labels = scales::percent) +
-      ggplot2::theme(ggplot2::legend.position = "none",
-                     ggplot2::legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "dotted"),
-                     ggplot2::legend.title = ggplot2::element_text(face = "bold"),
-                     ggplot2::axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face = "bold"),
-                     ggplot2::axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 0, b = 0, l = 0), face = "bold"),
-                     ggplot2::axis.text.x = ggplot2::element_text(face = "bold"))
+      ggplot2::theme(legend.position = "none",
+                     legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "dotted"),
+                     legend.title = ggplot2::element_text(face = "bold"),
+                     axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face = "bold"),
+                     axis.title.x = ggplot2::element_text(margin = ggplot2::margin(t = 20, r = 0, b = 0, l = 0), face = "bold"),
+                     axis.text.x = ggplot2::element_text(face = "bold"))
   } else {
     xlab <- attr(data[, variable], "var_label")
     xlab <- ifelse(!is.null(variable), variable, group)
