@@ -14,7 +14,7 @@
 #' errorPosition <- checkNotDigitInDataframe(df = mtcars, returnError = TRUE)
 checkNotDigitInDataframe <- function(df, returnError = FALSE){
 
-  if(class(df) != "data.frame"){
+  if(is.data.frame(df) != "data.frame"){
     stop("df must be a data.frame")
   }
 
@@ -268,11 +268,11 @@ checkNormality <- function(data, variable, group = NULL, p_value = FALSE, method
 #' df <- labellisationDataFrame(df, labelTable)
 labellisationDataFrame <- function(df, labelTable){
 
-  if(class(df) != "data.frame"){
+  if(is.data.frame(df) != "data.frame"){
     stop("df must be a data.frame")
   }
 
-  if(class(labelTable) != "data.frame"){
+  if(is.data.frame(labelTable) != "data.frame"){
     stop("labelTable must be a data.frame")
   }
 

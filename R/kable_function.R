@@ -85,7 +85,8 @@ addKable <- function(data_frame){
   ## get kable
   kable <- table %>%
     kableExtra::kable(booktabs = TRUE, escape = FALSE, format = "html", col.names = col.names) %>%
-    kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE) %>%
+    kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE,
+                              bootstrap_options = c("hover", "condensed", "responsive")) %>%
     kableExtra::row_spec(row = 0, bold = T, align = "center") %>%
     kableExtra::row_spec(row = c(1:nrow(table)), hline_after = FALSE, extra_css = "border:none;") %>%
     kableExtra::column_spec(column = which(!colnames(table) %in% c("Modality", "Description", "Test")), extra_css = "text-align:right;") %>%
