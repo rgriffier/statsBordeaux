@@ -1,7 +1,7 @@
 ---
 title: "*statsBordeaux* package"
 author: Romain GRIFFIER
-date: "18/08/2019"
+date: 18/08/2019
 output: html_notebook
 ---
 
