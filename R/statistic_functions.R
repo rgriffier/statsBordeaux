@@ -9,12 +9,11 @@
 #' @examples
 #' data(mtcars)
 #' checkNotDigitInDataframe(df = mtcars, returnError = FALSE)
-#'
 #' mtcars$NOT_DIGIT <- rep("A", nrow(mtcars))
 #' errorPosition <- checkNotDigitInDataframe(df = mtcars, returnError = TRUE)
 checkNotDigitInDataframe <- function(df, returnError = FALSE){
 
-  if(is.data.frame(df) != "data.frame"){
+  if(is.data.frame(df)){
     stop("df must be a data.frame")
   }
 
@@ -268,11 +267,11 @@ checkNormality <- function(data, variable, group = NULL, p_value = FALSE, method
 #' df <- labellisationDataFrame(df, labelTable)
 labellisationDataFrame <- function(df, labelTable){
 
-  if(is.data.frame(df) != "data.frame"){
+  if(is.data.frame(df)){
     stop("df must be a data.frame")
   }
 
-  if(is.data.frame(labelTable) != "data.frame"){
+  if(is.data.frame(labelTable)){
     stop("labelTable must be a data.frame")
   }
 

@@ -22,7 +22,6 @@ Check if the input data.frale are only composed of digits
 \examples{
 data(mtcars)
 checkNotDigitInDataframe(df = mtcars, returnError = FALSE)
-
 mtcars$NOT_DIGIT <- rep("A", nrow(mtcars))
 errorPosition <- checkNotDigitInDataframe(df = mtcars, returnError = TRUE)
 }
