@@ -132,10 +132,10 @@ checkNormality <- function(data, variable, group = NULL, p_value = FALSE, method
   if(!is.numeric(data[, variable])){
     stop("variable must be a numerical variable in data.")
   }
-  if(!is.vector(group) | !is.character(group) | length(group) != 1){
-    stop("group must be a character vector of length one.")
-  }
   if(!is.null(group)){
+    if(!is.vector(group) | !is.character(group) | length(group) != 1){
+      stop("group must be a character vector of length one.")
+    }
     if(!group %in% colnames(data)){
       stop("group must be the name of one column in data.")
     }
