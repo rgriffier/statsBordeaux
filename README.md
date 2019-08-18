@@ -1,8 +1,8 @@
 ---
-title: "*statsBordeaux* package"
+title: "Stats bordeaux package"
+output: html_notebook
 author: Romain GRIFFIER
 date: 18/08/2019
-output: html_notebook
 ---
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.  
