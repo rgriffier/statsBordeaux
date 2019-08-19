@@ -284,7 +284,7 @@ On réalise les statistiques comparatives des données en fonction d'une variabl
 comp <- labelledData %>%
   statsBordeaux::describeDataFrame(group = "vs",
                                    p_value = TRUE)
-comp
+comp[c(1:5, 36:39), ]
 ```
 
 #### Utilisateurs avancés, utilisation pas à pas
