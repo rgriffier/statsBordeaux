@@ -251,7 +251,7 @@ graphicDescription[[1]]
 ## $mpg
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png)
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png)
 
 ```r
 ## Variable qualitative : BAR PLOT
@@ -262,7 +262,7 @@ graphicDescription[[8]]
 ## $vs
 ```
 
-![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-2.png)
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-2.png)
 
 #### Utilisateurs avancés, utilisation pas à pas
 On créé un tableau de sortie vierge à partir de la fonction `statsBordeaux::createOutput()`. C'est ce dernier qui va contenir la description de nos variables.  
@@ -370,7 +370,7 @@ graphicDescription[[1]]
 ## $mpg
 ```
 
-![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png)
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
 
 ```r
 ## Variable qualitative : BAR PLOT
@@ -381,7 +381,7 @@ graphicDescription[[9]]
 ## $am
 ```
 
-![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-2.png)
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-2.png)
 #### Utilisateurs avancés, utilisation pas à pas
 On réalise les statistiques descriptives des données en fonction d'une variable qualitative de comparaison en rajoutant un paramètre `group` aux fonction `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`.
 On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher une description globale des variables.
@@ -762,7 +762,7 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg")
 ## [[1]]$mpg
 ```
 
-<img src="figure/unnamed-chunk-20-1.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" />
+<img src="figure/unnamed-chunk-21-1.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" />
 
 ```r
 ## évaluation graphique et avec un test de Shapiro-Wilk de la distribution de la variable 'mpg'
@@ -774,7 +774,7 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg", p_value = T
 ## [[1]]$mpg
 ```
 
-<img src="figure/unnamed-chunk-20-2.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" />
+<img src="figure/unnamed-chunk-21-2.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" />
 
 ```r
 ## évaluation graphique et avec un test de Shapiro-Wilk de la distribution de la variable 'mpg' dans chacun des sous-groupe de 'vs'
@@ -786,7 +786,7 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg", group = "vs
 ## [[1]]$mpg
 ```
 
-<img src="figure/unnamed-chunk-20-3.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" />
+<img src="figure/unnamed-chunk-21-3.png" title="plot of chunk unnamed-chunk-21" alt="plot of chunk unnamed-chunk-21" style="display: block; margin: auto;" />
 
 ### Gestion des 'non-applicables'
 La gestion des 'non-applicables' fait intervenir la fonction `statsBordeaux::manageNotApplicable()`.
