@@ -352,3 +352,200 @@ manageDataBeforePairedTest <- function(df, variable, group, id_paired){
   result <- result[result[, id_paired] %in% names(which(table(result[, id_paired]) == 2)), ]
   return(result)
 }
+
+
+#' @title A convenient warp method to describe a full data.frame.
+#' @description  A convenient warp method to describe a full data.frame.
+#' @param data a data.frame containing the data to describe
+#' @param variable a character vector contening the name of column to describe. Default to colnames(data).
+#' @param group a character vector of length 1. The name of the factor column to use as commparaison group. Default to NULL.
+#' @param group_str a numeric vector. The index of the levels of the group variable to use. Default to NULL.
+#' @param p_value a boolean. If TRUE, comparaison test are performed.
+#' @param all a boolean. If TRUE, total column will be displayed. Default to FALSE
+#' @param desc a character vector. Could contain "Mean", "Median", "Range" and/or "Mode"
+#' @param round an integer, number of maximal decimal. Default to 3
+#' @param confint a boolean. If TRUE, the confidence interval of the mean will be displayed. Default to FALSE
+#' @param NA_asModality a boolean. If TRUE, missing data of the factor variable to describe will be considered as levels.
+#' Default to FALSE
+#' @param NA_group_AsModality a boolean. If TRUE, missing data of the group variable will be considered as levels. Default to FALSE
+#' @return a data.frame containing the description of the variables
+#' @noRd
+jumpDescribeDataFrame <- function(data, variable, group = NULL, group_str = NULL,
+                                  p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
+                                  round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
+  output <- statsBordeaux::createOutput()
+  if(is.numeric(data[, variable])){
+    output <- statsBordeaux::statsQT(output = output,
+                                     input = data,
+                                     variable = colnames(data[variable]),
+                                     group = group,
+                                     group_str = group_str,
+                                     p_value = p_value,
+                                     all = all,
+                                     desc = desc,
+                                     round = round,
+                                     confint = confint,
+                                     NA_group_AsModality = NA_group_AsModality)
+  }
+  else if(is.factor(data[, variable])){
+    output <- statsBordeaux::statsQL(output = output,
+                                     input = data,
+                                     variable = colnames(data[variable]),
+                                     group = group,
+                                     group_str = group_str,
+                                     p_value = p_value,
+                                     all = all,
+                                     round = round,
+                                     NA_asModality = NA_asModality,
+                                     NA_group_AsModality = NA_group_AsModality)
+  }
+  else {
+    message(paste0("Variable '", colnames(data[variable]), "' non décrite (", class(data[, variable]), ")"))
+    return(NULL)
+  }
+  return(output)
+}
+
+jumpDescribeDataFrame <- Vectorize(jumpDescribeDataFrame, vectorize.args = "variable", SIMPLIFY = FALSE, USE.NAMES = FALSE)
+
+
+#' @title Test normality of numeric variable based on graphic and statistc methods
+#' @description Test normality of numeric variable based on graphic and statistc methods
+#' @param data a data.frace conteting the numeric data witch normality need to be evaluate
+#' @param variable a character vector of length 1. The name of the numeric column to describe.
+#' @param group a character vector of length 1. The name of the factor column to use as commparaison group. Default to NULL.
+#' @param p_value a boolean. If TRUE, comparaison test to normality are performed. Default to FALSE.
+#' @param method a character vector of length 1. The name og the statistic method to use : 'Kolmogorov' or 'Shapiro'
+#' @return a plot
+#' @importFrom ggpubr ggtexttable ggparagraph ggarrange
+#' @import ggplot2
+#' @noRd
+checkNormalityInternal <- function(data, variable, group = NULL, p_value = FALSE, method = 'Kolmogorov') {
+
+  if(!is.data.frame(data)){
+    stop("data must be a data.frame.")
+  }
+  if(!is.vector(variable) | !is.character(variable) | length(variable) != 1){
+    stop("variable must be a character vector of length one.")
+  }
+  if(!variable %in% colnames(data)){
+    stop("variable must be the name of one column in data.")
+  }
+  if(!is.numeric(data[, variable])){
+    stop("variable must be a numerical variable in data.")
+  }
+  if(!is.null(group)){
+    if(!is.vector(group) | !is.character(group) | length(group) != 1){
+      stop("group must be a character vector of length one.")
+    }
+    if(!group %in% colnames(data)){
+      stop("group must be the name of one column in data.")
+    }
+  }
+  if(!is.vector(p_value) | !is.logical(p_value) | length(p_value) != 1){
+    stop("p_value must be a boolean vector of length one.")
+  }
+  if(isTRUE(p_value)){
+    if(!is.vector(method) | !is.character(method) | length(method) != 1 | !method %in% c('Kolmogorov', 'Shapiro')){
+      stop("method must be a character vector of length one in 'Kolmogorov' or 'Shapiro'.")
+    }
+  }
+
+  currentData <- colnames(data[variable])
+  if(p_value){
+    dataStatistic <- as.data.frame(matrix(nrow = 0, ncol = 4))
+    colnames(dataStatistic) <- c("Groupe", "Effectif", "Test", "p-value")
+
+    if(method == "Kolmogorov"){
+      ## Kolmogorov-Smirnov normality test
+      if(!is.null(group)){
+        j <- 0
+        for(grp in levels(data[, group])){
+          j <- j + 1
+          dataKolmogorov <- subset(data[, variable], data[group] == grp)
+          dataStatistic[j, 1] <- grp
+          dataStatistic[j, 2] <- sum(!is.na(dataKolmogorov))
+          if(sum(!is.na(dataKolmogorov)) >= 2 & sum(!is.na(unique(dataKolmogorov))) > 1){
+            kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
+                                                    sd(dataKolmogorov, na.rm = TRUE)))
+            dataStatistic[j, 3] <- kolmogorov$method
+            dataStatistic[j, 4] <- statsBordeaux::pvalFormat(kolmogorov$p.value)
+          } else {
+            dataStatistic[j, 3] <- "-"
+            dataStatistic[j, 4] <- "-"
+          }
+        }
+      } else {
+        dataKolmogorov <- data[, variable]
+        dataStatistic[1, 1] <- ""
+        dataStatistic[1, 2] <- sum(!is.na(dataKolmogorov))
+        if(sum(!is.na(dataKolmogorov)) >= 2 & sum(!is.na(unique(dataKolmogorov))) > 1){
+          kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
+                                                  sd(dataKolmogorov, na.rm = TRUE)) )
+          dataStatistic[1, 3] <- kolmogorov$method
+          dataStatistic[1, 4] <- statsBordeaux::pvalFormat(kolmogorov$p.value)
+        } else {
+          dataStatistic[1, 3] <- "-"
+          dataStatistic[1, 4] <- "-"
+        }
+      }
+    } else if(method == "Shapiro"){
+      ## Shapiro-Wilk normality test
+      if(!is.null(group)){
+        j <- 0
+        for(grp in levels(data[, group])){
+          j <- j+1
+          dataShapiro <- subset(data[, variable], data[group] == grp)
+          dataStatistic[j, 1] <- grp
+          dataStatistic[j, 2] <- sum(!is.na(dataShapiro))
+          if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
+            shapiro <- shapiro.test(dataShapiro)
+            dataStatistic[j, 3] <- shapiro$method
+            dataStatistic[j, 4] <- statsBordeaux::pvalFormat(shapiro$p.value)
+          } else {
+            dataStatistic[j, 3] <- "-"
+            dataStatistic[j, 4] <- "-"
+          }
+        }
+      } else {
+        dataShapiro <- data[, variable]
+        dataStatistic[1, 1] <- ""
+        dataStatistic[1, 2] <- sum(!is.na(dataShapiro))
+        if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
+          shapiro <- shapiro.test(dataShapiro)
+          dataStatistic[1, 3] <- shapiro$method
+          dataStatistic[1, 4] <- statsBordeaux::pvalFormat(shapiro$p.value)
+        } else {
+          dataStatistic[1, 3] <- "-"
+          dataStatistic[1, 4] <- "-"
+        }
+      }
+
+      if(is.null(group)){
+        dataStatistic$Groupe <- NULL
+      }
+    }
+  }
+
+  ## plot
+  plot <- ggplot2::ggplot(data, ggplot2::aes(x = get(currentData))) +
+    ggplot2::geom_histogram(alpha = 0.8, fill = "lightblue", color = "black", bins = 30) +
+    ggplot2::xlab(attr(data[, variable], "var_label")) +
+    ggplot2::ylab("Effectif") +
+    ggplot2::theme_minimal()
+
+  if(!is.null(group)){
+    plot <- plot + ggplot2::facet_grid(get(group) ~ .)
+  }
+
+  if(p_value){
+    table <- ggpubr::ggtexttable(dataStatistic, rows = NULL)
+    paragraph <- ggpubr::ggparagraph(text = "H0 : la variable suit une loi normale.\nH1 : la variable ne suit pas une loi normale.\np-value < 0,05 : on rejette H0, la variable ne suit pas une loi normale", face = "italic", size = 11, color = "black")
+    plot <- suppressWarnings(
+      ggpubr::ggarrange(plot, table, paragraph,
+                        ncol = 1, nrow = 3,
+                        heights = c(0.7, 0.3, 0.3), align = "hv"))
+  }
+  return(plot)
+}
+checkNormalityInternal <- Vectorize(checkNormalityInternal, vectorize.args = "variable", SIMPLIFY = FALSE)

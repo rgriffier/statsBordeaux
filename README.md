@@ -2,7 +2,7 @@
 title: "Stats bordeaux package"
 output: html_notebook
 author: Romain GRIFFIER
-date: 18/08/2019
+date: 19/08/2019
 ---
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.  
@@ -102,7 +102,7 @@ statsBordeaux::checkNotDigitInDataframe(mtcars)
 
 ### ÉTAPE 2 : labélisation des modalité des variables qualiatives
 Comme le data.frame d'entrée ne contient que des nombres, il faut labéliser les modalités des variables qualitatives.  
-On effectue cette labélisation grâce à la fonction `statsBordeaux::labellisationDataFrame()` à partir du data.frame `labels` créé précédemment.  
+On effectue cette labélisation grâce à la fonction `statsBordeaux::setLabelToFactorLevels()` à partir du data.frame `labels` créé précédemment.  
 Cette fonction gère à la fois :
 
 - La conversion des variables présentes dans le data.frame `labels` en tant que `factor`.
@@ -113,7 +113,7 @@ La fonction vérifie que les variables du fichier des labels sont bien dans le d
 
 ```r
 ## association à chaque modalité des variables qualitatives du label correspondant et conversion de ces variables en factor
-labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
+labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
 head(labelledData)
 ```
 
@@ -206,7 +206,65 @@ list_variableFormat
 ```
 
 ## Statistiques descriptives
-### Statistique descriptive de l'ensemble de la population
+### Statistiques descriptives globales
+#### Utilisation de la fonction pipe `%>%`
+
+La fonction `statsBordeaux::describeDataFrame()` permet de décrire les variables qualitatives et quantitatives d'un data.frame. Elle peut s'utiliser avec les pipes `%>%` (package `dplyr`).
+
+```r
+# chargement de dplyr
+library(dplyr)
+
+# statistique descriptive sur l'ensemble du data.frame
+description <- labelledData %>%
+  statsBordeaux::describeDataFrame()
+
+description[c(1:5, 36:39), ]
+```
+
+```
+##             Variable       Modality      Description                  All
+## 1  Miles/(US) gallon           <NA>             <NA>                 <NA>
+## 2               <NA>           <NA>         N (m.d.)               32 (0)
+## 3               <NA>           <NA>        Mean (SD)       20,091 (6,027)
+## 4               <NA>           <NA> Median [Q1 ; Q3] 19,2 [15,425 ; 22,8]
+## 5               <NA>           <NA>        Min ; Max          10,4 ; 33,9
+## 36            Engine           <NA>             <NA>                 <NA>
+## 37              <NA> All modalities     N (m.d. ; %)           32 (0 ; 0)
+## 38              <NA>       V-shaped            N (%)           18 (56,25)
+## 39              <NA>       Straight            N (%)           14 (43,75)
+```
+
+De la même manière, il est possible de réaliser une description graphique des données avec la fonction `statsBordeaux::getGraphicalDescription()`
+
+
+```r
+# statistique graphique sur l'ensemble du data.frame
+graphicDescription <- labelledData %>%
+  statsBordeaux::getGraphicalDescription()
+
+## Variable quantitative : BOX PLOT
+graphicDescription[[1]]
+```
+
+```
+## $mpg
+```
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png)
+
+```r
+## Variable qualitative : BAR PLOT
+graphicDescription[[8]]
+```
+
+```
+## $vs
+```
+
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-2.png)
+
+#### Utilisateurs avancés, utilisation pas à pas
 On créé un tableau de sortie vierge à partir de la fonction `statsBordeaux::createOutput()`. C'est ce dernier qui va contenir la description de nos variables.  
 On réalise les statistiques descriptives des données avec les fonctions `statsBordeaux::statsQT()` et `statsBordeaux::statsQL()` (en fonction de la nature quantitative ou qualitative de la variable à décrire).
 
@@ -247,53 +305,84 @@ head(description, n = 5)
 ## 5              <NA>     <NA>        Min ; Max          10,4 ; 33,9
 ```
 
-### Statistiques descriptives graphique de l'ensemble de la population
-On réalise les statistiques descriptives graphiques des données à l'aide des fonctions `statsBordeaux::getBoxPlot()` et `statsBordeaux::getBarPlot()`.
-
-Les fonction `statsBordeaux::getBoxPlot()` et `statsBordeaux::getBarPlot()` retournent un objet de la classe ggplot qui peut ensuite être modifié si besoin.
-
-
-```r
-## création d'une liste vide
-plot <- list()
-
-## boucle qui va traiter chaque colonne du data.frame les unes après les autres
-for(i in 1:ncol(labelledData)){
-  # cas où la colonne en cours est de type quantitative
-  if(is.numeric(labelledData[, i])){
-    plot[[i]] <- statsBordeaux::getBoxPlot(data = labelledData,
-                                           variable = colnames(labelledData)[i],
-                                           legend.position = 'bottom')
-  }
-  # cas où la colonne en cours est de type qualitative
-  else if(is.factor(labelledData[, i])){
-    plot[[i]] <- statsBordeaux::getBarPlot(data = labelledData,
-                                           variable = colnames(labelledData)[i],
-                                           legend.position = 'bottom')
-  }
-  # autre cas non pris en charge
-  else {
-    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
-  }
-}
-
-## on supprime les éléments null de la liste
-plot[sapply(plot, is.null)] <- NULL
-
-## exemple de plot de variable quantitative
-plot[[1]]
-```
-
-<img src="figure/unnamed-chunk-11-1.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" style="display: block; margin: auto;" />
-
-```r
-## exemple de plot de variable qualitative
-plot[[8]]
-```
-
-<img src="figure/unnamed-chunk-11-2.png" title="plot of chunk unnamed-chunk-11" alt="plot of chunk unnamed-chunk-11" style="display: block; margin: auto;" />
-
 ### Statistiques descriptives en fonction d'une variable qualitative de groupe
+#### Utilisation de la fonction pipe `%>%`
+
+La fonction `statsBordeaux::describeDataFrame()` permet également de réaliser les statistiques en fonction d'unevariable qualitative de groupe. Il suffit pour celà de renseigner le paramètre `group`.
+On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher en plus une description globale des variables.
+
+
+```r
+# statistique comparative sur l'ensemble du data.frame
+comp <- labelledData %>%
+  statsBordeaux::describeDataFrame(group = "vs",
+                                   all = TRUE)
+
+comp[c(1:5, 36:39), ]
+```
+
+```
+##             Variable       Modality      Description
+## 1  Miles/(US) gallon           <NA>             <NA>
+## 2               <NA>           <NA>         N (m.d.)
+## 3               <NA>           <NA>        Mean (SD)
+## 4               <NA>           <NA> Median [Q1 ; Q3]
+## 5               <NA>           <NA>        Min ; Max
+## 36      Transmission           <NA>             <NA>
+## 37              <NA> All modalities     N (m.d. ; %)
+## 38              <NA>      Automatic            N (%)
+## 39              <NA>         Manual            N (%)
+##                   V-shaped             Straight                  All Test
+## 1                     <NA>                 <NA>                 <NA>   NA
+## 2                   18 (0)               14 (0)               32 (0)   NA
+## 3           16,617 (3,861)       24,557 (5,379)       20,091 (6,027)   NA
+## 4  15,65 [14,775 ; 19,075] 22,8 [21,4 ; 29,625] 19,2 [15,425 ; 22,8]   NA
+## 5                10,4 ; 26          17,8 ; 33,9          10,4 ; 33,9   NA
+## 36                    <NA>                 <NA>                 <NA>   NA
+## 37              18 (0 ; 0)           14 (0 ; 0)           32 (0 ; 0)   NA
+## 38             12 (66,667)               7 (50)          19 (59,375)   NA
+## 39              6 (33,333)               7 (50)          13 (40,625)   NA
+##    p-value
+## 1       NA
+## 2       NA
+## 3       NA
+## 4       NA
+## 5       NA
+## 36      NA
+## 37      NA
+## 38      NA
+## 39      NA
+```
+
+De la même manière, il est possible de réaliser une description graphique des données en fonction d'une variable qualitative de groupe en rajoutant le paramètre `group` à la fonction `statsBordeaux::getGraphicalDescription()`
+
+
+```r
+# statistique graphique sur l'ensemble du data.frame
+graphicDescription <- labelledData %>%
+  statsBordeaux::getGraphicalDescription(group = "vs")
+
+## Variable quantitative : BOX PLOT
+graphicDescription[[1]]
+```
+
+```
+## $mpg
+```
+
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-1.png)
+
+```r
+## Variable qualitative : BAR PLOT
+graphicDescription[[9]]
+```
+
+```
+## $am
+```
+
+![plot of chunk unnamed-chunk-14](figure/unnamed-chunk-14-2.png)
+#### Utilisateurs avancés, utilisation pas à pas
 On réalise les statistiques descriptives des données en fonction d'une variable qualitative de comparaison en rajoutant un paramètre `group` aux fonction `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`.
 On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher une description globale des variables.
 
@@ -350,58 +439,7 @@ head(comparaison, n = 5)
 ## 5          17,8 ; 33,9          10,4 ; 33,9   NA      NA
 ```
 
-### Statistiques descriptives graphiques en fonction d'une variable qualitative de groupe
-Pour réaliser les statistiques descriptives graphiques des données au sein de différents sous-groupes, on rajoute aux fonctions `statsBordeaux::getBoxPlot()` et `statsBordeaux::getBarPlot()` un paramètre `group`.
-
-
-```r
-## création d'une liste vide
-plotGroupe <- list()
-
-## on défini la variable de groupe
-group <- "vs"
-
-## boucle qui va traiter chaque colonne du data.frame les unes après les autres
-for(i in 1:ncol(labelledData)){
-  # cas où la colonne en cours est de type quantitative
-  if(is.numeric(labelledData[, i])){
-    plotGroupe[[i]] <- statsBordeaux::getBoxPlot(data = labelledData,
-                                                 variable = colnames(labelledData)[i],
-                                                 group = group,
-                                                 legend.position = 'bottom')
-  }
-  # cas où la colonne en cours est de type qualitative
-  else if(is.factor(labelledData[, i])){
-    plotGroupe[[i]] <- statsBordeaux::getBarPlot(data = labelledData,
-                                                 variable = colnames(labelledData)[i],
-                                                 group = group,
-                                                 legend.position = 'bottom')
-  }
-  # autre cas non pris en charge
-  else {
-    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
-  }
-}
-
-## on supprime les éléments null de la liste
-plotGroupe[sapply(plotGroupe, is.null)] <- NULL
-
-## exemple de plot de variable quantitative
-plotGroupe[[1]]
-```
-
-<img src="figure/unnamed-chunk-13-1.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" />
-
-```r
-## exemple de plot de variable qualitative
-plotGroupe[[8]]
-```
-
-<img src="figure/unnamed-chunk-13-2.png" title="plot of chunk unnamed-chunk-13" alt="plot of chunk unnamed-chunk-13" style="display: block; margin: auto;" />
-
 ## Statistiques comparatives
-### Statistiques comparatives en fonction d'une variable qualitative de groupe
-On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests :  
 
 - Comparaison de fréquences :
     * Si tous les effectifs théoriques sont supérieurs ou égaux à 5, un Chi² est réalisé.
@@ -414,6 +452,175 @@ On réalise les statistiques comparatives des données en fonction d'une variabl
     * Cas où la variable de groupe est composée de plus de deux modalitées :
         + Si tous les effectifs sont supérieurs ou égaux à 30, l'hypothèse de normalité est considérée vraie. Un test d'ANOVA est réalisé.
         + Si un des effectifs est inférieur à 30, l'hypothèse de normalité n'est pas considérée vraie. Un test non-paramétrique de Kruskal-Wallis est réalisé.
+
+#### Utilisation de la fonction pipe `%>%`
+
+On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans la fonction `statsBordeaux::describeDataFrame()`.
+
+
+```r
+# statistique comparative sur l'ensemble du data.frame
+comp <- labelledData %>%
+  statsBordeaux::describeDataFrame(group = "vs",
+                                   p_value = TRUE)
+comp
+```
+
+```
+##                   Variable       Modality      Description
+## 1        Miles/(US) gallon           <NA>             <NA>
+## 2                     <NA>           <NA>         N (m.d.)
+## 3                     <NA>           <NA>        Mean (SD)
+## 4                     <NA>           <NA> Median [Q1 ; Q3]
+## 5                     <NA>           <NA>        Min ; Max
+## 6      Number of cylinders           <NA>             <NA>
+## 7                     <NA>           <NA>         N (m.d.)
+## 8                     <NA>           <NA>        Mean (SD)
+## 9                     <NA>           <NA> Median [Q1 ; Q3]
+## 10                    <NA>           <NA>        Min ; Max
+## 11   Displacement (cu.in.)           <NA>             <NA>
+## 12                    <NA>           <NA>         N (m.d.)
+## 13                    <NA>           <NA>        Mean (SD)
+## 14                    <NA>           <NA> Median [Q1 ; Q3]
+## 15                    <NA>           <NA>        Min ; Max
+## 16       Gross horsepower            <NA>             <NA>
+## 17                    <NA>           <NA>         N (m.d.)
+## 18                    <NA>           <NA>        Mean (SD)
+## 19                    <NA>           <NA> Median [Q1 ; Q3]
+## 20                    <NA>           <NA>        Min ; Max
+## 21         Rear axle ratio           <NA>             <NA>
+## 22                    <NA>           <NA>         N (m.d.)
+## 23                    <NA>           <NA>        Mean (SD)
+## 24                    <NA>           <NA> Median [Q1 ; Q3]
+## 25                    <NA>           <NA>        Min ; Max
+## 26       Weight (1000 lbs)           <NA>             <NA>
+## 27                    <NA>           <NA>         N (m.d.)
+## 28                    <NA>           <NA>        Mean (SD)
+## 29                    <NA>           <NA> Median [Q1 ; Q3]
+## 30                    <NA>           <NA>        Min ; Max
+## 31           1/4 mile time           <NA>             <NA>
+## 32                    <NA>           <NA>         N (m.d.)
+## 33                    <NA>           <NA>        Mean (SD)
+## 34                    <NA>           <NA> Median [Q1 ; Q3]
+## 35                    <NA>           <NA>        Min ; Max
+## 36            Transmission           <NA>             <NA>
+## 37                    <NA> All modalities                N
+## 38                    <NA>      Automatic            N (%)
+## 39                    <NA>         Manual            N (%)
+## 40 Number of forward gears           <NA>             <NA>
+## 41                    <NA>           <NA>         N (m.d.)
+## 42                    <NA>           <NA>        Mean (SD)
+## 43                    <NA>           <NA> Median [Q1 ; Q3]
+## 44                    <NA>           <NA>        Min ; Max
+## 45   Number of carburetors           <NA>             <NA>
+## 46                    <NA>           <NA>         N (m.d.)
+## 47                    <NA>           <NA>        Mean (SD)
+## 48                    <NA>           <NA> Median [Q1 ; Q3]
+## 49                    <NA>           <NA>        Min ; Max
+##                   V-shaped                  Straight All
+## 1                     <NA>                      <NA>  NA
+## 2                   18 (0)                    14 (0)  NA
+## 3           16,617 (3,861)            24,557 (5,379)  NA
+## 4  15,65 [14,775 ; 19,075]      22,8 [21,4 ; 29,625]  NA
+## 5                10,4 ; 26               17,8 ; 33,9  NA
+## 6                     <NA>                      <NA>  NA
+## 7                   18 (0)                    14 (0)  NA
+## 8            7,444 (1,149)             4,571 (0,938)  NA
+## 9                8 [8 ; 8]               4 [4 ; 5,5]  NA
+## 10                   4 ; 8                     4 ; 6  NA
+## 11                    <NA>                      <NA>  NA
+## 12                  18 (0)                    14 (0)  NA
+## 13        307,15 (106,765)          132,457 (56,893)  NA
+## 14       311 [275,8 ; 360] 120,55 [83,025 ; 162,375]  NA
+## 15             120,3 ; 472                71,1 ; 258  NA
+## 16                    <NA>                      <NA>  NA
+## 17                  18 (0)                    14 (0)  NA
+## 18        189,722 (60,282)           91,357 (24,424)  NA
+## 19   180 [156,25 ; 226,25]          96 [66 ; 109,75]  NA
+## 20                91 ; 335                  52 ; 123  NA
+## 21                    <NA>                      <NA>  NA
+## 22                  18 (0)                    14 (0)  NA
+## 23           3,392 (0,474)             3,859 (0,506)  NA
+## 24     3,18 [3,07 ; 3,702]       3,92 [3,718 ; 4,08]  NA
+## 25             2,76 ; 4,43               2,76 ; 4,93  NA
+## 26                    <NA>                      <NA>  NA
+## 27                  18 (0)                    14 (0)  NA
+## 28           3,689 (0,904)             2,611 (0,715)  NA
+## 29    3,57 [3,236 ; 3,844]     2,622 [2,001 ; 3,209]  NA
+## 30            2,14 ; 5,424              1,513 ; 3,46  NA
+## 31                    <NA>                      <NA>  NA
+## 32                  18 (0)                    14 (0)  NA
+## 33          16,694 (1,092)            19,334 (1,354)  NA
+## 34 17,02 [15,995 ; 17,415]   19,17 [18,602 ; 19,975]  NA
+## 35               14,5 ; 18               16,9 ; 22,9  NA
+## 36                    <NA>                      <NA>  NA
+## 37              18 (0 ; 0)                14 (0 ; 0)  NA
+## 38             12 (66,667)                    7 (50)  NA
+## 39              6 (33,333)                    7 (50)  NA
+## 40                    <NA>                      <NA>  NA
+## 41                  18 (0)                    14 (0)  NA
+## 42           3,556 (0,856)             3,857 (0,535)  NA
+## 43               3 [3 ; 4]                 4 [4 ; 4]  NA
+## 44                   3 ; 5                     3 ; 5  NA
+## 45                    <NA>                      <NA>  NA
+## 46                  18 (0)                    14 (0)  NA
+## 47           3,611 (1,539)             1,786 (1,051)  NA
+## 48            4 [2,25 ; 4]               1,5 [1 ; 2]  NA
+## 49                   2 ; 8                     1 ; 4  NA
+##                                                 Test p-value
+## 1  Wilcoxon rank sum test with continuity correction  <0,001
+## 2                                               <NA>    <NA>
+## 3                                               <NA>    <NA>
+## 4                                               <NA>    <NA>
+## 5                                               <NA>    <NA>
+## 6  Wilcoxon rank sum test with continuity correction  <0,001
+## 7                                               <NA>    <NA>
+## 8                                               <NA>    <NA>
+## 9                                               <NA>    <NA>
+## 10                                              <NA>    <NA>
+## 11 Wilcoxon rank sum test with continuity correction  <0,001
+## 12                                              <NA>    <NA>
+## 13                                              <NA>    <NA>
+## 14                                              <NA>    <NA>
+## 15                                              <NA>    <NA>
+## 16 Wilcoxon rank sum test with continuity correction  <0,001
+## 17                                              <NA>    <NA>
+## 18                                              <NA>    <NA>
+## 19                                              <NA>    <NA>
+## 20                                              <NA>    <NA>
+## 21 Wilcoxon rank sum test with continuity correction  0,0134
+## 22                                              <NA>    <NA>
+## 23                                              <NA>    <NA>
+## 24                                              <NA>    <NA>
+## 25                                              <NA>    <NA>
+## 26 Wilcoxon rank sum test with continuity correction 0,00116
+## 27                                              <NA>    <NA>
+## 28                                              <NA>    <NA>
+## 29                                              <NA>    <NA>
+## 30                                              <NA>    <NA>
+## 31 Wilcoxon rank sum test with continuity correction  <0,001
+## 32                                              <NA>    <NA>
+## 33                                              <NA>    <NA>
+## 34                                              <NA>    <NA>
+## 35                                              <NA>    <NA>
+## 36                        Pearson's Chi-squared test   0,341
+## 37                                              <NA>    <NA>
+## 38                                              <NA>    <NA>
+## 39                                              <NA>    <NA>
+## 40 Wilcoxon rank sum test with continuity correction   0,120
+## 41                                              <NA>    <NA>
+## 42                                              <NA>    <NA>
+## 43                                              <NA>    <NA>
+## 44                                              <NA>    <NA>
+## 45 Wilcoxon rank sum test with continuity correction  <0,001
+## 46                                              <NA>    <NA>
+## 47                                              <NA>    <NA>
+## 48                                              <NA>    <NA>
+## 49                                              <NA>    <NA>
+```
+
+#### Utilisateurs avancés, utilisation pas à pas
+On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests. 
 
 
 ```r
@@ -450,31 +657,28 @@ for(i in 1:ncol(labelledData)){
   }
 }
 
-head(statsComparatives)
+head(statsComparatives, n = 5)
 ```
 
 ```
-##              Variable Modality      Description                V-shaped
-## 1   Miles/(US) gallon     <NA>             <NA>                    <NA>
-## 2                <NA>     <NA>         N (m.d.)                  18 (0)
-## 3                <NA>     <NA>        Mean (SD)          16,617 (3,861)
-## 4                <NA>     <NA> Median [Q1 ; Q3] 15,65 [14,775 ; 19,075]
-## 5                <NA>     <NA>        Min ; Max               10,4 ; 26
-## 6 Number of cylinders     <NA>             <NA>                    <NA>
+##            Variable Modality      Description                V-shaped
+## 1 Miles/(US) gallon     <NA>             <NA>                    <NA>
+## 2              <NA>     <NA>         N (m.d.)                  18 (0)
+## 3              <NA>     <NA>        Mean (SD)          16,617 (3,861)
+## 4              <NA>     <NA> Median [Q1 ; Q3] 15,65 [14,775 ; 19,075]
+## 5              <NA>     <NA>        Min ; Max               10,4 ; 26
 ##               Straight All
 ## 1                 <NA>  NA
 ## 2               14 (0)  NA
 ## 3       24,557 (5,379)  NA
 ## 4 22,8 [21,4 ; 29,625]  NA
 ## 5          17,8 ; 33,9  NA
-## 6                 <NA>  NA
 ##                                                Test p-value
 ## 1 Wilcoxon rank sum test with continuity correction  <0,001
 ## 2                                              <NA>    <NA>
 ## 3                                              <NA>    <NA>
 ## 4                                              <NA>    <NA>
 ## 5                                              <NA>    <NA>
-## 6 Wilcoxon rank sum test with continuity correction  <0,001
 ```
 
 ## Reporting
@@ -553,21 +757,36 @@ La fonction `statsBordeaux::checkNormality()` permet d'évaluer la normalité d'
 statsBordeaux::checkNormality(data = labelledData, variable = "mpg")
 ```
 
-<img src="figure/unnamed-chunk-17-1.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" />
+```
+## [[1]]
+## [[1]]$mpg
+```
+
+<img src="figure/unnamed-chunk-20-1.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" />
 
 ```r
 ## évaluation graphique et avec un test de Shapiro-Wilk de la distribution de la variable 'mpg'
 statsBordeaux::checkNormality(data = labelledData, variable = "mpg", p_value = TRUE, method = 'Shapiro')
 ```
 
-<img src="figure/unnamed-chunk-17-2.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" />
+```
+## [[1]]
+## [[1]]$mpg
+```
+
+<img src="figure/unnamed-chunk-20-2.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" />
 
 ```r
 ## évaluation graphique et avec un test de Shapiro-Wilk de la distribution de la variable 'mpg' dans chacun des sous-groupe de 'vs'
 statsBordeaux::checkNormality(data = labelledData, variable = "mpg", group = "vs", p_value = TRUE, method = 'Shapiro')
 ```
 
-<img src="figure/unnamed-chunk-17-3.png" title="plot of chunk unnamed-chunk-17" alt="plot of chunk unnamed-chunk-17" style="display: block; margin: auto;" />
+```
+## [[1]]
+## [[1]]$mpg
+```
+
+<img src="figure/unnamed-chunk-20-3.png" title="plot of chunk unnamed-chunk-20" alt="plot of chunk unnamed-chunk-20" style="display: block; margin: auto;" />
 
 ### Gestion des 'non-applicables'
 La gestion des 'non-applicables' fait intervenir la fonction `statsBordeaux::manageNotApplicable()`.
@@ -612,7 +831,7 @@ labels <- rbind(labels, data.frame(Variable = c("nSpeed", "nSpeed"),
                                    Modality = c(5, 6),
                                    Label = c("5 vitesses", "6 vitesses")))
 # labellisation des modalitées des variables qualitatives
-labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
+labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
 
 ## labélisation des variables du data.frame
 labelVariable <- rbind(labelVariable,

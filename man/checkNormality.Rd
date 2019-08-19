@@ -4,13 +4,13 @@
 \alias{checkNormality}
 \title{Test normality of numeric variable based on graphic and statistc methods}
 \usage{
-checkNormality(data, variable, group = NULL, p_value = FALSE,
-  method = "Kolmogorov")
+checkNormality(data, variable = colnames(data), group = NULL,
+  p_value = FALSE, method = "Kolmogorov")
 }
 \arguments{
 \item{data}{a data.frace conteting the numeric data witch normality need to be evaluate}
 
-\item{variable}{a character vector of length 1. The name of the numeric column to describe.}
+\item{variable}{a character vector. The name of the numeric columns to describe.}
 
 \item{group}{a character vector of length 1. The name of the factor column to use as commparaison group. Default to NULL.}
 

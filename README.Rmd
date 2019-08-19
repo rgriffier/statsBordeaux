@@ -2,7 +2,7 @@
 title: "Stats bordeaux package"
 output: html_notebook
 author: Romain GRIFFIER
-date: 18/08/2019
+date: 19/08/2019
 ---
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.  
@@ -73,7 +73,7 @@ statsBordeaux::checkNotDigitInDataframe(mtcars)
 
 ### ÉTAPE 2 : labélisation des modalité des variables qualiatives
 Comme le data.frame d'entrée ne contient que des nombres, il faut labéliser les modalités des variables qualitatives.  
-On effectue cette labélisation grâce à la fonction `statsBordeaux::labellisationDataFrame()` à partir du data.frame `labels` créé précédemment.  
+On effectue cette labélisation grâce à la fonction `statsBordeaux::setLabelToFactorLevels()` à partir du data.frame `labels` créé précédemment.  
 Cette fonction gère à la fois :
 
 - La conversion des variables présentes dans le data.frame `labels` en tant que `factor`.
@@ -83,7 +83,7 @@ La fonction vérifie que les variables du fichier des labels sont bien dans le d
 
 ```{r}
 ## association à chaque modalité des variables qualitatives du label correspondant et conversion de ces variables en factor
-labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
+labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
 head(labelledData)
 ```
 
@@ -131,7 +131,36 @@ list_variableFormat
 ```
 
 ## Statistiques descriptives
-### Statistique descriptive de l'ensemble de la population
+### Statistiques descriptives globales
+#### Utilisation de la fonction pipe `%>%`
+
+La fonction `statsBordeaux::describeDataFrame()` permet de décrire les variables qualitatives et quantitatives d'un data.frame. Elle peut s'utiliser avec les pipes `%>%` (package `dplyr`).
+```{r}
+# chargement de dplyr
+library(dplyr)
+
+# statistique descriptive sur l'ensemble du data.frame
+description <- labelledData %>%
+  statsBordeaux::describeDataFrame()
+
+description[c(1:5, 36:39), ]
+```
+
+De la même manière, il est possible de réaliser une description graphique des données avec la fonction `statsBordeaux::getGraphicalDescription()`
+
+```{r}
+# statistique graphique sur l'ensemble du data.frame
+graphicDescription <- labelledData %>%
+  statsBordeaux::getGraphicalDescription()
+
+## Variable quantitative : BOX PLOT
+graphicDescription[[1]]
+
+## Variable qualitative : BAR PLOT
+graphicDescription[[8]]
+```
+
+#### Utilisateurs avancés, utilisation pas à pas
 On créé un tableau de sortie vierge à partir de la fonction `statsBordeaux::createOutput()`. C'est ce dernier qui va contenir la description de nos variables.  
 On réalise les statistiques descriptives des données avec les fonctions `statsBordeaux::statsQT()` et `statsBordeaux::statsQL()` (en fonction de la nature quantitative ou qualitative de la variable à décrire).
 
@@ -162,46 +191,36 @@ for(i in 1:ncol(labelledData)){
 head(description, n = 5)
 ```
 
-### Statistiques descriptives graphique de l'ensemble de la population
-On réalise les statistiques descriptives graphiques des données à l'aide des fonctions `statsBordeaux::getBoxPlot()` et `statsBordeaux::getBarPlot()`.
+### Statistiques descriptives en fonction d'une variable qualitative de groupe
+#### Utilisation de la fonction pipe `%>%`
 
-Les fonction `statsBordeaux::getBoxPlot()` et `statsBordeaux::getBarPlot()` retournent un objet de la classe ggplot qui peut ensuite être modifié si besoin.
+La fonction `statsBordeaux::describeDataFrame()` permet également de réaliser les statistiques en fonction d'unevariable qualitative de groupe. Il suffit pour celà de renseigner le paramètre `group`.
+On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher en plus une description globale des variables.
 
-```{r, fig.align = 'center'}
-## création d'une liste vide
-plot <- list()
+```{r}
 
-## boucle qui va traiter chaque colonne du data.frame les unes après les autres
-for(i in 1:ncol(labelledData)){
-  # cas où la colonne en cours est de type quantitative
-  if(is.numeric(labelledData[, i])){
-    plot[[i]] <- statsBordeaux::getBoxPlot(data = labelledData,
-                                           variable = colnames(labelledData)[i],
-                                           legend.position = 'bottom')
-  }
-  # cas où la colonne en cours est de type qualitative
-  else if(is.factor(labelledData[, i])){
-    plot[[i]] <- statsBordeaux::getBarPlot(data = labelledData,
-                                           variable = colnames(labelledData)[i],
-                                           legend.position = 'bottom')
-  }
-  # autre cas non pris en charge
-  else {
-    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
-  }
-}
+# statistique comparative sur l'ensemble du data.frame
+comp <- labelledData %>%
+  statsBordeaux::describeDataFrame(group = "vs",
+                                   all = TRUE)
 
-## on supprime les éléments null de la liste
-plot[sapply(plot, is.null)] <- NULL
-
-## exemple de plot de variable quantitative
-plot[[1]]
-
-## exemple de plot de variable qualitative
-plot[[8]]
+comp[c(1:5, 36:39), ]
 ```
 
-### Statistiques descriptives en fonction d'une variable qualitative de groupe
+De la même manière, il est possible de réaliser une description graphique des données en fonction d'une variable qualitative de groupe en rajoutant le paramètre `group` à la fonction `statsBordeaux::getGraphicalDescription()`
+
+```{r}
+# statistique graphique sur l'ensemble du data.frame
+graphicDescription <- labelledData %>%
+  statsBordeaux::getGraphicalDescription(group = "vs")
+
+## Variable quantitative : BOX PLOT
+graphicDescription[[1]]
+
+## Variable qualitative : BAR PLOT
+graphicDescription[[9]]
+```
+#### Utilisateurs avancés, utilisation pas à pas
 On réalise les statistiques descriptives des données en fonction d'une variable qualitative de comparaison en rajoutant un paramètre `group` aux fonction `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`.
 On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher une description globale des variables.
 
@@ -242,52 +261,7 @@ for(i in 1:ncol(labelledData)){
 head(comparaison, n = 5)
 ```
 
-### Statistiques descriptives graphiques en fonction d'une variable qualitative de groupe
-Pour réaliser les statistiques descriptives graphiques des données au sein de différents sous-groupes, on rajoute aux fonctions `statsBordeaux::getBoxPlot()` et `statsBordeaux::getBarPlot()` un paramètre `group`.
-
-```{r, fig.align = 'center'}
-## création d'une liste vide
-plotGroupe <- list()
-
-## on défini la variable de groupe
-group <- "vs"
-
-## boucle qui va traiter chaque colonne du data.frame les unes après les autres
-for(i in 1:ncol(labelledData)){
-  # cas où la colonne en cours est de type quantitative
-  if(is.numeric(labelledData[, i])){
-    plotGroupe[[i]] <- statsBordeaux::getBoxPlot(data = labelledData,
-                                                 variable = colnames(labelledData)[i],
-                                                 group = group,
-                                                 legend.position = 'bottom')
-  }
-  # cas où la colonne en cours est de type qualitative
-  else if(is.factor(labelledData[, i])){
-    plotGroupe[[i]] <- statsBordeaux::getBarPlot(data = labelledData,
-                                                 variable = colnames(labelledData)[i],
-                                                 group = group,
-                                                 legend.position = 'bottom')
-  }
-  # autre cas non pris en charge
-  else {
-    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
-  }
-}
-
-## on supprime les éléments null de la liste
-plotGroupe[sapply(plotGroupe, is.null)] <- NULL
-
-## exemple de plot de variable quantitative
-plotGroupe[[1]]
-
-## exemple de plot de variable qualitative
-plotGroupe[[8]]
-
-```
-
 ## Statistiques comparatives
-### Statistiques comparatives en fonction d'une variable qualitative de groupe
-On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests :  
 
 - Comparaison de fréquences :
     * Si tous les effectifs théoriques sont supérieurs ou égaux à 5, un Chi² est réalisé.
@@ -300,6 +274,21 @@ On réalise les statistiques comparatives des données en fonction d'une variabl
     * Cas où la variable de groupe est composée de plus de deux modalitées :
         + Si tous les effectifs sont supérieurs ou égaux à 30, l'hypothèse de normalité est considérée vraie. Un test d'ANOVA est réalisé.
         + Si un des effectifs est inférieur à 30, l'hypothèse de normalité n'est pas considérée vraie. Un test non-paramétrique de Kruskal-Wallis est réalisé.
+
+#### Utilisation de la fonction pipe `%>%`
+
+On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans la fonction `statsBordeaux::describeDataFrame()`.
+
+```{r}
+# statistique comparative sur l'ensemble du data.frame
+comp <- labelledData %>%
+  statsBordeaux::describeDataFrame(group = "vs",
+                                   p_value = TRUE)
+comp
+```
+
+#### Utilisateurs avancés, utilisation pas à pas
+On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests. 
 
 ```{r}
 ## création du tableau de sortie vierge
@@ -335,7 +324,7 @@ for(i in 1:ncol(labelledData)){
   }
 }
 
-head(statsComparatives)
+head(statsComparatives, n = 5)
 ```
 
 ## Reporting
@@ -459,7 +448,7 @@ labels <- rbind(labels, data.frame(Variable = c("nSpeed", "nSpeed"),
                                    Modality = c(5, 6),
                                    Label = c("5 vitesses", "6 vitesses")))
 # labellisation des modalitées des variables qualitatives
-labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
+labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
 
 ## labélisation des variables du data.frame
 labelVariable <- rbind(labelVariable,

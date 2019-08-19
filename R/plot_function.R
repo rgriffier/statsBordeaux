@@ -1,8 +1,7 @@
 #' @title A convenient method to get box plot from numeric variable.
 #' @description A convenient method to get box plot from numeric variable.
 #' @param data a data.frame, containing the numeric variable to describe with boxplot
-#' @param variable a character vector of length one, containing the name of the
-#' variable to describe
+#' @param variable a character vector, containing the name of the variables to describe
 #' @param group a character vector of length one, containing the name of the
 #' group which need to be used to describe the numeric variable. Depault to NULL
 #' @param legend.position a characher vector of length one, containing the legend position.
@@ -14,7 +13,7 @@
 #' data(mtcars)
 #' mtcars$am <- as.factor(mtcars$am)
 #' getBoxPlot(data = mtcars, variable = "mpg", group = "am")
-getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
+getBoxPlot <- function(data, variable, group = NULL, legend.position = "right"){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -26,7 +25,7 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
     stop("variable must be the name of one column in data.")
   }
   if(!is.numeric(data[, variable])){
-    stop("variable must be a numerical variable in data.")
+    return(NULL)
   }
   if(!is.null(group)){
     if(!is.vector(group) | !is.character(group) | length(group) != 1){
@@ -84,13 +83,13 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
   }
   return(plot)
 }
+getBoxPlot <- Vectorize(getBoxPlot, vectorize.args = "variable", SIMPLIFY = FALSE)
 
 
 #' @title A convenient method to get bar plot from qualitative variable.
 #' @description A convenient method to get bar plot from qualitative variable.
 #' @param data a data.frame, containing the qualitative variable to describe with barplot
-#' @param variable a character vector of length one, containing the name of the
-#' variable to describe
+#' @param variable a character vector, containing the name of the variables to describe
 #' @param group a character vector of length one, containing the name of the
 #' group which need to be used to describe the qualitative variable. Depault to NULL
 #' @param legend.position a characher vector of length one, containing the legend position.
@@ -105,7 +104,7 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = 'right'){
 #' mtcars$am <- as.factor(mtcars$am)
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' getBarPlot(data = mtcars, variable = "vs", group = "am")
-getBarPlot <- function(data, variable, group = NULL, legend.position = 'right', na.rm = TRUE){
+getBarPlot <- function(data, variable, group = NULL, legend.position = "right", na.rm = TRUE){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -117,7 +116,7 @@ getBarPlot <- function(data, variable, group = NULL, legend.position = 'right', 
     stop("variable must be the name of one column in data.")
   }
   if(!is.factor(data[, variable])){
-    stop("variable must be a qualitative variable in data.")
+    return(NULL)
   }
   if(!is.null(group)){
     if(!is.vector(group) | !is.character(group) | length(group) != 1){
@@ -194,4 +193,42 @@ getBarPlot <- function(data, variable, group = NULL, legend.position = 'right', 
                      axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face = "bold"))
   }
   return(plot)
+}
+getBarPlot <- Vectorize(getBarPlot, vectorize.args = "variable", SIMPLIFY = FALSE)
+
+
+#' @title A convenient method to get plot from data.frame.
+#' @description A convenient method to get plot from data.frame
+#' @param data a data.frame, containing the numeric variable to describe with boxplot
+#' @param variable a character vector, containing the name of the variables to describe
+#' @param group a character vector of length one, containing the name of the
+#' @param legend.position a characher vector of length one, containing the legend position.
+#' Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.
+#' @param na.rm a boolean vector of length one. If TRUE, missig value of variable will be remove.
+#' Default to TRUE
+#' @return a ggplot2 plot
+#' @export
+#' @examples
+#' data(mtcars)
+#' mtcars$am <- as.factor(mtcars$am)
+#' mtcars$vs <- as.factor(mtcars$vs)
+#' mtcars %>% getGraphicalDescription(group = "am")
+getGraphicalDescription <- function(data, variable = colnames(data), group = NULL,
+                                    legend.position = "right", na.rm = TRUE){
+  listPlot <- lapply(variable, function(currentVar){
+    if(is.numeric(data[, currentVar])){
+      plot <- getBoxPlot(data = data,
+                         variable = currentVar,
+                         group = group,
+                         legend.position = legend.position)
+    } else if(is.factor(data[, currentVar])){
+      plot <- getBarPlot(data = data,
+                         variable = currentVar,
+                         group = group,
+                         legend.position = legend.position,
+                         na.rm = na.rm)
+    }
+  })
+  listPlot[sapply(listPlot, is.null)] <- NULL
+  return(listPlot)
 }

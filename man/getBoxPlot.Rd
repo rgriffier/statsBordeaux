@@ -9,8 +9,7 @@ getBoxPlot(data, variable, group = NULL, legend.position = "right")
 \arguments{
 \item{data}{a data.frame, containing the numeric variable to describe with boxplot}
 
-\item{variable}{a character vector of length one, containing the name of the
-variable to describe}
+\item{variable}{a character vector, containing the name of the variables to describe}
 
 \item{group}{a character vector of length one, containing the name of the
 group which need to be used to describe the numeric variable. Depault to NULL}
