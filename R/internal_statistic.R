@@ -370,7 +370,7 @@ manageDataBeforePairedTest <- function(df, variable, group, id_paired){
 #' @param NA_group_AsModality a boolean. If TRUE, missing data of the group variable will be considered as levels. Default to FALSE
 #' @return a data.frame containing the description of the variables
 #' @noRd
-jumpDescribeDataFrame <- function(data, variable, group = NULL, group_str = NULL,
+jumpDescribeDataFrame <- Vectorize(function(data, variable, group = NULL, group_str = NULL,
                                   p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
                                   round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
   output <- statsBordeaux::createOutput()
@@ -404,10 +404,7 @@ jumpDescribeDataFrame <- function(data, variable, group = NULL, group_str = NULL
     return(NULL)
   }
   return(output)
-}
-
-jumpDescribeDataFrame <- Vectorize(jumpDescribeDataFrame, vectorize.args = "variable", SIMPLIFY = FALSE, USE.NAMES = FALSE)
-
+}, vectorize.args = "variable", SIMPLIFY = FALSE, USE.NAMES = FALSE)
 
 #' @title Test normality of numeric variable based on graphic and statistc methods
 #' @description Test normality of numeric variable based on graphic and statistc methods
@@ -420,7 +417,7 @@ jumpDescribeDataFrame <- Vectorize(jumpDescribeDataFrame, vectorize.args = "vari
 #' @importFrom ggpubr ggtexttable ggparagraph ggarrange
 #' @import ggplot2
 #' @noRd
-checkNormalityInternal <- function(data, variable, group = NULL, p_value = FALSE, method = 'Kolmogorov') {
+checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_value = FALSE, method = 'Kolmogorov') {
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -547,5 +544,4 @@ checkNormalityInternal <- function(data, variable, group = NULL, p_value = FALSE
                         heights = c(0.7, 0.3, 0.3), align = "hv"))
   }
   return(plot)
-}
-checkNormalityInternal <- Vectorize(checkNormalityInternal, vectorize.args = "variable", SIMPLIFY = FALSE)
+}, vectorize.args = "variable", SIMPLIFY = FALSE)

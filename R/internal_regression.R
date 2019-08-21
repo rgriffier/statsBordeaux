@@ -12,7 +12,6 @@ getFormulaFromVariableName <- function(dependentVariable, independentVariables) 
 }
 
 
-
 #' @title Extact from linear model fit data.frame with meaning result
 #' @description Extact from linear model fit data.frame with meaning result
 #' @param fit a fit
@@ -97,7 +96,6 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
   colnames(summaryFitData) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
   return(summaryFitData)
 }
-
 
 
 #' @title Extact from logistic model fit data.frame with meaning result
@@ -188,7 +186,6 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
   colnames(summaryFitData) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
   return(summaryFitData)
 }
-
 
 
 #' @title Perform univariable logistic regression models
@@ -313,7 +310,6 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
     return(fitUnivariable)
   }
 }
-
 
 
 #' @title Perform univariable linear regression models

@@ -260,6 +260,7 @@ displayRegressionTable <- function(table, modalitySize, sampleSize, parameterSiz
   return(outputRT)
 }
 
+
 #' @title An internal method to generate a regular table based on data.frame containing description of i2b2data
 #' @description An internal method to generate a regular table based on data.frame containing description of i2b2data
 #' @param table a data.table

@@ -134,7 +134,6 @@ checkNormality <- function(data, variable = colnames(data), group = NULL, p_valu
 }
 
 
-
 #' @title set label to qualitative variable into a data.frame based on dictionnary.
 #' @description manage the conversion and sat label to qualitative into a data.frame based
 #' on dictionnary.
@@ -214,7 +213,6 @@ setLabelToFactorLevels <- function(df, labelTable){
 }
 
 
-
 #' @title set label to each column of data.frame based on dictionnaty
 #' @description add a label as attribute (var_label) to each column of data.frame based on dictionnary. This
 #' label will be used during the reporting function.
@@ -271,7 +269,6 @@ setLabelToVariable <- function(df, label){
 }
 
 
-
 #' @title get the label of variable in a data.frame
 #' @description Get the label of variables witch were labelised thanks the setLabel function
 #' @param df a data.frame witch contain some variable witch were labelized
@@ -313,7 +310,6 @@ getLabelFromVariable <- function(df){
 }
 
 
-
 #' @title Subset data keeping attributes
 #' @description  Allows to subset data and keeping all the attributes of the data
 #' @param x a data.frame
@@ -336,7 +332,6 @@ subset_withAttributes <- function(x, subset){
   }
   return(subset_df)
 }
-
 
 
 #' @title Manage the not applicable condition into data.frame
@@ -1867,7 +1862,7 @@ describeDataFrame <- function(data, variables = colnames(data), group = NULL, gr
     variables <- setdiff(variables, group)
   }
 
-  result <- do.call("rbind", jumpDescribeDataFrame(data = labelledData,
+  result <- do.call("rbind", jumpDescribeDataFrame(data = data,
                                                    variable = variables,
                                                    group = group,
                                                    group_str = group_str,
@@ -1881,4 +1876,3 @@ describeDataFrame <- function(data, variables = colnames(data), group = NULL, gr
 
   return(result)
 }
-

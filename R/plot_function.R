@@ -13,7 +13,7 @@
 #' data(mtcars)
 #' mtcars$am <- as.factor(mtcars$am)
 #' getBoxPlot(data = mtcars, variable = "mpg", group = "am")
-getBoxPlot <- function(data, variable, group = NULL, legend.position = "right"){
+getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right"){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -82,8 +82,7 @@ getBoxPlot <- function(data, variable, group = NULL, legend.position = "right"){
                      axis.title.y.left = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face="bold"))
   }
   return(plot)
-}
-getBoxPlot <- Vectorize(getBoxPlot, vectorize.args = "variable", SIMPLIFY = FALSE)
+}, vectorize.args = "variable", SIMPLIFY = FALSE)
 
 
 #' @title A convenient method to get bar plot from qualitative variable.
@@ -104,7 +103,7 @@ getBoxPlot <- Vectorize(getBoxPlot, vectorize.args = "variable", SIMPLIFY = FALS
 #' mtcars$am <- as.factor(mtcars$am)
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' getBarPlot(data = mtcars, variable = "vs", group = "am")
-getBarPlot <- function(data, variable, group = NULL, legend.position = "right", na.rm = TRUE){
+getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", na.rm = TRUE){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -193,8 +192,7 @@ getBarPlot <- function(data, variable, group = NULL, legend.position = "right", 
                      axis.title.y = ggplot2::element_text(margin = ggplot2::margin(t = 0, r = 20, b = 0, l = 0), face = "bold"))
   }
   return(plot)
-}
-getBarPlot <- Vectorize(getBarPlot, vectorize.args = "variable", SIMPLIFY = FALSE)
+}, vectorize.args = "variable", SIMPLIFY = FALSE)
 
 
 #' @title A convenient method to get plot from data.frame.

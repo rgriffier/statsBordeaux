@@ -1,5 +1,5 @@
-#' @title A convenient method to add kable into a RMarkdown documet
-#' @description  A convenient method to add kable into a RMarkdown documet
+#' @title A convenient method to add kable into a RMarkdown document
+#' @description  A convenient method to add kable into a RMarkdown document
 #' @param data_frame a data.frame, containing the data to add
 #' @return a knitr::kable
 #' @export
@@ -11,14 +11,22 @@
 #' output <- createOutput()
 #' output <- statsQT(output, mtcars, "mpg")
 #' addKable(output)
-addKable <- function(data_frame){
+addKable <- function(data_frame, all_before = FALSE){
 
   if(!is.data.frame(data_frame) | nrow(data_frame) == 0){
     stop("data_frame must be a data.frame containing some data")
   }
+  if(!is.vector(all_before) | !is.logical(all_before) | length(all_before) != 1){
+    stop("all_before must be a boolean vector of length one")
+  }
 
   ## knitr option
   options(knitr.kable.NA = '')
+
+  ## order all before group
+  if(all_before){
+    data_frame <- data_frame %>% dplyr::select(Variable, Modality, Description, All, dplyr::everything())
+  }
 
   ## manage '0 (NaN)', 'NaN (NA)',  'NA [NA ; NA]' 	, 'NA ; NA'
   data_frame[data_frame == "0 (NaN)"] <- "\\-"
