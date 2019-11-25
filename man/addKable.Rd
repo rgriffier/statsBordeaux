@@ -2,9 +2,9 @@
 % Please edit documentation in R/kable_function.R
 \name{addKable}
 \alias{addKable}
-\title{A convenient method to add kable into a RMarkdown documet}
+\title{A convenient method to add kable into a RMarkdown document}
 \usage{
-addKable(data_frame)
+addKable(data_frame, all_before = FALSE)
 }
 \arguments{
 \item{data_frame}{a data.frame, containing the data to add}
@@ -13,7 +13,7 @@ addKable(data_frame)
 a knitr::kable
 }
 \description{
-A convenient method to add kable into a RMarkdown documet
+A convenient method to add kable into a RMarkdown document
 }
 \examples{
 data(mtcars)

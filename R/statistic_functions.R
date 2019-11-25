@@ -67,6 +67,69 @@ checkNotDigitInDataframe <- function(df, returnError = FALSE){
 }
 
 
+#' @title Get a summary for the given data.frame
+#' @description Get a summary for the given data.frame
+#' @param data a data.frame or tbl_df
+#' @return a data.frame containing the metada description
+#' @export
+#' @examples
+#' data(mtcars)
+#' describeMetadata(mtcars)
+describeMetadata <- function(data){
+
+  if(!is.data.frame(data)){
+    stop("data must be a data.frame")
+  }
+
+  # convert tbl_df as data.frame
+  if(any(class(data) %in% "tbl_df")){
+    data <- as.data.frame(data)
+  }
+
+  # for each columns
+  metadataDescription <- do.call(rbind, (lapply(colnames(data), function(x){
+
+    # get var label if exist
+    varLabel <- attributes(data[, x])$var_label
+    if(is.null(varLabel)){
+      varLabel <- attributes(data[, x])$label
+      if(is.null(varLabel)){
+        varLabel <- NA
+      }
+    }
+
+    # compute N_AVAILABLE, N_MISSING DATA and DATA_TYPE
+    N_AVAILABLE <- sum(!is.na(data[, x]))
+    N_MISSING <- sum(is.na(data[, x]))
+    DATA_TYPE <- class(data[, x])
+    # if numeric DATA_TYPE, compute N_INF
+    if(DATA_TYPE %in% c("numeric", "integer", "double")){
+      N_INF <- sum(is.infinite(data[, x]))
+    } else {
+      N_INF <- NA
+    }
+
+    # arrange metadata description
+    metadataDescription <- data.frame(VAR = x,
+                                      VAR_LABEL = varLabel,
+                                      DATA_TYPE = class(data[, x]),
+                                      LEVELS = ifelse(test = DATA_TYPE =='factor',
+                                                      yes = paste0(levels(data[, x]), collapse = ", "),
+                                                      no = NA),
+                                      N_AVAILABLE = N_AVAILABLE,
+                                      PROP_AVAILABLE = round(N_AVAILABLE/nrow(data), 2),
+                                      N_MISSING = N_MISSING,
+                                      PROP_MISSING = round(N_MISSING/nrow(data), 2),
+                                      N_INF = N_INF,
+                                      PROP_INF = round(N_INF/nrow(data), 2),
+                                      UNIQUE = length(unique(data[, x])))
+
+    return(metadataDescription)
+  })))
+  return(metadataDescription)
+}
+
+
 #' @title Format some float in the french p-value format for display usage
 #' @description Manage the display of p-value format in french format
 #' @param pvalues a numeric, witch need to be formated

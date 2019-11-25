@@ -4,7 +4,11 @@
 \alias{updateStatsBordeaux}
 \title{Update the statsBordeaux package}
 \usage{
-updateStatsBordeaux()
+updateStatsBordeaux(force = FALSE)
+}
+\arguments{
+\item{force}{a boolean vector of length one. If TRUE, force installation, even if the
+remote state has not changed since the previous install. Default to FALSE}
 }
 \description{
 Update the statsBordeaux package

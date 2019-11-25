@@ -116,17 +116,7 @@ Toutes les variables à analyser doivent être de classe  `numeric` (`integer` o
 
 ```{r}
 ## description des méta-données
-list_variableFormat <- do.call(rbind, (lapply(colnames(labelledData), function(x){
-  varLabel <- attributes(labelledData[, x])$var_label
-  if(is.null(varLabel)){
-    varLabel <- NA
-  }
-  descVariable <- data.frame(VAR = x,
-                             VAR_LABEL = varLabel,
-                             CLASS = class(labelledData[, x]),
-                             LEVELS = paste0(levels(labelledData[, x]), collapse = ", "))
-  return(descVariable)
-})))
+list_variableFormat <- statsBordeaux::describeMetadata(labelledData)
 list_variableFormat
 ```
 

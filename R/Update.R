@@ -3,6 +3,8 @@
 #' @param force a boolean vector of length one. If TRUE, force installation, even if the
 #' remote state has not changed since the previous install. Default to FALSE
 #' @export
+#' @import pkgbuild
+#' @import processx
 #' @examples
 #' updateStatsBordeaux()
 updateStatsBordeaux <- function(force = FALSE){
