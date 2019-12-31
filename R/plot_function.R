@@ -230,3 +230,28 @@ getGraphicalDescription <- function(data, variable = colnames(data), group = NUL
   listPlot[sapply(listPlot, is.null)] <- NULL
   return(listPlot)
 }
+
+#' @title Get density plot of numeric variable into data.frame
+#' @description Get density plot of numeric variable into data.frame
+#' @param data a data.frame
+#' @return a list of plot
+#' @export
+#' @import reshape
+#' @import ggplot2
+#' @examples
+#' data(mtcars)
+#' getDensityPlot(mtcars)
+getDensityPlot <- function(data){
+  densityPlot <- lapply(colnames(data), function(x){
+    if(!class(data[, x]) %in% c("numeric", "integer", "double")){
+      return(NA)
+    }
+    plot <- ggplot2::ggplot(data = data, ggplot2::aes(x = get(x))) +
+      ggplot2::geom_density(na.rm = T, color="black", fill="lightblue", alpha = 0.5) +
+      ggplot2::theme_minimal() +
+      ggplot2::xlab(statsBordeaux::getLabelFromVariable(data[x])) +
+      ggplot2::ylab("Density")
+    return(plot)
+  })
+  return(densityPlot)
+}

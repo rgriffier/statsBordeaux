@@ -4,10 +4,10 @@
 \alias{manageNotApplicable}
 \title{Manage the not applicable condition into data.frame}
 \usage{
-manageNotApplicable(df, notApplicableChar)
+manageNotApplicable(data, notApplicableChar)
 }
 \arguments{
-\item{df}{a data.frame containing data to clean}
+\item{data}{a data.frame containing data to clean}
 
 \item{notApplicableChar}{a character vector of length 1, with the not applicable character as in the data.frame}
 }

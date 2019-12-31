@@ -104,7 +104,7 @@ labelVariable <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt
 labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
 
 ## fonction pour récupérer les labels d'un data.frame labellisé
-statsBordeaux::getLabelFromVariable(labelledData)
+statsBordeaux::getVarLabel(labelledData)
 
 ## attribut stockant le label d'une variable
 nomVariable <- attributes(labelledData[, 1])$var_label
@@ -163,13 +163,13 @@ for(i in 1:ncol(labelledData)){
   # cas où la colonne en cours est de type quantitative
   if(is.numeric(labelledData[, i])){
     description <- statsBordeaux::statsQT(output = description,
-                                          input = labelledData,
+                                          data = labelledData,
                                           variable = colnames(labelledData)[i])
   }
   # cas où la colonne en cours est de type qualitative
   else if(is.factor(labelledData[, i])){
     description <- statsBordeaux::statsQL(output = description,
-                                          input = labelledData,
+                                          data = labelledData,
                                           variable = colnames(labelledData)[i])
   }
   # autre cas non pris en charge
@@ -228,7 +228,7 @@ for(i in 1:ncol(labelledData)){
     # cas où la colonne en cours est de type quantitative
     if(is.numeric(labelledData[, i])){
       comparaison <- statsBordeaux::statsQT(output = comparaison,
-                                            input = labelledData,
+                                            data = labelledData,
                                             variable = colnames(labelledData)[i],
                                             group = group,
                                             all = TRUE)
@@ -236,7 +236,7 @@ for(i in 1:ncol(labelledData)){
     # cas où la colonne en cours est de type qualitative
     else if(is.factor(labelledData[, i])){
       comparaison <- statsBordeaux::statsQL(output = comparaison,
-                                            input = labelledData,
+                                            data = labelledData,
                                             variable = colnames(labelledData)[i],
                                             group = group,
                                             all = TRUE)
@@ -282,7 +282,7 @@ On réalise les statistiques comparatives des données en fonction d'une variabl
 
 ```{r}
 ## création du tableau de sortie vierge
-statsComparatives <-  statsBordeaux::createOutput()
+statsComparatives <- statsBordeaux::createOutput()
 
 ## on défini la variable de groupe
 group <- "vs"
@@ -294,7 +294,7 @@ for(i in 1:ncol(labelledData)){
     # cas où la colonne en cours est de type quantitative
     if(is.numeric(labelledData[, i])){
       statsComparatives <- statsBordeaux::statsQT(output = statsComparatives,
-                                                  input = labelledData,
+                                                  data = labelledData,
                                                   variable = colnames(labelledData)[i],
                                                   group = group,
                                                   p_value = TRUE)
@@ -302,7 +302,7 @@ for(i in 1:ncol(labelledData)){
     # cas où la colonne en cours est de type qualitative
     else if(is.factor(labelledData[, i])){
       statsComparatives <- statsBordeaux::statsQL(output = statsComparatives,
-                                                  input = labelledData,
+                                                  data = labelledData,
                                                   variable = colnames(labelledData)[i],
                                                   group = group,
                                                   p_value = TRUE)
@@ -324,7 +324,7 @@ La gestion des titre et des numéro de tableau se fait au niveau du document et 
 
 La génération de .pdf en LaTeX n'est actuellement pas prise en charge.
 
-```{r, eval = FALSE}
+```{r}
 statsBordeaux::addKable(description)
 ```
 
@@ -456,7 +456,7 @@ for(i in 1:ncol(labelledData)){
   # cas où la colonne en cours est de type quantitative
   if(is.numeric(labelledData[, i])){
     descriptionNonAvailable <- statsBordeaux::statsQT(output = descriptionNonAvailable,
-                                                      input = statsBordeaux::subset_withAttributes(
+                                                      data = statsBordeaux::subset_withAttributes(
                                                         labelledData,
                                                         applicable[[colnames(labelledData)[i]]]),
                                                       variable = colnames(labelledData)[i])
@@ -464,7 +464,7 @@ for(i in 1:ncol(labelledData)){
   # cas où la colonne en cours est de type qualitative
   else if(is.factor(labelledData[, i])){
     descriptionNonAvailable <- statsBordeaux::statsQL(output = descriptionNonAvailable,
-                                                      input = statsBordeaux::subset_withAttributes(
+                                                      data = statsBordeaux::subset_withAttributes(
                                                         labelledData,
                                                         applicable[[colnames(labelledData)[i]]]),
                                                       variable = colnames(labelledData)[i])

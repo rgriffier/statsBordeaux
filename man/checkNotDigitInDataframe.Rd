@@ -4,13 +4,15 @@
 \alias{checkNotDigitInDataframe}
 \title{Check if data are only digits}
 \usage{
-checkNotDigitInDataframe(df, returnError = FALSE)
+checkNotDigitInDataframe(data, returnError = FALSE, excelFormat = TRUE)
 }
 \arguments{
-\item{df}{the data.frame to check}
+\item{data}{a data.frame containing the data to check}
 
-\item{returnError}{boolean. If TRUE, return a data.frame with the coordinate of the cell
-containing some non digit data in excel style.}
+\item{returnError}{boolean. If TRUE, return a data.frame with the coordinate of the cell}
+
+\item{excelFormat}{a boolean vector of length one. If TRUE, data.frame containing position of none
+digit cell is in excel format. Default to TRUE.}
 }
 \value{
 TRUE if the data.frame only contain digit, else return a data.frame
@@ -21,7 +23,7 @@ Check if the input data.frale are only composed of digits
 }
 \examples{
 data(mtcars)
-checkNotDigitInDataframe(df = mtcars, returnError = FALSE)
+checkNotDigitInDataframe(data = mtcars, returnError = FALSE)
 mtcars$NOT_DIGIT <- rep("A", nrow(mtcars))
-errorPosition <- checkNotDigitInDataframe(df = mtcars, returnError = TRUE)
+errorPosition <- checkNotDigitInDataframe(data = mtcars, returnError = TRUE)
 }

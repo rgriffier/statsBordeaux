@@ -4,26 +4,32 @@
 \alias{setLabelToFactorLevels}
 \title{set label to qualitative variable into a data.frame based on dictionnary.}
 \usage{
-setLabelToFactorLevels(df, labelTable)
+setLabelToFactorLevels(data, factorLevelsLabel, varIndex = 1,
+  levelsIndex = 2, labelIndex = 3)
 }
 \arguments{
-\item{df}{a data.frame containing qualitative variable witch need to be labelised.}
+\item{data}{a data.frame containing qualitative variable witch need to be labelised.}
 
-\item{labelTable}{a data.frame containing three columns : 1) the variable names, 2) one
-modality as digit, 3) the label of the modality.}
+\item{factorLevelsLabel}{a data.frame containing variable names / modality as digit / label of the modality.}
+
+\item{varIndex}{a numeric vector of length one, dontaining the index of the variable column.}
+
+\item{levelsIndex}{a numeric vector of length one, dontaining the index of the levels column.}
+
+\item{labelIndex}{a numeric vector of length one, dontaining the index of the labels column.}
 }
 \value{
-a data.frame with qualitative variable in the labelTable convert as factor with clean label
+a data.frame with qualitative variable in the factorLevelsLabel convert as factor with clean label
 }
 \description{
 manage the conversion and sat label to qualitative into a data.frame based
 on dictionnary.
 }
 \examples{
-df <- data.frame(X1 = c(0, 1, 2, 1, 2, 1, 2),
+data <- data.frame(X1 = c(0, 1, 2, 1, 2, 1, 2),
 X2 = c(0, 1, 0, 1, 1, 0, 0))
 labelTable <- data.frame(VARIABLE = c("X2", "X2"),
                          MODALITY = c(0, 1),
                          LABEL = c("Male", "Female"))
-df <- setLabelToFactorLevels(df, labelTable)
+data <- setLabelToFactorLevels(data, labelTable)
 }

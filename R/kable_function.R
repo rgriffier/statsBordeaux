@@ -25,8 +25,11 @@ addKable <- function(data_frame, all_before = FALSE){
 
   ## order all before group
   if(all_before){
-    data_frame <- data_frame %>% dplyr::select(Variable, Modality, Description, All, dplyr::everything())
+    data_frame <- data_frame %>%
+      dplyr::select(Variable, Modality, Description, All, dplyr::everything())
   }
+
+  containsQualitativeVariable <- any(!is.na(data_frame$Modality))
 
   ## manage '0 (NaN)', 'NaN (NA)',  'NA [NA ; NA]' 	, 'NA ; NA'
   data_frame[data_frame == "0 (NaN)"] <- "\\-"
@@ -35,24 +38,24 @@ addKable <- function(data_frame, all_before = FALSE){
   data_frame[data_frame == "NA ; NA"] <- "\\-"
   data_frame[] <- lapply(data_frame, function(x) gsub(pattern = '\\(NA\\)$', replacement = "\\(\\-\\)", x = x, ignore.case = FALSE))
 
-  ## manage variable label as pack_rows
+  # replace Variable by concat of Variable and Modality
   varRowsIndex <- which(!is.na(data_frame$Variable))
-  varLabel <- data_frame$Variable[varRowsIndex]
-  groupLength <- diff(varRowsIndex)
-  groupLength <- c(groupLength, nrow(data_frame) - sum(groupLength))
+  data_frame$Modality <- ifelse(test = !is.na(data_frame$Modality) &  data_frame$Modality == "All modalities",
+                                yes = paste0(data_frame$Description),
+                                no = data_frame$Modality)
+  data_frame$Variable <- ifelse(test = is.na(data_frame$Modality),
+                                yes = data_frame$Variable,
+                                no = paste0("<p style=\"text-indent:20px;\">", data_frame$Modality, "</p>"))
+  data_frame$Variable <- ifelse(test = is.na(data_frame$Variable),
+                                yes = paste0("<p style=\"text-indent:20px;\">", data_frame$Description, "</p>"),
+                                no = data_frame$Variable)
+  data_frame$Modality <- NULL
+  data_frame$Description <- NULL
 
   if(!is.null(attributes(data_frame)$var_group)){
-    labelVar <- data_frame$Variable[varRowsIndex]
-    names(groupLength) <- varLabel
-    table <- data_frame %>%
-      dplyr::select(-Variable)
+    table <- data_frame
   } else {
-    groupLength <- groupLength - 1
-    labelVar <- data_frame$Variable[varRowsIndex]
-    names(groupLength) <- varLabel
-    table <- data_frame %>%
-      dplyr::filter(is.na(Variable)) %>%
-      dplyr::select(-Variable)
+    table <- data_frame
   }
 
   ## footer management
@@ -62,16 +65,12 @@ addKable <- function(data_frame, all_before = FALSE){
     names(footNote) <- listTest
     table$`p-value` <- apply(table, 1, function(currentRow){
       ifelse(test = !is.na(footNote[currentRow["Test"]]),
-             yes =  paste0(currentRow["p-value"], " ", unname(footNote[currentRow["Test"]])),
+             yes =  paste0(currentRow["p-value"], "&nbsp;", unname(footNote[currentRow["Test"]])),
              no = currentRow["p-value"])
     })
     table$Test <- NA
   }
 
-  ## manage empty column
-  if(!any(!is.na(table$Modality))){
-    table$Modality <- NULL
-  }
   if(!any(!is.na(table$All))){
     table$All <- NULL
   }
@@ -83,26 +82,35 @@ addKable <- function(data_frame, all_before = FALSE){
   }
 
   ## manage col.names
-  beforeIndex <- which(colnames(table) %in% c("Modality", "Description"))
-  if(length(colnames(table)[-beforeIndex]) == 1){
-    col.names <- c(rep(" ", length(beforeIndex) + 1))
-  } else {
-    col.names <- c(rep(" ", length(beforeIndex)), colnames(table)[-beforeIndex])
-  }
+  beforeIndex <- which(colnames(table) %in% c("Variable", "Description"))
+  col.names <- c(rep(" ", length(beforeIndex)), colnames(table)[-beforeIndex])
 
   ## get kable
   kable <- table %>%
     kableExtra::kable(booktabs = TRUE, escape = FALSE, format = "html", col.names = col.names) %>%
     kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE,
                               bootstrap_options = c("hover", "condensed", "responsive")) %>%
-    kableExtra::row_spec(row = 0, bold = T, align = "center") %>%
-    kableExtra::row_spec(row = c(1:nrow(table)), hline_after = FALSE, extra_css = "border:none;") %>%
-    kableExtra::column_spec(column = which(!colnames(table) %in% c("Modality", "Description", "Test")), extra_css = "text-align:right;") %>%
-    kableExtra::pack_rows(index = groupLength, label_row_css = "background-color:#EBEBEB;")
+    kableExtra::row_spec(row = 0, bold = TRUE, align = "center",
+                         extra_css = "border-bottom: 2px solid black; padding: 0px 10px 5px 10px;") %>%
+    kableExtra::column_spec(column = which(!colnames(table) %in% c("Variable", "Description", "Test")),
+                            extra_css = "text-align:right;") %>%
+    kableExtra::row_spec(row = varRowsIndex, bold = TRUE) %>%
+    kableExtra::row_spec(row = c(1:nrow(table)), hline_after = FALSE, extra_css = "border:none; padding: 0px 0px;")
 
   ## add footer if some test
   if(length(listTest) >= 1){
-    kable <- kable %>% kableExtra::footnote(symbol = names(footNote))
+    kable <- kable %>%
+      kableExtra::footnote(symbol_title = "Test: ",
+                           symbol = names(footNote),
+                           footnote_as_chunk = FALSE)
+  }
+
+  ## add footer if qualitative data
+  if(containsQualitativeVariable){
+    kable <- kable %>%
+      kableExtra::footnote(general_title = "Note: ",
+                           general = "Qualitative data are expressed as N (%)",
+                           footnote_as_chunk = TRUE)
   }
 
   ## manage header
@@ -111,13 +119,69 @@ addKable <- function(data_frame, all_before = FALSE){
     if(is.null(labelVar)){
       labelVar <- attributes(data_frame)$var_group
     }
-    nbBefore <- length(which(colnames(table) %in% c("Modality", "Description")))
-    nbAfter <- length(which(colnames(table) %in% c("Test", "p-value")))
-    nbVar <- length(which(!colnames(table) %in% c("Modality", "Description", "Test", "p-value")))
+    nbBefore <- length(which(colnames(table) %in% c("Variable", "Description")))
+    nbAfter <- length(which(colnames(table) %in% c("p-value")))
+    nbVar <- length(which(!colnames(table) %in% c("Variable", "Description", "Test", "p-value")))
     namedVector <- c(nbBefore, nbVar, nbAfter)
     names(namedVector) <- c(" ", labelVar, " ")
-    kable <- kable %>% kableExtra::add_header_above(namedVector)
+    kable <- kable %>%
+      kableExtra::add_header_above(header = namedVector,
+                                   bold = TRUE,
+                                   extra_css = "border-bottom: 1px solid black; padding: 0px 10px 0px 10px;")
   }
 
+  kable <- gsub(pattern = '<tbody>',
+                x = kable,
+                replacement = '<tbody style="border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
+
+  kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
+                x = kable,
+                replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-top: 1px solid black;border-collapse: collapse;">')
+
+  return(kable)
+}
+
+#' @title A convenient method to add regression kable into a RMarkdown document
+#' @description A convenient method to add regression kable into a RMarkdown document
+#' @param data_frame a data.frame, containing the data to add
+#' @return a knitr::kable
+#' @export
+#' @import dplyr
+#' @import knitr
+#' @import kableExtra
+addRegressionKable <- function(data_frame){
+  if(!is.data.frame(data_frame) | nrow(data_frame) == 0){
+    stop("data_frame must be a data.frame containing some data")
+  }
+
+  ## knitr option
+  options(knitr.kable.NA = '')
+  table <- data_frame
+
+  # get variable index row
+  varIndexRow <- which(!is.na(table$Variable))
+
+  # replace Variable by concat of Variable and Modality
+  table$Variable <- ifelse(test = is.na(table$Modality),
+                           yes = table$Variable,
+                           no = paste0("<p style=\"text-indent:20px;\">", table$Modality, "</p>"))
+  table$Modality <- NULL
+
+  table$`95%CI[OR]` <- gsub(pattern = " ", replacement = "&nbsp;", x = table$`95%CI[OR]`)
+  table$`p-value` <- gsub(pattern = " ", replacement = "&nbsp;", x = table$`p-value`)
+
+  ## get kable
+  kable <- table %>%
+    kableExtra::kable(booktabs = TRUE, escape = FALSE, format = "html") %>%
+    kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE,
+                              bootstrap_options = c("hover", "condensed", "responsive")) %>%
+    kableExtra::row_spec(row = 0, bold = TRUE, align = "center", extra_css = "border-bottom: 2px solid black;") %>%
+    kableExtra::row_spec(row = c(1:nrow(table)), hline_after = FALSE, extra_css = "border:none; padding-top: 0px; padding-bottom: 0px;") %>%
+    kableExtra::column_spec(column = which(!colnames(table) %in% c("Variable")), extra_css = "text-align:right;") %>%
+    kableExtra::row_spec(row = varIndexRow, bold = TRUE)
+
+  kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
+                x = kable,
+                replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
   return(kable)
 }

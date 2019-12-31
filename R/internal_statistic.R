@@ -77,29 +77,6 @@ checkIfNumericOrFactor <- function(data){
 }
 
 
-#' @title format some numeric for display usage
-#' @description format numeric with comma as decimal separator and space as big-mark
-#' @param num a digit, witch need to be formated
-#' @param round an integer, number of maximal decimal. Default to 3
-#' @return a character representing the formated digit
-#' @noRd
-#' @examples
-#' num <- 10348.3147
-#' num <- numberFormat(num)
-numberFormat <- function(num, round = 3){
-  if(!is.numeric(num)){
-    stop("num must be a numeric vector")
-  }
-  if(!is.vector(round) | !is.numeric(round) | length(round) !=1){
-    stop("round must be a integer vector of length 1")
-  }
-  num <- round(num, round)
-  # num <- format(num, decimal.mark = ",")
-  num <- gsub('\\.', ',', num)
-  return(num)
-}
-
-
 #' @title Get the mod of numeric vector
 #' @description  Get the most represented value (mod) of numeric vector
 #' @param data a numeric vector
@@ -120,7 +97,7 @@ getMode <- function(data) {
 
 #' @title an internal function to do the description of quantitative variable from a data.frame
 #' @description an internal function to do the description of quantitative variable from a data.frame
-#' @param input a data.frame
+#' @param data a data.frame containing the data to analyse
 #' @param variable a characher vector of length 1 containing the name of the column to describe
 #' @param round an integer, number of maximal decimal. Default to 3
 #' @param confint a boolean. If TRUE, the confidence interval of the mean will be displayed. Default to FALSE
@@ -130,77 +107,67 @@ getMode <- function(data) {
 #' @examples
 #' data(mtcars)
 #' statQT(mtcars, "mpg")
-statQT <- function(input, variable, round = 3, confint = FALSE, desc = c("Mean", "Median", "Range")) {
-
-  if(!is.data.frame(input)){
-    stop("input must be a data.frame")
+statQT <- function(data, variable, round = 3, confint = FALSE, desc = c("Mean", "Median", "Range")) {
+  if(!is.data.frame(data)){
+    stop("data must be a data.frame")
   }
-
   if(!is.vector(variable) | !is.character(variable) | length(variable) !=1){
     stop("variable must a character vector of length 1")
   }
-
-  if(!variable %in% colnames(input)){
-    stop("variable must be the name of one column in input")
+  if(!variable %in% colnames(data)){
+    stop("variable must be the name of one column in data")
   }
-
-  if(!is.numeric(input[, variable])){
+  if(!is.numeric(data[, variable])){
     stop("variable must be the name of a numeric variable")
   }
-
   if(!is.vector(round) | !is.numeric(round) | length(variable) !=1){
     stop("round must a numeric vector of length 1")
   }
-
   if(!is.vector(confint) | !is.logical(confint) | length(confint) !=1){
     stop("confint must a logical vector of length 1")
   }
-
-  # Si un autre terme que Mean, Median, Range et Mode ont été saisis dans l'argument desc, on génère un stop
-  if (length(setdiff(desc, c("Mean", "Median", "Range", "Mode"))) != 0) {
+  if(length(setdiff(desc, c("Mean", "Median", "Range", "Mode"))) != 0) {
     stop(paste0("desc must be a characher vector composer with 'Mean', 'Median', 'Range' or 'Mode'"))
   }
 
-  # Création du tableau de sortie
+  ## output creation
   output <- data.frame(matrix(ncol = 4, nrow = 0))
 
-  # Statistiques descriptives
-  summary <- summary(input[, variable])
+  ## descriptive statistic
+  summary <- summary(data[, variable])
 
-  min <- numberFormat(as.numeric(summary['Min.']), round)
-  quart1st <- numberFormat(as.numeric(summary['1st Qu.']), round)
-  median <- numberFormat(as.numeric(summary['Median']), round)
-  mean <- numberFormat(as.numeric(summary['Mean']), round)
-  quart3th <- numberFormat(as.numeric(summary['3rd Qu.']), round)
-  max <- numberFormat(as.numeric(summary['Max.']), round)
-  sd <- numberFormat(sd(input[, variable], na.rm = TRUE), round)
+  min <- setFormatToNumber(as.numeric(summary['Min.']), round)
+  quart1st <- setFormatToNumber(as.numeric(summary['1st Qu.']), round)
+  median <- setFormatToNumber(as.numeric(summary['Median']), round)
+  mean <- setFormatToNumber(as.numeric(summary['Mean']), round)
+  quart3th <- setFormatToNumber(as.numeric(summary['3rd Qu.']), round)
+  max <- setFormatToNumber(as.numeric(summary['Max.']), round)
+  sd <- setFormatToNumber(sd(data[, variable], na.rm = TRUE), round)
 
-  # On initialise la ligne actuelle comme la premièrè ligne du tableau
+  ## current row definition
   currentRow <- nrow(output) + 1
 
-  # Sauvegarde du nom de la variable
-  output[currentRow, 1] <- getLabelFromVariable(input[variable])
+  ## varName
+  output[currentRow, 1] <- getVarLabel(data[variable])
   currentRow <- nrow(output) + 1
 
-  # Sauvegarde des éffectifs
+  ## sample size
   output[currentRow, 3] <- 'N (m.d.)'
-  output[currentRow, 4] <- paste0(sum(!is.na(input[variable])), ' (', sum(is.na(input[variable])), ')')
+  output[currentRow, 4] <- paste0(sum(!is.na(data[variable])), ' (', sum(is.na(data[variable])), ')')
   currentRow <- nrow(output) + 1
 
-  # Sauvegarde de la moyenne / ecart-type si desc contient 'Mean'
-  if (any(grepl('Mean', desc))) {
+  ## mean and sd
+  if('Mean' %in% desc) {
     output[currentRow, 3] <- 'Mean (SD)'
     output[currentRow, 4] <- paste0(mean, ' (', sd, ')')
     currentRow <- nrow(output) + 1
 
-    # Sauvegarde de l'IC de la moyenne (ne peut se faire que si la moyenne est aussi sauvegardée)
-    if (confint == TRUE) {
+    ## confint
+    if(confint == TRUE) {
       output[currentRow, 3] <- 'IC95% [Mean]'
-      if (!is.na(sd(input[, variable], na.rm = TRUE))) {
-        if (sd(input[, variable], na.rm = TRUE) != 0) {
-          conf_int_mean <- numberFormat(t.test(input[, variable])$conf.int, round)
-          output[currentRow, 4] <- paste0('[', conf_int_mean[1], ' ; ', conf_int_mean[2], ']')
-        }
+      if(!is.na(sd(data[, variable], na.rm = TRUE)) & sd(data[, variable], na.rm = TRUE) != 0) {
+        confint_mean <- setFormatToNumber(t.test(data[, variable])$conf.int, round)
+        output[currentRow, 4] <- paste0('[', confint_mean[1], ' ; ', confint_mean[2], ']')
       } else {
         output[currentRow, 4] <- NA
       }
@@ -208,24 +175,24 @@ statQT <- function(input, variable, round = 3, confint = FALSE, desc = c("Mean",
     }
   }
 
-  # Sauvegarde de la médiane / de Q1 ; Q3 si desc contient 'Median'
-  if (any(grepl('Median', desc))) {
+  ## median and IQR
+  if('Median' %in% desc){
     output[currentRow, 3] <- 'Median [Q1 ; Q3]'
     output[currentRow, 4] <- paste0(median, ' [', quart1st, ' ; ', quart3th, ']')
     currentRow <- nrow(output) + 1
   }
 
-  # Sauvegarde du range si desc contient 'Range'
-  if (any(grepl('Range', desc))) {
+  ## range
+  if('Range' %in% desc){
     output[currentRow, 3] <- 'Min ; Max'
     output[currentRow, 4] <- paste0(min, ' ; ', max)
     currentRow <- nrow(output) + 1
   }
 
-  # Sauvegarde du mode si desc contient 'Mode'
-  if (any(grepl('Mode', desc)) & !any(grepl('\\.', as.character(input[, variable])))) {
+  ## mode
+  if('Mode' %in% desc & !any(grepl('\\.', as.character(data[, variable])))){
     output[currentRow, 3] <- 'Mode'
-    output[currentRow, 4] <- numberFormat(getMode(input[, variable]), round)
+    output[currentRow, 4] <- setFormatToNumber(getMode(data[, variable]), round)
     currentRow <- nrow(output) + 1
   }
   return(output)
@@ -234,7 +201,7 @@ statQT <- function(input, variable, round = 3, confint = FALSE, desc = c("Mean",
 
 #' @title an internal function to do the description of factor from a data.frame
 #' @description an internal function to do the description of factor from a data.frame
-#' @param input a data.frame
+#' @param data a data.frame containing the data to analyse
 #' @param variable a characher vector of length 1 containing the name of the column to describe
 #' @param round an integer, number of maximal decimal. Default to 3
 #' @param NA_asModality a boolean. If TRUE, missing data of the variable will be considered as levels.
@@ -245,94 +212,70 @@ statQT <- function(input, variable, round = 3, confint = FALSE, desc = c("Mean",
 #' data(mtcars)
 #' mtcars$am <- as.factor(mtcars$am)
 #' statQL(mtcars, "am")
-statQL <- function(input, variable, round = 3, NA_asModality = FALSE) {
-
-  if(!is.data.frame(input)){
-    stop("input must be a data.frame")
+statQL <- function(data, variable, round = 3, NA_asModality = FALSE) {
+  if(!is.data.frame(data)){
+    stop("data must be a data.frame")
   }
-
   if(!is.vector(variable) | !is.character(variable) | length(variable) !=1){
     stop("variable must a character vector of length 1")
   }
-
-  if(!variable %in% colnames(input)){
-    stop("variable must be the name of one column in input")
+  if(!variable %in% colnames(data)){
+    stop("variable must be the name of one column in data")
   }
-
-  if(!is.factor(input[, variable])){
+  if(!is.factor(data[, variable])){
     stop("variable must be the name of a numeric variable")
   }
-
   if(!is.vector(round) | !is.numeric(round) | length(variable) !=1){
     stop("round must a numeric vector of length 1")
   }
-
   if(!is.vector(NA_asModality) | !is.logical(NA_asModality) | length(NA_asModality) !=1){
     stop("NA_asModality must be the logical vector of length 1")
   }
 
-
-
-  # Création du tableau de sortie
+  ## output creation
   output <- data.frame(matrix(ncol = 4, nrow = 0))
 
-  # Calcul des effectifs et des pourcentages des différentes modalitées
-  size <- table(input[, variable], useNA = 'always')
-  sizeWithoutNA <- table(input[, variable], useNA = 'no')
-  percent <- numberFormat(prop.table(table(input[, variable], useNA = 'always')) * 100, round)
-  percentWithoutNA <- numberFormat(prop.table(table(input[, variable], useNA = 'no')) * 100, round)
+  ## sample size
+  size <- table(data[, variable], useNA = 'always')
+  sizeWithoutNA <- table(data[, variable], useNA = 'no')
+  percent <- setFormatToNumber(prop.table(table(data[, variable], useNA = 'always')) * 100, round)
+  percentWithoutNA <- setFormatToNumber(prop.table(table(data[, variable], useNA = 'no')) * 100, round)
 
-  # Structuration des données de résultat dans le tableau de sortie
-  for (i in 1:length(size)) {
-    # Initialisation du tableau de ortie
-    if (i == 1) {
-      output[i, 1] <- getLabelFromVariable(input[variable])
-      # Si NA_asModality == FALSE, on affiche dasn l'entête le pourcentage de donnees manquantes
-      if (NA_asModality) {
+  ## result save
+  for(i in 1:length(size)){
+    # initialisation
+    if(i == 1){
+      output[i, 1] <- getVarLabel(data[variable])
+      # if NA_asModality == FALSE, missing data in header
+      if(NA_asModality){
         output[i + 1, 2] <- 'All modalities'
         output[i + 1, 3] <- 'N (m.d.)'
-        output[i + 1, 4] <- paste0(sum(sizeWithoutNA),
-                                   ' (',
-                                   sum(size) - sum(sizeWithoutNA),
-                                   ')')
+        output[i + 1, 4] <- paste0(sum(sizeWithoutNA), ' (', sum(size) - sum(sizeWithoutNA), ')')
       } else {
         output[i + 1, 2] <- 'All modalities'
         output[i + 1, 3] <- 'N (m.d. ; %)'
-        output[i + 1, 4] <- paste0(sum(sizeWithoutNA),
-                                   ' (',
-                                   sum(size) - sum(sizeWithoutNA),
-                                   ' ; ',
-                                   percent[length(size)],
-                                   ')')
+        output[i + 1, 4] <- paste0(sum(sizeWithoutNA), ' (', sum(size) - sum(sizeWithoutNA), ' ; ', percent[length(size)], ')')
       }
     }
-
-    # Cas où NA_asModality = TRUE et modalité actuelle is.na()
-    # On affiche les résultats de calcul d'effectif et de pourcentage avec useNA = 'always'
-    # On renomme la modalite NA par m.d.
-    if (is.na(names(size[i])) & NA_asModality == TRUE) {
+    ## NA_asModality == TRUE and NA current modality
+    if(is.na(names(size[i])) & NA_asModality == TRUE){
       output[i + 2, 2] <- 'm.d.'
       output[i + 2, 3] <- 'N (%)'
       output[i + 2, 4] <- paste0(size[i], ' (', percent[i], ')')
     }
-
-    # Cas où NA_asModality = TRUE et modalité actuelle !is.na()
-    # On affiche les résultats de calcul d'effectif et de pourcentage avec useNA = 'always'
-    else if (!is.na(names(size[i])) & NA_asModality == TRUE) {
+    ## NA_asModality == TRUE and current modality not NA
+    else if(!is.na(names(size[i])) & NA_asModality == TRUE){
       output[i + 2, 2] <- names(size[i])
       output[i + 2, 3] <- 'N (%)'
       output[i + 2, 4] <- paste0(size[i], ' (', percent[i], ')')
     }
-
-    # Cas où NA_asModality = FALSE
-    # On affiche les résultats de calcul d'effectif et de pourcentage avec useNA = 'no'
-    else if (!is.na(names(size[i])) & NA_asModality == FALSE) {
+    ## NA_asModality == FALSE
+    else if(!is.na(names(size[i])) & NA_asModality == FALSE){
       output[i + 2, 2] <- names(size[i])
       output[i + 2, 3] <- 'N (%)'
       output[i + 2, 4] <- paste0(size[i], ' (', percentWithoutNA[i], ')')
     }
   }
-
   return(output)
 }
 
@@ -345,7 +288,6 @@ statQL <- function(input, variable, round = 3, NA_asModality = FALSE) {
 #' @param id_paired a character vector of length one, containing the colname of the id_paired
 #' @return a data.frame, containing paired data ready to be analyzed
 #' @noRd
-#' @examples
 manageDataBeforePairedTest <- function(df, variable, group, id_paired){
   result <- df[, c(id_paired, variable, group)]
   result <- result[complete.cases(result), ]
@@ -373,10 +315,9 @@ manageDataBeforePairedTest <- function(df, variable, group, id_paired){
 jumpDescribeDataFrame <- Vectorize(function(data, variable, group = NULL, group_str = NULL,
                                   p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
                                   round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
-  output <- statsBordeaux::createOutput()
+
   if(is.numeric(data[, variable])){
-    output <- statsBordeaux::statsQT(output = output,
-                                     input = data,
+    output <- statsBordeaux::statsQT(data = data,
                                      variable = colnames(data[variable]),
                                      group = group,
                                      group_str = group_str,
@@ -388,8 +329,7 @@ jumpDescribeDataFrame <- Vectorize(function(data, variable, group = NULL, group_
                                      NA_group_AsModality = NA_group_AsModality)
   }
   else if(is.factor(data[, variable])){
-    output <- statsBordeaux::statsQL(output = output,
-                                     input = data,
+    output <- statsBordeaux::statsQL(data = data,
                                      variable = colnames(data[variable]),
                                      group = group,
                                      group_str = group_str,
@@ -466,7 +406,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
             kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
                                                     sd(dataKolmogorov, na.rm = TRUE)))
             dataStatistic[j, 3] <- kolmogorov$method
-            dataStatistic[j, 4] <- statsBordeaux::pvalFormat(kolmogorov$p.value)
+            dataStatistic[j, 4] <- statsBordeaux::setFormatToPvalue(kolmogorov$p.value)
           } else {
             dataStatistic[j, 3] <- "-"
             dataStatistic[j, 4] <- "-"
@@ -480,7 +420,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
           kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
                                                   sd(dataKolmogorov, na.rm = TRUE)) )
           dataStatistic[1, 3] <- kolmogorov$method
-          dataStatistic[1, 4] <- statsBordeaux::pvalFormat(kolmogorov$p.value)
+          dataStatistic[1, 4] <- statsBordeaux::setFormatToPvalue(kolmogorov$p.value)
         } else {
           dataStatistic[1, 3] <- "-"
           dataStatistic[1, 4] <- "-"
@@ -498,7 +438,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
           if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
             shapiro <- shapiro.test(dataShapiro)
             dataStatistic[j, 3] <- shapiro$method
-            dataStatistic[j, 4] <- statsBordeaux::pvalFormat(shapiro$p.value)
+            dataStatistic[j, 4] <- statsBordeaux::setFormatToPvalue(shapiro$p.value)
           } else {
             dataStatistic[j, 3] <- "-"
             dataStatistic[j, 4] <- "-"
@@ -511,7 +451,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
         if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
           shapiro <- shapiro.test(dataShapiro)
           dataStatistic[1, 3] <- shapiro$method
-          dataStatistic[1, 4] <- statsBordeaux::pvalFormat(shapiro$p.value)
+          dataStatistic[1, 4] <- statsBordeaux::setFormatToPvalue(shapiro$p.value)
         } else {
           dataStatistic[1, 3] <- "-"
           dataStatistic[1, 4] <- "-"
@@ -545,3 +485,164 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
   }
   return(plot)
 }, vectorize.args = "variable", SIMPLIFY = FALSE)
+
+
+#' @title An internal function that allow to get the label of variable of a data.frame
+#' @description An internal function that allow to get the label of variable of a data.frame
+#' @param data a data.frame in witch we want to get
+#' @param variable a character vector of length one, the colname to get varriable label
+#' @return a character vector of length one, containing the varriable label
+#' @noRd
+getVarLabel_int <- Vectorize(function(data, variable){
+  if(!is.data.frame(data)) {
+    warning("data must be a data.frame.")
+  }
+
+  varLabel <- attributes(data[, variable])$var_label
+  if(is.null(varLabel)){
+    varLabel <- variable
+  }
+  return(varLabel)
+}, vectorize.args = "variable", SIMPLIFY = TRUE, USE.NAMES = TRUE)
+
+
+#' @title A convenient method to get the test to perform in case of 2 groups numeric comparaison
+#' @description A convenient method to get the test to perform in case of 2 groups numeric comparaison
+#' @param data.as.list a list of data containing the two vectors of numerical data
+#' @return a character vector of length one, containing the test name to perform
+#' @noRd
+getTest_numericComparaison_2groups <- function(data.as.list){
+
+  ## test's application condition
+  allSampleSizeSup_30 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 30)
+  if(!allSampleSizeSup_30){
+    allSampleSizeSup_2 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 2)
+  }
+  allVar_notZero <- all(sapply(data.as.list, function(x) {sd(unlist(x), na.rm = TRUE)}) != 0)
+
+  ## test if all sample size >= 30
+  if (allSampleSizeSup_30) {
+    ## test if all sd <> 0
+    if (allVar_notZero) {
+      ## equality of variance test
+      varTest <- var.test(x = unlist(data.as.list[[1]]), unlist(data.as.list[[2]]))
+      if (varTest$p.value < 0.05) {
+        return("t-test for inequal variances")
+      } else {
+        return("t-test for equal variances")
+      }
+    } else {
+      return("Variability needed to perform test")
+    }
+  }
+  ## test if all sample size >=2
+  else if (allSampleSizeSup_2) {
+    ## test if all sd <> 0
+    if (allVar_notZero) {
+      return("Wilcoxon test")
+    } else {
+      return("Variability needed to perform test")
+    }
+  }
+  # test not possible
+  else {
+    return("Sample size not large enough to perform test")
+  }
+}
+
+
+
+#' @title A convenient method to get the test to perform in case of more than 2 groups numeric comparaison
+#' @description A convenient method to get the test to perform in case of more than 2 groups numeric comparaison
+#' @param data.as.list a list of data containing the vectors of numerical data
+#' @return a character vector of length one, containing the test name to perform
+#' @noRd
+getTest_numericComparaison_moreThan2groups <- function(data.as.list){
+
+  ## test's application condition
+  allSampleSizeSup_30 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 30)
+  allSampleSizeSup_2 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 2)
+
+  ## test if all sample size >= 30
+  if (allSampleSizeSup_30) {
+    ## Homoscedasticity test
+    bartlett <- bartlett.test(sapply(data.as.list, function(x){ unlist(x)}))
+    if(bartlett$p.value < 0.05){
+      hypothesisANOVA <- FALSE
+    } else {
+      hypothesisANOVA <- TRUE
+    }
+  } else {
+    hypothesisANOVA <- FALSE
+  }
+  # ANOVA
+  if (hypothesisANOVA) {
+    return("Analysis of variance")
+  } else {
+    ## test if all sample size >= 2
+    if (allSampleSizeSup_2) {
+      return("Kruskal-Wallis test")
+    } else {
+      return("Sample size not large enough to perform test")
+    }
+  }
+}
+
+
+
+#' @title A convenient method to get the test to perform in case of numeric comparaison
+#' @description A convenient method to get the test to perform in case of numeric comparaison
+#' @param data.as.list a list of data containing the vectors of numerical data
+#' @return a character vector of length one, containing the test name to perform
+#' @noRd
+getTest_numericComparaison <- function(data.as.list){
+  if(length(data.as.list) == 2){
+    resultTest <- getTest_numericComparaison_2groups(data.as.list)
+  } else if(length(data.as.list) > 2){
+    resultTest <- getTest_numericComparaison_moreThan2groups(data.as.list)
+  }
+  return(resultTest)
+}
+
+
+
+#' @title A convenient method to get the test to perform in case of qualitative comparaison
+#' @description A convenient method to get the test to perform in case of qualitative comparaison
+#' @param data a data.frame containing the qualitative data to compare
+#' @param variable a character vector of length one, cntaining the colname of the variable to compare
+#' @param group a character vector of length one, cntaining the colname of the group variable to use in comparaison
+#' @return a character vector of length one, containing the test name to perform
+#' @noRd
+getTest_factorComparaison <- function(data, variable, group){
+  if(!is.data.frame(data)){
+    stop("data must be a data.frame")
+  }
+  if(!is.vector(variable) || !is.character(variable) || length(variable) != 1 || !variable %in% colnames(data)){
+    stop("variable must be a character vector as colname of some column in data")
+  }
+  if(!is.vector(group) || !is.character(group) || length(group) != 1 || !group %in% colnames(data)){
+    stop("group must be a character vector as colname of some column in data")
+  }
+
+  ftable <- ftable(data[, variable] ~ data[, group])
+  if(length(levels(data[, variable])) > 1 & length(levels(data[, group])) > 1){
+    if(all(rowSums(ftable) != 0) | all(colSums(ftable) != 0)){
+      expected <- tcrossprod(rowSums(ftable), colSums(ftable))/sum(rowSums(ftable))
+      if(all(expected > 5)){
+        return("Pearson's Chi-squared test")
+      } else if(all(expected > 3)){
+        if(length(ftable) == 4){
+          return("Pearson's Chi-squared test with Yates' continuity correction")
+        } else {
+          return("Fisher's Exact Test for Count Data")
+        }
+      } else {
+        return("Fisher's Exact Test for Count Data")
+      }
+    } else {
+      return("Fisher's Exact Test for Count Data")
+    }
+  } else {
+    return("Not enought modality to perform test")
+  }
+}

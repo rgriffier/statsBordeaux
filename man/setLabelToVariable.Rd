@@ -4,12 +4,16 @@
 \alias{setLabelToVariable}
 \title{set label to each column of data.frame based on dictionnaty}
 \usage{
-setLabelToVariable(df, label)
+setLabelToVariable(data, varLabel, varIndex = 1, labelIndex = 2)
 }
 \arguments{
-\item{df}{the data.frame witch nedd to be labelised}
+\item{data}{the data.frame witch nedd to be labelised}
 
-\item{label}{a data.frame with two columns : 1) the variable colname, 2) the clean label to display}
+\item{varLabel}{a data.frame with two columns : 1) the variable colname, 2) the clean label to display}
+
+\item{varIndex}{a numeric vector of length one, containing the index if the variable label column.}
+
+\item{labelIndex}{a numeric vector of length one, containing the index if the variable label column.}
 }
 \value{
 a data.frame with the var_label attribute

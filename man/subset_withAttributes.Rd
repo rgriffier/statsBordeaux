@@ -4,10 +4,10 @@
 \alias{subset_withAttributes}
 \title{Subset data keeping attributes}
 \usage{
-subset_withAttributes(x, subset)
+subset_withAttributes(data, subset)
 }
 \arguments{
-\item{x}{a data.frame}
+\item{data}{a data.frame}
 
 \item{subset}{a logical vector}
 }

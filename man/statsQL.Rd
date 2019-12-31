@@ -4,15 +4,13 @@
 \alias{statsQL}
 \title{Generate description of factor varaible.}
 \usage{
-statsQL(output, input, variable, group = NULL, group_str = NULL,
-  p_value = FALSE, forcedTest = NULL, all = NA_asModality,
-  round = 3, NA_asModality = FALSE, NA_group_AsModality = FALSE)
+statsQL(data, variable, group = NULL, group_str = NULL,
+  all = NA_asModality, round = 3, p_value = FALSE,
+  forcedTest = NULL, NA_group_AsModality = FALSE,
+  NA_asModality = FALSE, output = NULL)
 }
 \arguments{
-\item{output}{a data.frame, containing a previously generated data.frame or a new data.frame.
-data.frame are generated using createOutput() function.}
-
-\item{input}{a data.frame containing the data to describe}
+\item{data}{a data.frame containing the data to describe}
 
 \item{variable}{a character vector of length 1. The name of the factor column to describe.}
 
@@ -20,20 +18,23 @@ data.frame are generated using createOutput() function.}
 
 \item{group_str}{a character vector. The name of the levels of the group variable to use. Default to NULL.}
 
-\item{p_value}{a boolean. If TRUE, comparaison test are performed.}
-
-\item{forcedTest}{a character vector of length 1. Must be one of "Chi-squared", "Corrected Chi-squared", "Fisher".
-Default to NULL.}
-
 \item{all}{a boolean. If TRUE, total column will be displayed. Default to FALSE}
 
 \item{round}{an integer, number of maximal decimal. Default to 3}
 
-\item{NA_asModality}{a boolean. If TRUE, missing data of the factor variable to describe will be considered as levels.
-Default to FALSE}
+\item{p_value}{a boolean. If TRUE, comparaison test are performed.}
+
+\item{forcedTest}{a character vector of length 1. Must be one of "Pearson's Chi-squared test", "Pearson's Chi-squared test with Yates" or
+"Fisher's Exact Test for Count Data". Default to NULL.}
 
 \item{NA_group_AsModality}{a boolean. If TRUE, missing data of the group variable will be considered as levels.
 Default to FALSE}
+
+\item{NA_asModality}{a boolean. If TRUE, missing data of the factor variable to describe will be considered as levels.
+Default to FALSE}
+
+\item{output}{a data.frame, containing a previously generated data.frame or a new data.frame.
+data.frame are generated using createOutput() function.}
 }
 \value{
 a data.frame containing the description of the factor variable

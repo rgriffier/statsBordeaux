@@ -66,10 +66,10 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
     Modality = c(NA, paste(levels(data[, independentVariable])[1], "(Ref.)"),
                  gsub(pattern = independentVariable, replacement = "", x = rownames(summaryFitData)))
     N = c(length(summaryFit$residuals), rep(NA, nrow(summaryFitData)+1))
-    Beta = numberFormat(c(NA, NA, summaryFitData$Estimate))
-    IC95_Beta = c(NA, NA, paste0("[", numberFormat(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                 numberFormat(round(summaryFitData$`97.5 %`, round)), "]"))
-    p_value =  c(pvalFormat(anova(fit)$'Pr(>F)'[1], round = round),
+    Beta = setFormatToNumber(c(NA, NA, summaryFitData$Estimate))
+    IC95_Beta = c(NA, NA, paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
+                                 setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"))
+    p_value =  c(setFormatToPvalue(anova(fit)$'Pr(>F)'[1], round = round),
                  rep(NA, nrow(summaryFitData)+1))
 
     summaryFitData <- data.frame(Variable = Variable,
@@ -86,10 +86,10 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
     summaryFitData <- data.frame(Variable = independentVariableName,
                                  Modality = NA,
                                  N = length(summaryFit$residuals),
-                                 Beta = numberFormat(summaryFitData$Estimate),
-                                 IC95_Beta = paste0("[", numberFormat(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                                    numberFormat(round(summaryFitData$`97.5 %`, round)), "]"),
-                                 p_value =  pvalFormat(anova(fit)$'Pr(>F)'[1], round = round),
+                                 Beta = setFormatToNumber(summaryFitData$Estimate),
+                                 IC95_Beta = paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
+                                                    setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"),
+                                 p_value =  setFormatToPvalue(anova(fit)$'Pr(>F)'[1], round = round),
                                  stringsAsFactors = FALSE)
   }
 
@@ -152,10 +152,10 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
     Modality <- c(NA, paste(levels(data[, independentVariable])[1], "(Ref.)"),
                   gsub(pattern = independentVariable, replacement = "", x = rownames(summaryFitData)))
     N <- c(length(fit$fitted.values), rep(NA, nrow(summaryFitData)+1))
-    OR <- numberFormat(c(NA, 1, summaryFitData$Estimate))
-    IC95_OR <- c(NA, NA, paste0("[", numberFormat(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                numberFormat(round(summaryFitData$`97.5 %`, round)), "]"))
-    p_value <-  c(pvalFormat(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
+    OR <- setFormatToNumber(c(NA, 1, summaryFitData$Estimate))
+    IC95_OR <- c(NA, NA, paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
+                                setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"))
+    p_value <-  c(setFormatToPvalue(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
                                                   length(fit$coef) - 1),
                              round = round),
                   rep(NA, nrow(summaryFitData)+1))
@@ -174,10 +174,10 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
     summaryFitData <- data.frame(Variable = independentVariableName,
                                  Modality = NA,
                                  N = length(fit$fitted.values),
-                                 OR = numberFormat(summaryFitData$Estimate),
-                                 IC95_OR = paste0("[", numberFormat(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                                  numberFormat(round(summaryFitData$`97.5 %`, round)), "]"),
-                                 p_value =  pvalFormat(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
+                                 OR = setFormatToNumber(summaryFitData$Estimate),
+                                 IC95_OR = paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
+                                                  setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"),
+                                 p_value =  setFormatToPvalue(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
                                                                             length(fit$coef) - 1),
                                                        round = round),
                                  stringsAsFactors = FALSE)
@@ -199,7 +199,8 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
 setUnivariableLogisticRegression <- function(data, dependentVariable, independentVariable, round = 2) {
 
   ## keep only complete casses data and get independent var name
-  independentVariableName <- getLabelFromVariable(data[independentVariable])
+  independentVariableName <- getVarLabel_int(data = data,
+                                             variable = independentVariable)
   data <- data[, c(dependentVariable, independentVariable)]
   data <- data[complete.cases(data), ]
 
@@ -322,7 +323,8 @@ setUnivariableLogisticRegression <- function(data, dependentVariable, independen
 #' @noRd
 setUnivariableLinearRegression <- function(data, dependentVariable, independentVariable, round = 2) {
   ## keep only complete casses data and get independent var name
-  independentVariableName <- getLabelFromVariable(data[independentVariable])
+  independentVariableName <- getVarLabel_int(data = data,
+                                             variable = independentVariable)
   data <- data[, c(dependentVariable, independentVariable)]
   data <- data[complete.cases(data), ]
 
@@ -460,7 +462,8 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
     ## get the current data of independent variable
     currentDataIndependentVariable <- data[, currentIndependentVariable]
     ## get the current independent variable name
-    currentIndependentVariableName <- getLabelFromVariable(data[currentIndependentVariable])
+    currentIndependentVariableName <- getVarLabel_int(data = data,
+                                                      variable = currentIndependentVariable)
     ## if current independent variable is numeric
     if(is.numeric(currentDataIndependentVariable)){
       ## manage the currentOutput
@@ -468,10 +471,10 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
         Variable = currentIndependentVariableName,
         Modality = NA,
         N = fitSize,
-        OR = numberFormat(num = summaryFit[currentRowFit, 1], round = round),
-        IC95_OR = paste0("[", numberFormat(summaryFit[currentRowFit, 5], round = round), " ; ",
-                         numberFormat(summaryFit[currentRowFit, 6], round = round), "]"),
-        p_value = pvalFormat(pvalue = globalPvalue[currentIndependentVariable, "Pr(>Chi)"], round = round),
+        OR = setFormatToNumber(num = summaryFit[currentRowFit, 1], round = round),
+        IC95_OR = paste0("[", setFormatToNumber(summaryFit[currentRowFit, 5], round = round), " ; ",
+                         setFormatToNumber(summaryFit[currentRowFit, 6], round = round), "]"),
+        p_value = setFormatToPvalue(pvalue = globalPvalue[currentIndependentVariable, "Pr(>Chi)"], round = round),
         stringsAsFactors = FALSE
       )
       ## merge the currentOutput with the global output
@@ -495,7 +498,7 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
             N = c(fitSize, NA),
             OR = c(NA, 1),
             IC95_OR = c(NA, NA),
-            p_value = c(pvalFormat(pvalue = globalPvalue[currentIndependentVariable, "Pr(>Chi)"], round = round), NA),
+            p_value = c(setFormatToPvalue(pvalue = globalPvalue[currentIndependentVariable, "Pr(>Chi)"], round = round), NA),
             stringsAsFactors = FALSE
           )
           ## merge the currentOutput with the global output
@@ -508,9 +511,9 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
             Variable = NA,
             Modality = currentModalityCurrentFactor,
             N = NA,
-            OR = numberFormat(num = summaryFit[currentRowFit, 1], round = round),
-            IC95_OR = paste0("[", numberFormat(summaryFit[currentRowFit, 5], round = round), " ; ",
-                             numberFormat(summaryFit[currentRowFit, 6], round = round), "]"),
+            OR = setFormatToNumber(num = summaryFit[currentRowFit, 1], round = round),
+            IC95_OR = paste0("[", setFormatToNumber(summaryFit[currentRowFit, 5], round = round), " ; ",
+                             setFormatToNumber(summaryFit[currentRowFit, 6], round = round), "]"),
             p_value = NA,
             stringsAsFactors = FALSE)
           ## merge the currentOutput with the global output
@@ -527,7 +530,8 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
   attr(output, "var_indep") <- independentVariables
   attr(output, "modelisation") <- paste0("Sont modélisées les probabilités de transition des modalitées : '",
                                          paste0(levels(data[, dependentVariable]), collapse = "' -> '"),
-                                         "' (variable : '", getLabelFromVariable(data[dependentVariable]), "')")
+                                         "' (variable : '", getVarLabel_int(data = data,
+                                                                            variable = dependentVariable), "')")
   return(output)
 }
 
@@ -564,7 +568,8 @@ extractDataFromMultivariableLinearModel <- function(data, dependentVariable, ind
     ## get the current data of independent variable
     currentDataIndependentVariable <- data[, currentIndependentVariable]
     ## get the current independent variable name
-    currentIndependentVariableName <- getLabelFromVariable(data[currentIndependentVariable])
+    currentIndependentVariableName <- getVarLabel_int(data = data,
+                                                      variable = currentIndependentVariable)
     ## if current independent variable is numeric
     if(is.numeric(currentDataIndependentVariable)){
       ## manage the currentOutput
@@ -572,10 +577,10 @@ extractDataFromMultivariableLinearModel <- function(data, dependentVariable, ind
         Variable = currentIndependentVariableName,
         Modality = NA,
         N = fitSize,
-        Beta = numberFormat(num = summaryFit[currentRowFit, 1], round = round),
-        IC95_beta = paste0("[", numberFormat(summaryFit[currentRowFit, 5], round = round), " ; ",
-                           numberFormat(summaryFit[currentRowFit, 6], round = round), "]"),
-        p_value = pvalFormat(pvalue = globalPvalue[currentIndependentVariable, "Pr(>F)"], round = round),
+        Beta = setFormatToNumber(num = summaryFit[currentRowFit, 1], round = round),
+        IC95_beta = paste0("[", setFormatToNumber(summaryFit[currentRowFit, 5], round = round), " ; ",
+                           setFormatToNumber(summaryFit[currentRowFit, 6], round = round), "]"),
+        p_value = setFormatToPvalue(pvalue = globalPvalue[currentIndependentVariable, "Pr(>F)"], round = round),
         stringsAsFactors = FALSE
       )
       ## merge the currentOutput with the global output
@@ -599,7 +604,7 @@ extractDataFromMultivariableLinearModel <- function(data, dependentVariable, ind
             N = c(fitSize, NA),
             Beta = c(NA, NA),
             IC95_beta = c(NA, NA),
-            p_value = c(pvalFormat(pvalue = globalPvalue[currentIndependentVariable, "Pr(>F)"], round = round), NA),
+            p_value = c(setFormatToPvalue(pvalue = globalPvalue[currentIndependentVariable, "Pr(>F)"], round = round), NA),
             stringsAsFactors = FALSE
           )
           ## merge the currentOutput with the global output
@@ -612,9 +617,9 @@ extractDataFromMultivariableLinearModel <- function(data, dependentVariable, ind
             Variable = NA,
             Modality = currentModalityCurrentFactor,
             N = NA,
-            Beta = numberFormat(num = summaryFit[currentRowFit, 1], round = round),
-            IC95_beta = paste0("[", numberFormat(summaryFit[currentRowFit, 5], round = round), " ; ",
-                               numberFormat(summaryFit[currentRowFit, 6], round = round), "]"),
+            Beta = setFormatToNumber(num = summaryFit[currentRowFit, 1], round = round),
+            IC95_beta = paste0("[", setFormatToNumber(summaryFit[currentRowFit, 5], round = round), " ; ",
+                               setFormatToNumber(summaryFit[currentRowFit, 6], round = round), "]"),
             p_value = NA,
             stringsAsFactors = FALSE)
           ## merge the currentOutput with the global output

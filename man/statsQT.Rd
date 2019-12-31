@@ -4,16 +4,13 @@
 \alias{statsQT}
 \title{Generate description of numeric varaible.}
 \usage{
-statsQT(output, input, variable, group = NULL, group_str = NULL,
-  p_value = FALSE, forcedTest = NULL, all = FALSE, desc = c("Mean",
-  "Median", "Range"), round = 3, confint = FALSE,
-  NA_group_AsModality = FALSE)
+statsQT(data, variable, group = NULL, group_str = NULL, all = FALSE,
+  round = 3, confint = FALSE, desc = c("Mean", "Median", "Range"),
+  p_value = FALSE, forcedTest = NULL, NA_group_AsModality = FALSE,
+  output = NULL)
 }
 \arguments{
-\item{output}{a data.frame, containing a previously generated data.frame or a new data.frame.
-data.frame are generated using createOutput() function.}
-
-\item{input}{a data.frame containing the data to describe}
+\item{data}{a data.frame containing the data to describe}
 
 \item{variable}{a character vector of length 1. The name of the numeric column to describe.}
 
@@ -21,21 +18,24 @@ data.frame are generated using createOutput() function.}
 
 \item{group_str}{a character vector. The name of the levels of the group variable to use. Default to NULL.}
 
-\item{p_value}{a boolean. If TRUE, comparaison test are performed.}
-
-\item{forcedTest}{a character vector of length 1. Must be one of "Student", "Welch", "Wilcoxon", "ANOVA", or
-"Kruskal-Wallis". Default to NULL.}
-
 \item{all}{a boolean. If TRUE, total column will be displayed. Default to FALSE}
-
-\item{desc}{a character vector. Could contain "Mean", "Median", "Range" and/or "Mode"}
 
 \item{round}{an integer, number of maximal decimal. Default to 3}
 
 \item{confint}{a boolean. If TRUE, the confidence interval of the mean will be displayed. Default to FALSE}
 
+\item{desc}{a character vector. Could contain "Mean", "Median", "Range" and/or "Mode"}
+
+\item{p_value}{a boolean. If TRUE, comparaison test are performed.}
+
+\item{forcedTest}{a character vector of length 1. Must be one of "t-test for inequal variances", "t-test for equal variances",
+"Wilcoxon test", "Analysis of variance", or "Kruskal-Wallis test". Default to NULL.}
+
 \item{NA_group_AsModality}{a boolean. If TRUE, missing data of the group variable will be considered as levels.
 Default to FALSE}
+
+\item{output}{a data.frame, containing a previously generated data.frame or a new data.frame.
+data.frame are generated using createOutput() function.}
 }
 \value{
 a data.frame containing the description of the variable
