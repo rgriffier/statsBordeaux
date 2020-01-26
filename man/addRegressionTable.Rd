@@ -4,8 +4,15 @@
 \alias{addRegressionTable}
 \title{Add table into a rdocx element}
 \usage{
-addRegressionTable(doc, table, title, modalitySize = 1, sampleSize = 1,
-  parameterSize = 1, confintSize = 2)
+addRegressionTable(
+  doc,
+  table,
+  title,
+  modalitySize = 1,
+  sampleSize = 1,
+  parameterSize = 1,
+  confintSize = 2
+)
 }
 \arguments{
 \item{doc}{a rdocx element}

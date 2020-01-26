@@ -4,8 +4,14 @@
 \alias{manageMultipleColumnVariableAndDictionnary}
 \title{A conveinient method to manage multiple column data and label dictionnary}
 \usage{
-manageMultipleColumnVariableAndDictionnary(data, labelVar, labelQL,
-  listVarToMerge, nonAppChar = "NonApp", varOutputLabel)
+manageMultipleColumnVariableAndDictionnary(
+  data,
+  labelVar,
+  labelQL,
+  listVarToMerge,
+  nonAppChar = "NonApp",
+  varOutputLabel
+)
 }
 \arguments{
 \item{data}{a data.frame, containing the data with the indicator variable created by manageMultipleColumnVariable}

@@ -4,8 +4,13 @@
 \alias{setLabelToFactorLevels}
 \title{set label to qualitative variable into a data.frame based on dictionnary.}
 \usage{
-setLabelToFactorLevels(data, factorLevelsLabel, varIndex = 1,
-  levelsIndex = 2, labelIndex = 3)
+setLabelToFactorLevels(
+  data,
+  factorLevelsLabel,
+  varIndex = 1,
+  levelsIndex = 2,
+  labelIndex = 3
+)
 }
 \arguments{
 \item{data}{a data.frame containing qualitative variable witch need to be labelised.}

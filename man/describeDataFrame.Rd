@@ -4,10 +4,19 @@
 \alias{describeDataFrame}
 \title{A convenient method to describe a full data.frame.}
 \usage{
-describeDataFrame(data, variables = colnames(data), group = NULL,
-  group_str = NULL, p_value = FALSE, all = FALSE, desc = c("Mean",
-  "Median", "Range"), round = 3, confint = FALSE,
-  NA_asModality = FALSE, NA_group_AsModality = FALSE)
+describeDataFrame(
+  data,
+  variables = colnames(data),
+  group = NULL,
+  group_str = NULL,
+  p_value = FALSE,
+  all = FALSE,
+  desc = c("Mean", "Median", "Range"),
+  round = 3,
+  confint = FALSE,
+  NA_asModality = FALSE,
+  NA_group_AsModality = FALSE
+)
 }
 \arguments{
 \item{data}{a data.frame containing the data to describe}

@@ -4,8 +4,13 @@
 \alias{getGraphicalDescription}
 \title{A convenient method to get plot from data.frame.}
 \usage{
-getGraphicalDescription(data, variable = colnames(data), group = NULL,
-  legend.position = "right", na.rm = TRUE)
+getGraphicalDescription(
+  data,
+  variable = colnames(data),
+  group = NULL,
+  legend.position = "right",
+  na.rm = TRUE
+)
 }
 \arguments{
 \item{data}{a data.frame, containing the numeric variable to describe with boxplot}

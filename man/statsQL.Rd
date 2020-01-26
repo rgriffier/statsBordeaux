@@ -4,10 +4,19 @@
 \alias{statsQL}
 \title{Generate description of factor varaible.}
 \usage{
-statsQL(data, variable, group = NULL, group_str = NULL,
-  all = NA_asModality, round = 3, p_value = FALSE,
-  forcedTest = NULL, NA_group_AsModality = FALSE,
-  NA_asModality = FALSE, output = NULL)
+statsQL(
+  data,
+  variable,
+  group = NULL,
+  group_str = NULL,
+  all = NA_asModality,
+  round = 3,
+  p_value = FALSE,
+  forcedTest = NULL,
+  NA_group_AsModality = FALSE,
+  NA_asModality = FALSE,
+  output = NULL
+)
 }
 \arguments{
 \item{data}{a data.frame containing the data to describe}

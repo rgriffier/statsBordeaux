@@ -4,8 +4,16 @@
 \alias{addTable}
 \title{Add table into a rdocx element}
 \usage{
-addTable(doc, table, title, displayTestName = TRUE, modalitySize = 1,
-  descriptionSize = 1.1, valueSize = 1, testSize = 2)
+addTable(
+  doc,
+  table,
+  title,
+  displayTestName = TRUE,
+  modalitySize = 1,
+  descriptionSize = 1.1,
+  valueSize = 1,
+  testSize = 2
+)
 }
 \arguments{
 \item{doc}{a rdocx element}

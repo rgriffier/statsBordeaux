@@ -4,8 +4,12 @@
 \alias{setUnivariableRegression}
 \title{Perform univariable regression models}
 \usage{
-setUnivariableRegression(data, dependentVariable, independentVariable,
-  round = 2)
+setUnivariableRegression(
+  data,
+  dependentVariable,
+  independentVariable,
+  round = 2
+)
 }
 \arguments{
 \item{data}{a data.frame, containing the data to be used in the regression}

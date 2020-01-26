@@ -4,8 +4,13 @@
 \alias{getBarPlot}
 \title{A convenient method to get bar plot from qualitative variable.}
 \usage{
-getBarPlot(data, variable, group = NULL, legend.position = "right",
-  na.rm = TRUE)
+getBarPlot(
+  data,
+  variable,
+  group = NULL,
+  legend.position = "right",
+  na.rm = TRUE
+)
 }
 \arguments{
 \item{data}{a data.frame, containing the qualitative variable to describe with barplot}

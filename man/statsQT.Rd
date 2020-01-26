@@ -4,10 +4,20 @@
 \alias{statsQT}
 \title{Generate description of numeric varaible.}
 \usage{
-statsQT(data, variable, group = NULL, group_str = NULL, all = FALSE,
-  round = 3, confint = FALSE, desc = c("Mean", "Median", "Range"),
-  p_value = FALSE, forcedTest = NULL, NA_group_AsModality = FALSE,
-  output = NULL)
+statsQT(
+  data,
+  variable,
+  group = NULL,
+  group_str = NULL,
+  all = FALSE,
+  round = 3,
+  confint = FALSE,
+  desc = c("Mean", "Median", "Range"),
+  p_value = FALSE,
+  forcedTest = NULL,
+  NA_group_AsModality = FALSE,
+  output = NULL
+)
 }
 \arguments{
 \item{data}{a data.frame containing the data to describe}
