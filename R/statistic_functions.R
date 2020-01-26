@@ -265,6 +265,7 @@ setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levels
     factorLevels <- factorLevelsLabel[factorLevelsLabel[varIndex] == currentVar, labelIndex]
     factorLevels <- as.factor(as.character(factorLevels))
     data[, currentVar] <- factorLevels[match(data[, currentVar], factorLevelsLabel[factorLevelsLabel[varIndex] == currentVar, levelsIndex])]
+    data[, currentVar] <- factor(data[, currentVar], levels = unique(factorLevelsLabel[factorLevelsLabel[varIndex] == currentVar, ][, labelIndex]))
   }
 
   ## manage full digit column in french and english format

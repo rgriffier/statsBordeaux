@@ -1,8 +1,8 @@
 ---
 title: "Stats bordeaux package"
 author: "Romain GRIFFIER"
-date: "02/01/2020"
-output:
+date: "26/01/2020"
+output: 
   html_document:
     df_print: paged
 ---
@@ -19,7 +19,7 @@ Pour installer le package, il faut avoir au prélable installé `devtools`.
 Une fois fait, le pakage s'installe grace à la fonction `devtools::install_github()`.
 ```{r, eval = F}
 # install.packages("devtools")
-devtools::install_github("rgriffier/statsBordeaux")
+# devtools::install_github("rgriffier/statsBordeaux")
 ```
 
 # Mise à jour du package

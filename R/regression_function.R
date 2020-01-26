@@ -32,22 +32,22 @@ setUnivariableRegression <- function(data, dependentVariable, independentVariabl
 
   ## LOGISTIC REGRESSION
   if(is.factor(data[, dependentVariable])){
-    setUnivariableLogisticRegression(data = data,
+    resultFit <- setUnivariableLogisticRegression(data = data,
                                      dependentVariable = dependentVariable,
                                      independentVariable = independentVariable,
                                      round = round)
   }
-
-
   ## LINEAR REGRESSION
   else if(is.numeric(data[, dependentVariable])){
-    setUnivariableLinearRegression(data = data,
+    resultFit <- setUnivariableLinearRegression(data = data,
                                    dependentVariable = dependentVariable,
                                    independentVariable = independentVariable,
                                    round = round)
 
   }
 
+  row.names(resultFit) <- NULL
+  return(resultFit)
 }
 
 
@@ -120,6 +120,9 @@ setMultivariableRegression <- function(data, dependentVariable, independentVaria
       fit = fit,
       summaryFit = summaryFit,
       confint = confint)
+
+    row.names(multivariableDataOutput) <- NULL
+
     return(multivariableDataOutput)
   }
 
@@ -160,6 +163,9 @@ setMultivariableRegression <- function(data, dependentVariable, independentVaria
       fit = fit,
       summaryFit = summaryFit,
       confint = confint)
+
+    row.names(multivariableDataOutput) <- NULL
+
     return(multivariableDataOutput)
   }
 }

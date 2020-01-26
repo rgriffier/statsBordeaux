@@ -524,7 +524,7 @@ extractDataFromMultivariableLogisticModel <- function(data, dependentVariable, i
       }
     }
   }
-  colnames(output) <- c("Variable", "Modality", "N", "OR*", "95%CI[OR]*", "p-value*")
+  colnames(output) <- c("Variable", "Modality", "N", "OR", "95%CI[OR]", "p-value")
   attr(output, "var_dep") <- dependentVariable
   attr(output, "mod_var_dep") <- levels(data[, dependentVariable])
   attr(output, "var_indep") <- independentVariables
