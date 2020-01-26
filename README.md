@@ -111,7 +111,7 @@ Dans le cas où la fonction `statsBordeaux::checkNotDigitInDataframe()` renvoie 
 
 ``` r
 ## vérification que le jeu de donnée ne contient que des chiffres
-statsBordeaux::checkNotDigitInDataframe(mtcars)
+statsBordeaux::checkNotDigitInDataframe(data = mtcars)
 ```
 
 ### ÉTAPE 2 : labélisation des modalité des variables qualiatives
@@ -149,10 +149,11 @@ labelVariable <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt
                                       "Number of carburetors"))
 
 ## labélisation des variables du data.frame
-labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
+labelledData <- statsBordeaux::setLabelToVariable(data = labelledData,
+                                                  varLabel = labelVariable)
 
 ## fonction pour récupérer les labels d'un data.frame labellisé
-statsBordeaux::getVarLabel(labelledData)
+statsBordeaux::getVarLabel(data = labelledData)
 ```
 
     ##                       mpg                       cyl                      disp 
@@ -176,7 +177,7 @@ Toutes les variables à analyser doivent être de classe `numeric` (`integer` ou
 
 ``` r
 ## description des méta-données
-list_variableFormat <- statsBordeaux::describeMetadata(labelledData)
+list_variableFormat <- statsBordeaux::describeMetadata(data = labelledData)
 list_variableFormat
 ```
 
@@ -511,7 +512,7 @@ La gestion des titre et des numéro de tableau se fait au niveau du document et 
 La génération de .pdf en LaTeX n'est actuellement pas prise en charge.
 
 ``` r
-statsBordeaux::addKable(description)
+statsBordeaux::addKable(data_frame = description)
 ```
 
 <table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-top: 1px solid black;border-collapse: collapse;">
@@ -1148,7 +1149,7 @@ mtcars$nSpeed <- c(5, 6, 5, "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
 
 ## on utilise la fonction manageNotApplicable() pour gérer les non-applicable,
 ## représentés ici par des 'NonApp'
-notApplicable <- statsBordeaux::manageNotApplicable(mtcars, "NonApp")
+notApplicable <- statsBordeaux::manageNotApplicable(data = mtcars, notApplicableChar = "NonApp")
 
 ## on récupère le data.frame sans les 'non-applicables'
 mtcars <- notApplicable[[1]]
@@ -1157,7 +1158,7 @@ mtcars <- notApplicable[[1]]
 applicable <- notApplicable[[2]]
 
 ## vérification que le jeu de donnée ne contient que des chiffres
-onlyDigit <- statsBordeaux::checkNotDigitInDataframe(mtcars)
+onlyDigit <- statsBordeaux::checkNotDigitInDataframe(data = mtcars)
 
 ## labellisation des modalitées des variables qualitatives
 # on rajoute les labels des modalités de la nouvelle variable qualitative
@@ -1171,7 +1172,7 @@ labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
 labelVariable <- rbind(labelVariable,
                        data.frame(Variable = "nSpeed",
                                   Label = "Nombre de vitesses (boite manuelle)"))
-labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
+labelledData <- statsBordeaux::setLabelToVariable(data = labelledData, varLabel = labelVariable)
 
 ##----------------
 
