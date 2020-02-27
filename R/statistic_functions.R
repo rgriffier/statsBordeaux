@@ -21,6 +21,7 @@ checkNotDigitInDataframe <- function (data, returnError = FALSE, excelFormat = T
   data <- data.frame(lapply(data, function(x) {
     gsub("^[ \t\r\n]+$", NA, x)
   }))
+
   ## data as.character
   data[] <- lapply(data, as.character)
 
@@ -42,7 +43,7 @@ checkNotDigitInDataframe <- function (data, returnError = FALSE, excelFormat = T
       numCol[numRow == 0] <- numCol[numRow == 0]-1
       numRow[numRow == 0] <- nrow(data)
       ## get the leter representation of the col index
-      letterCol <- paste0(ifelse(floor(numCol/26) == 0, '', LETTERS[floor(numCol/26)]), LETTERS[numCol%%26])
+      letterCol <- paste0(do.call("c", lapply(floor(ifelse(numCol%%26 == 0, numCol-1, numCol)/26), function(x){ifelse(length(LETTERS[x]) == 0, "", LETTERS[x])})), ifelse(numCol%%26 == 0, 'Z', LETTERS[numCol%%26]))
       ## save result in a data.frame
       error <- data.frame(Lignes = numRow, Colonnes = numCol, Contenu = NA, stringsAsFactors = FALSE)
       ## for each row of error, get the text element corresponding in data
@@ -251,11 +252,19 @@ setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levels
 
   listeVariableQL <- unique(as.character(factorLevelsLabel[, varIndex]))
   diff <- setdiff(listeVariableQL, colnames(data))
-  if(length(diff) == 1){
-    stop(paste0("Variable ", paste0("'", paste0(diff, collapse = "', '"), "'"), " is in levels table and not in data."))
-  } else if(length(diff) > 1){
-    stop(paste0("Variables ", paste0("'", paste0(diff, collapse = "', '"), "'"), " are in levels table and not in data."))
+  if(length(diff) > 0){
+    stop(paste0("\nVariable '", diff, "' is in levels table and not in data."))
   }
+
+  # convert all variable as numeric if possible
+  data[] <- lapply(data, function(currentColumn){
+    if(isCastableAsNumeric(currentColumn)){
+      return(as.numeric(as.character(currentColumn)))
+    } else {
+      return(currentColumn)
+    }
+  })
+
 
   # all variable in the factorLevelsLabel data.frame are converted as factor
   data[, listeVariableQL] <- lapply(data[listeVariableQL], as.factor)
@@ -317,11 +326,9 @@ setLabelToVariable <- function (data, varLabel, varIndex = 1, labelIndex = 2){
   }
   listvarLabel <- as.character(varLabel[, varIndex])
   if(!all(listvarLabel %in% colnames(data))){
-    diff <- intersect(listvarLabel, colnames(data))
-    if(diff == 1) {
-      stop(paste0("Variable '", differences, "' is in varLabel data.frame and not in data."))
-    } else if(diff > 1){
-      stop(paste0("Variables '", paste0(differences, collapse = "', '"),"' are in varLabel data.frame and not in data."))
+    diff <- setdiff(listvarLabel, colnames(data))
+    if(length(diff) > 0) {
+      stop(paste0("\nVariable '", diff, "' is in varLabel data.frame and not in data."))
     }
   }
 
@@ -424,6 +431,13 @@ manageNotApplicable <- function(data, notApplicableChar){
   })
   ## remove notApplicableChar math
   data[data == notApplicableChar] <- NA
+  data[] <- lapply(data, function(currentColumn){
+    if(is.factor(currentColumn)){
+      return(as.factor(as.character(currentColumn)))
+    } else {
+      return(currentColumn)
+    }
+  })
   ## save data and notApplicable into a list
   result <- list(data, resultNotApplicable)
   names(result) <- c("data", "notApplicable")
@@ -617,8 +631,8 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            `t-test for inequal variances` = {
              test <- t.test(data[, variable] ~ data[, group], var.equal = FALSE)
              internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internalOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            },
 
@@ -626,8 +640,8 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            `t-test for equal variances` = {
              test <- t.test(data[, variable] ~ data[, group], var.equal = TRUE)
              internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internalOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            },
 
@@ -635,8 +649,8 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            `Wilcoxon test` = {
              test <- wilcox.test(data[, variable] ~ data[, group], correct = TRUE)
              internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internalOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            },
 
@@ -644,8 +658,8 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            `Analysis of variance` = {
              test <- aov(data[, variable] ~ data[, group])
              internalOutput <- cbind(internalOutput, data.frame(test = c("Analysis of variance", rep(NA, nrow(internalOutput)-1)),
-                                                p_value = c(setFormatToPvalue(summary(test)[[1]][1, 'Pr(>F)'], round),
-                                                            rep(NA, nrow(internalOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(summary(test)[[1]][1, 'Pr(>F)'], round),
+                                                                            rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            },
 
@@ -653,15 +667,15 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            `Kruskal-Wallis test` = {
              test <- kruskal.test(data[, variable] ~ data[, group])
              internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internalOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            },
 
            ## No test
            {
              internalOutput <- cbind(internalOutput, data.frame(test = c(rep(test_to_use, nrow(internalOutput))),
-                                                p_value = c(rep(NA, nrow(internalOutput)))))
+                                                                p_value = c(rep(NA, nrow(internalOutput)))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            })
   }
@@ -671,7 +685,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
   if (!is.null(group)) {
     attr(internalOutput, 'var_group') <- group
     attr(internalOutput, 'label_var_group') <- getVarLabel(data = data,
-                                                   variable = group)
+                                                           variable = group)
     if (!is.null(group_str)) {
       if(NA_group_AsModality){
         group_str <- c(group_str, NA)
@@ -813,8 +827,8 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
   ## if group is null or all = TRUE : QL description for all population
   if(is.null(group) | all){
     internatOutput <- statQL(data = data,
-                     variable = variable,
-                     round = round)
+                             variable = variable,
+                             round = round)
     colnames(internatOutput) <- c('Variable', 'Modality', 'Description', 'All')
   }
 
@@ -853,8 +867,8 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
            `Pearson's Chi-squared test` = {
              test <- chisq.test(x = data[, variable], y = data[, group], correct = FALSE)
              internatOutput <- cbind(internatOutput, data.frame(test = c(test$method, rep(NA, nrow(internatOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internatOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internatOutput)-1))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
            },
 
@@ -862,8 +876,8 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
            `Pearson's Chi-squared test with Yates' continuity correction` = {
              test <- suppressWarnings(chisq.test(x = data[, variable], y = data[, group], correct = TRUE))
              internatOutput <- cbind(internatOutput, data.frame(test = c(test$method, rep(NA, nrow(internatOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internatOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internatOutput)-1))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
            },
 
@@ -875,15 +889,15 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
                fisher.test(x = data[, variable], y = data[, group], simulate.p.value = TRUE)
              })
              internatOutput <- cbind(internatOutput, data.frame(test = c(test$method, rep(NA, nrow(internatOutput)-1)),
-                                                p_value = c(setFormatToPvalue(test$p.value, round),
-                                                            rep(NA, nrow(internatOutput)-1))))
+                                                                p_value = c(setFormatToPvalue(test$p.value, round),
+                                                                            rep(NA, nrow(internatOutput)-1))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
            },
 
            ## No test
            {
              internatOutput <- cbind(internatOutput, data.frame(test = c(rep(test_to_use, nrow(internatOutput))),
-                                                p_value = c(rep(NA, nrow(internatOutput)))))
+                                                                p_value = c(rep(NA, nrow(internatOutput)))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
            })
   }
@@ -893,7 +907,7 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
   if (!is.null(group)) {
     attr(internatOutput, 'var_group') <- group
     attr(internatOutput, 'label_var_group') <- getVarLabel(data = data,
-                                                   variable = group)
+                                                           variable = group)
     if (!is.null(group_str)) {
       if(NA_group_AsModality){
         group_str <- c(group_str, NA)

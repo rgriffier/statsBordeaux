@@ -13,3 +13,16 @@ manageMultipleColumnVariableAndDictionnary <- function(data, labelVar, labelQL, 
   manageDictionnary <- int_manageLabelDictionnaryMultipleColumnVariable(data = data, labelVar = labelVar, labelQL = labelQL, varOutputLabel = varOutputLabel)
   return(list(data, manageDictionnary[[1]], manageDictionnary[[2]]))
 }
+
+
+
+#' @title A conveinineg metho to check if some vector could be cast as numeric
+#' @description  A conveinineg metho to check if some vector could be cast as numeric
+#' @param vector a vector, which need to be cast as numeric
+#' @return a boolean vector of length 1.
+isCastableAsNumeric <- function(vector) {
+  stopifnot(is.atomic(vector) || is.list(vector))
+  numNAs <- sum(is.na(vector))
+  numNAs_new <- suppressWarnings(sum(is.na(as.numeric(vector))))
+  return(numNAs_new == numNAs)
+}
