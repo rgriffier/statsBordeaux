@@ -132,10 +132,11 @@ setMultivariableRegression <- function(data, dependentVariable, independentVaria
 
     ## get the fit
     fit <- tryCatch({
-      lm(formula = getFormulaFromVariableName(
+      glm(formula = getFormulaFromVariableName(
         dependentVariable = dependentVariable,
         independentVariables = independentVariables
       ),
+      family = gaussian(),
       data = data)
     }, warning = function(w){
       stop("Congergence problem")

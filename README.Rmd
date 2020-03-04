@@ -1,11 +1,8 @@
 ---
 title: "Stats bordeaux package"
 author: "Romain GRIFFIER"
-date: "26/01/2020"
-output: 
-  github_document:
-    df_print: paged
-always_allow_html: true
+date: "04/03/2020"
+output: html_document
 ---
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.  
@@ -16,15 +13,19 @@ Ce package s'appuit :
 - Sur `rmarkdown::` et `officer::` pour le reporting.
 
 # Installation
+
 Pour installer le package, il faut avoir au prélable installé `devtools`.  
 Une fois fait, le pakage s'installe grace à la fonction `devtools::install_github()`.
+
 ```{r, eval = F}
 # install.packages("devtools")
 devtools::install_github("rgriffier/statsBordeaux")
 ```
 
 # Mise à jour du package
+
 Le package n'étant pas hébergé sur le CRAN, la mise à jour du package ne peut pas se faire à partir de la fonction classique `update.packages()`. Pour le mettre à jour, vous devez utiliser la fonction `statsBordeaux::updateStatsBordeaux()`.
+
 ```{r, eval = F}
 statsBordeaux::updateStatsBordeaux()
 ```
@@ -37,9 +38,11 @@ library(statsBordeaux, warn.conflicts = FALSE)
 ```
 
 ## Chargement des données
+
 Ce tutoriel se base sur le dataset `mtcars` inclu dans R.
 
 ### Chargement du jeu de données
+
 Dans ce jeu de données, les variables qualitatives (`vs` et `am`) sont codées en 0/1.
 
 ```{r}
@@ -51,6 +54,7 @@ str(mtcars)
 ```
 
 ### Chargement des labels des modalitées des différentes variables qualitatives
+
 Pour les variables qualitatives, on charge un data.frame de 3 colonnes :  
 - `Variable` : nom de la variable, tel que renseigné dans le dataset.  
 - `Modality` : nombre représentant la modalité, tel que renseigné dans le dataset.  
@@ -66,6 +70,7 @@ labels
 
 ## Data management
 ### ÉTAPE 1 : vérification du contenu du data.frame contenant les données à analyser
+
 On vérifie que le data.frame du jeux de données ne contient que des nombre grace à la fonction `statsBordeaux::checkNotDigitInDataframe()`.  
 Dans le cas où la fonction `statsBordeaux::checkNotDigitInDataframe()` renvoie `FALSE`, il est possible de récupérer un data.frame contenant la position des cellules contenant des éléments non-numériques en ajoutant le paramètre `returnError = TRUE`. La position de ces cellules est donnée au format Excel (ex : A2).
 
@@ -75,6 +80,7 @@ statsBordeaux::checkNotDigitInDataframe(data = mtcars)
 ```
 
 ### ÉTAPE 2 : labélisation des modalité des variables qualiatives
+
 Comme le data.frame d'entrée ne contient que des nombres, il faut labéliser les modalités des variables qualitatives.  
 On effectue cette labélisation grâce à la fonction `statsBordeaux::setLabelToFactorLevels()` à partir du data.frame `labels` créé précédemment.  
 Cette fonction gère à la fois :
@@ -91,6 +97,7 @@ head(labelledData)
 ```
 
 ### ÉTAPE 3 (optionnelle) : labellisation des variables
+
 Il est possible d'associer à chaque variable du data.frame contenant le jeu de donnée un label (afin d'améliorer la sortie des résultats) grace à la fonction `statsBordeaux::setLabelToVariable()`.
 Le label des variables est contenu dans un attribut `var_label`.
 
@@ -115,6 +122,7 @@ nomVariable <- attributes(labelledData[, 1])$var_label
 ```
 
 ### ÉTAPE 4 : vérification de la structure finale du fichier à analyser
+
 On vérifie la structure du data.frame contenant le dataset.  
 Toutes les variables à analyser doivent être de classe  `numeric` (`integer` ou `double`) ou de classe `factor`.
 
@@ -129,6 +137,7 @@ list_variableFormat
 #### Utilisation de la fonction pipe `%>%`
 
 La fonction `statsBordeaux::describeDataFrame()` permet de décrire les variables qualitatives et quantitatives d'un data.frame. Elle peut s'utiliser avec les pipes `%>%` (package `dplyr`).
+
 ```{r}
 # chargement de dplyr
 library(dplyr)
@@ -142,7 +151,7 @@ description[c(1:5, 36:39), ]
 
 De la même manière, il est possible de réaliser une description graphique des données avec la fonction `statsBordeaux::getGraphicalDescription()`
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # statistique graphique sur l'ensemble du data.frame
 graphicDescription <- labelledData %>%
   statsBordeaux::getGraphicalDescription()
@@ -155,6 +164,7 @@ graphicDescription[[8]]
 ```
 
 #### Utilisateurs avancés, utilisation pas à pas
+
 On créé un tableau de sortie vierge à partir de la fonction `statsBordeaux::createOutput()`. C'est ce dernier qui va contenir la description de nos variables.  
 On réalise les statistiques descriptives des données avec les fonctions `statsBordeaux::statsQT()` et `statsBordeaux::statsQL()` (en fonction de la nature quantitative ou qualitative de la variable à décrire).
 
@@ -203,7 +213,7 @@ comp[c(1:5, 36:39), ]
 
 De la même manière, il est possible de réaliser une description graphique des données en fonction d'une variable qualitative de groupe en rajoutant le paramètre `group` à la fonction `statsBordeaux::getGraphicalDescription()`
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # statistique graphique sur l'ensemble du data.frame
 graphicDescription <- labelledData %>%
   statsBordeaux::getGraphicalDescription(group = "vs")
@@ -214,7 +224,9 @@ graphicDescription[[1]]
 ## Variable qualitative : BAR PLOT
 graphicDescription[[9]]
 ```
+
 #### Utilisateurs avancés, utilisation pas à pas
+
 On réalise les statistiques descriptives des données en fonction d'une variable qualitative de comparaison en rajoutant un paramètre `group` aux fonction `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`.
 On peut dans ce cas rajouter le paramètre `all = TRUE` afin afficher une description globale des variables.
 
@@ -273,7 +285,7 @@ head(comparaison, n = 5)
 
 On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans la fonction `statsBordeaux::describeDataFrame()`.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # statistique comparative sur l'ensemble du data.frame
 comp <- labelledData %>%
   statsBordeaux::describeDataFrame(group = "vs",
@@ -282,9 +294,10 @@ comp[c(1:5, 36:39), ]
 ```
 
 #### Utilisateurs avancés, utilisation pas à pas
+
 On réalise les statistiques comparatives des données en fonction d'une variable qualitative de comparaison en associant au paramètre `group` le paramètre `p_value = TRUE` dans les fonctions `statsBordeaux::statsQL()` et `statsBordeaux::statsQT()`. Le test réalisé est choisi en fonction des conditions d'application des différents tests. 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ## création du tableau de sortie vierge
 statsComparatives <- statsBordeaux::createOutput()
 
@@ -323,6 +336,7 @@ head(statsComparatives, n = 5)
 
 ## Reporting
 ### Reporting avec `rmarkdown`
+
 Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `statsBordeaux::addKable()`. Cette dernière génère un __tableau HTML__.   
 La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `statsBordeaux::addKable()`.
 
@@ -333,6 +347,7 @@ statsBordeaux::addKable(data_frame = description)
 ```
 
 ### Reporting avec `officier`
+
 Le reporting utilise le package `officier`.  
 Le reporting se base sur un template (document Word). Ce dernier peut contenir une page de garde et des styles. Ce sont les styles qui sont utilisées dans les différentes fonctions ci-dessous pour gérer la mise en page.  
 Les styles sont disponibles via la fonction `styles_info(doc)` dans la colonne `style_name` et dépendent du template utilisé.
@@ -384,12 +399,13 @@ print(doc, target = 'stat.docx')
 
 ## Fonctions avancées
 ### Tests de normalité
+
 Il est souvent interessant de s'interesser à la distribution des variables quantitatives afin de connaitre la meilleure façon de les décrire (utilisation de la moyenne ou médiane par exemple) et les test statistiques à appliquer.
 
 La distribution que l'on va le plus souvent vouloir évaluer est la distribution normale.  
 La fonction `statsBordeaux::checkNormality()` permet d'évaluer la normalité d'une variable de manière graphique et à l'aide de deux test statistiques (*Kolmogorov-Smirnov* ou *Shapiro-Wilk*).
 
-```{r, fig.align = 'center'}
+```{r fig.align='center', message=FALSE, warning=FALSE}
 ## évaluation graphique de la distribution de la variable 'mpg'
 statsBordeaux::checkNormality(data = labelledData, variable = "mpg")
 
@@ -401,6 +417,7 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg", group = "vs
 ```
 
 ### Gestion des 'non-applicables'
+
 La gestion des 'non-applicables' fait intervenir la fonction `statsBordeaux::manageNotApplicable()`.
 Cette fonction prend 2 paramètres d'entrée :
 

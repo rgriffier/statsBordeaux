@@ -1,12 +1,12 @@
 Package: statsBordeaux
 Type: Package
-Title: Helpful tool to describe dataset
-Version: 0.1.1
+Title: Helpful tool to describe and analyse dataset
+Version: 2.0.0
 Author: @R: person("Romain", "GRIFFIER", role=c("aut", "cre"), email="romain.griffier@chu-bordeaux.fr")
 Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
-Description: Method to describe numeric and qualitative variable from a dataset and generate reporting.
+Description: Method to describe and analyse dataset and generate reporting.
 Imports:
-    devEMF,
+	devEMF,
 	dplyr,
 	flextable,
 	ggplot2,
@@ -14,6 +14,8 @@ Imports:
 	knitr,
 	magrittr,
 	officer,
+	pkgbuild,
+	processx,
 	ggpubr,
 	plyr
 License: MIT

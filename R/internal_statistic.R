@@ -313,31 +313,31 @@ manageDataBeforePairedTest <- function(df, variable, group, id_paired){
 #' @return a data.frame containing the description of the variables
 #' @noRd
 jumpDescribeDataFrame <- Vectorize(function(data, variable, group = NULL, group_str = NULL,
-                                  p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
-                                  round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
+                                            p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
+                                            round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
 
   if(is.numeric(data[, variable])){
-    output <- statsBordeaux::statsQT(data = data,
-                                     variable = colnames(data[variable]),
-                                     group = group,
-                                     group_str = group_str,
-                                     p_value = p_value,
-                                     all = all,
-                                     desc = desc,
-                                     round = round,
-                                     confint = confint,
-                                     NA_group_AsModality = NA_group_AsModality)
+    output <- statsQT(data = data,
+                      variable = colnames(data[variable]),
+                      group = group,
+                      group_str = group_str,
+                      p_value = p_value,
+                      all = all,
+                      desc = desc,
+                      round = round,
+                      confint = confint,
+                      NA_group_AsModality = NA_group_AsModality)
   }
   else if(is.factor(data[, variable])){
-    output <- statsBordeaux::statsQL(data = data,
-                                     variable = colnames(data[variable]),
-                                     group = group,
-                                     group_str = group_str,
-                                     p_value = p_value,
-                                     all = all,
-                                     round = round,
-                                     NA_asModality = NA_asModality,
-                                     NA_group_AsModality = NA_group_AsModality)
+    output <- statsQL(data = data,
+                      variable = colnames(data[variable]),
+                      group = group,
+                      group_str = group_str,
+                      p_value = p_value,
+                      all = all,
+                      round = round,
+                      NA_asModality = NA_asModality,
+                      NA_group_AsModality = NA_group_AsModality)
   }
   else {
     message(paste0("Variable '", colnames(data[variable]), "' non décrite (", class(data[, variable]), ")"))
@@ -406,7 +406,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
             kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
                                                     sd(dataKolmogorov, na.rm = TRUE)))
             dataStatistic[j, 3] <- kolmogorov$method
-            dataStatistic[j, 4] <- statsBordeaux::setFormatToPvalue(kolmogorov$p.value)
+            dataStatistic[j, 4] <- setFormatToPvalue(kolmogorov$p.value)
           } else {
             dataStatistic[j, 3] <- "-"
             dataStatistic[j, 4] <- "-"
@@ -420,7 +420,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
           kolmogorov <-  suppressWarnings(ks.test(dataKolmogorov,"plnorm", mean(dataKolmogorov, na.rm = TRUE),
                                                   sd(dataKolmogorov, na.rm = TRUE)) )
           dataStatistic[1, 3] <- kolmogorov$method
-          dataStatistic[1, 4] <- statsBordeaux::setFormatToPvalue(kolmogorov$p.value)
+          dataStatistic[1, 4] <- setFormatToPvalue(kolmogorov$p.value)
         } else {
           dataStatistic[1, 3] <- "-"
           dataStatistic[1, 4] <- "-"
@@ -438,7 +438,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
           if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
             shapiro <- shapiro.test(dataShapiro)
             dataStatistic[j, 3] <- shapiro$method
-            dataStatistic[j, 4] <- statsBordeaux::setFormatToPvalue(shapiro$p.value)
+            dataStatistic[j, 4] <- setFormatToPvalue(shapiro$p.value)
           } else {
             dataStatistic[j, 3] <- "-"
             dataStatistic[j, 4] <- "-"
@@ -451,7 +451,7 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
         if(sum(!is.na(dataShapiro)) >= 3 & sum(!is.na(dataShapiro)) <= 5000 & sum(!is.na(unique(dataShapiro))) > 1){
           shapiro <- shapiro.test(dataShapiro)
           dataStatistic[1, 3] <- shapiro$method
-          dataStatistic[1, 4] <- statsBordeaux::setFormatToPvalue(shapiro$p.value)
+          dataStatistic[1, 4] <- setFormatToPvalue(shapiro$p.value)
         } else {
           dataStatistic[1, 3] <- "-"
           dataStatistic[1, 4] <- "-"

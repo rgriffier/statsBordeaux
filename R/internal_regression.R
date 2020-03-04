@@ -630,7 +630,7 @@ extractDataFromMultivariableLinearModel <- function(data, dependentVariable, ind
       }
     }
   }
-  colnames(output) <- c("Variable", "Modality", "N", "Beta*", "95%CI[Beta]*", "p-value*")
+  colnames(output) <- c("Variable", "Modality", "N", "Beta", "95%CI[Beta]", "p-value")
   attr(output, "var_dep") <- dependentVariable
   attr(output, "var_indep") <- independentVariables
   return(output)

@@ -167,7 +167,11 @@ addRegressionKable <- function(data_frame){
                            no = paste0("<p style=\"text-indent:20px;\">", table$Modality, "</p>"))
   table$Modality <- NULL
 
-  table$`95%CI[OR]` <- gsub(pattern = " ", replacement = "&nbsp;", x = table$`95%CI[OR]`)
+  if(any(grepl(pattern = "Beta", x = colnames(table)))){
+    table$`95%CI[Beta]` <- gsub(pattern = " ", replacement = "&nbsp;", x = table$`95%CI[Beta]`)
+  } else {
+    table$`95%CI[OR]` <- gsub(pattern = " ", replacement = "&nbsp;", x = table$`95%CI[OR]`)
+  }
   table$`p-value` <- gsub(pattern = " ", replacement = "&nbsp;", x = table$`p-value`)
 
   ## get kable

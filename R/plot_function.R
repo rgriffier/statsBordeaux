@@ -236,7 +236,6 @@ getGraphicalDescription <- function(data, variable = colnames(data), group = NUL
 #' @param data a data.frame
 #' @return a list of plot
 #' @export
-#' @import reshape
 #' @import ggplot2
 #' @examples
 #' data(mtcars)
@@ -249,7 +248,7 @@ getDensityPlot <- function(data){
     plot <- ggplot2::ggplot(data = data, ggplot2::aes(x = get(x))) +
       ggplot2::geom_density(na.rm = T, color="black", fill="lightblue", alpha = 0.5) +
       ggplot2::theme_minimal() +
-      ggplot2::xlab(statsBordeaux::getLabelFromVariable(data[x])) +
+      ggplot2::xlab(getLabelFromVariable(data[x])) +
       ggplot2::ylab("Density")
     return(plot)
   })
