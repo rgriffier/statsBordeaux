@@ -2,7 +2,8 @@
 title: "Stats bordeaux package"
 author: "Romain GRIFFIER"
 date: "04/03/2020"
-output: html_document
+output: github_document
+always_allow_html: true
 ---
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.  
@@ -497,5 +498,4 @@ for(i in 1:ncol(labelledData)){
 }
 
 descriptionNonAvailable[c(40:44, 55:57), ]
-
 ```
