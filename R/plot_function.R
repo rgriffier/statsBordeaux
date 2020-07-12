@@ -6,14 +6,16 @@
 #' group which need to be used to describe the numeric variable. Depault to NULL
 #' @param legend.position a characher vector of length one, containing the legend position.
 #' Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.
+#' @param legend.width a numeric vector of length one, containing the legend width. Default to 50
 #' @return a ggplot2 plot
 #' @import ggplot2
+#' @import stringr
 #' @export
 #' @examples
 #' data(mtcars)
 #' mtcars$am <- as.factor(mtcars$am)
 #' getBoxPlot(data = mtcars, variable = "mpg", group = "am")
-getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right"){
+getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", legend.width = 50){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -47,11 +49,13 @@ getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 
   ylab <- attr(data[, variable], "var_label")
   ylab <- ifelse(!is.null(ylab), ylab, variable)
-
+  ylab <- stringr::str_wrap(ylab, width = legend.width)
+  
   if(!is.null(group)){
 
     labs <- attr(data[, group], "var_label")
     labs <- ifelse(!is.null(labs), labs, group)
+    labs <- stringr::str_wrap(labs, width = legend.width)
 
     plot <- ggplot2::ggplot(data) +
       ggplot2::geom_boxplot(ggplot2::aes(y = get(variable), fill = get(group))) +
@@ -93,17 +97,19 @@ getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' group which need to be used to describe the qualitative variable. Depault to NULL
 #' @param legend.position a characher vector of length one, containing the legend position.
 #' Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.
+#' @param legend.width a numeric vector of length one, containing the legend width. Default to 50
 #' @param na.rm a boolean vector of length one. If TRUE, missig value of variable will be remove.
 #' Default to TRUE
 #' @return a ggplot2 plot
 #' @import ggplot2
+#' @import stringr
 #' @export
 #' @examples
 #' data(mtcars)
 #' mtcars$am <- as.factor(mtcars$am)
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' getBarPlot(data = mtcars, variable = "vs", group = "am")
-getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", na.rm = TRUE){
+getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", legend.width = 50, na.rm = TRUE){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -151,11 +157,13 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 
   labs <- attr(data[, variable], "var_label")
   labs <- ifelse(!is.null(labs), labs, variable)
-
+  labs <- stringr::str_wrap(labs, width = legend.width)
+  
   if(!is.null(group)){
     xlab <- attr(data[, group], "var_label")
     xlab <- ifelse(!is.null(xlab), xlab, group)
-
+    xlab <- stringr::str_wrap(xlab, width = legend.width)
+    
     plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), group = get(group), na.rm = TRUE)) +
       ggplot2::geom_bar(ggplot2::aes(y = ..prop.., fill = factor(..x..)), stat="count", na.rm = TRUE) +
       ggplot2::geom_text(ggplot2::aes(label = scales::percent(..prop..), y = ..prop.. ),
@@ -202,6 +210,7 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' @param group a character vector of length one, containing the name of the
 #' @param legend.position a characher vector of length one, containing the legend position.
 #' Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.
+#' @param legend.width a numeric vector of length one, containing the legend width. Default to 50
 #' @param na.rm a boolean vector of length one. If TRUE, missig value of variable will be remove.
 #' Default to TRUE
 #' @return a ggplot2 plot
@@ -212,18 +221,20 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' mtcars %>% getGraphicalDescription(group = "am")
 getGraphicalDescription <- function(data, variable = colnames(data), group = NULL,
-                                    legend.position = "right", na.rm = TRUE){
+                                    legend.position = "right", legend.width = 50, na.rm = TRUE){
   listPlot <- lapply(variable, function(currentVar){
     if(is.numeric(data[, currentVar])){
       plot <- getBoxPlot(data = data,
                          variable = currentVar,
                          group = group,
-                         legend.position = legend.position)
+                         legend.position = legend.position,
+                         legend.width = legend.width)
     } else if(is.factor(data[, currentVar])){
       plot <- getBarPlot(data = data,
                          variable = currentVar,
                          group = group,
                          legend.position = legend.position,
+                         legend.width = legend.width,
                          na.rm = na.rm)
     }
   })

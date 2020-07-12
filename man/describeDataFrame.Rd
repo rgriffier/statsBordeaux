@@ -7,6 +7,7 @@
 describeDataFrame(
   data,
   variables = colnames(data),
+  applicable = NULL,
   group = NULL,
   group_str = NULL,
   p_value = FALSE,
@@ -22,6 +23,8 @@ describeDataFrame(
 \item{data}{a data.frame containing the data to describe}
 
 \item{variables}{a character vector contening the name of columns to describe. Default to colnames(data).}
+
+\item{applicable}{a list of boolean vector generating based on manageNotApplicable(). Use in cas of NonApplicable data}
 
 \item{group}{a character vector of length 1. The name of the factor column to use as commparaison group. Default to NULL.}
 

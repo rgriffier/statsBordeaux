@@ -4,7 +4,13 @@
 \alias{getBoxPlot}
 \title{A convenient method to get box plot from numeric variable.}
 \usage{
-getBoxPlot(data, variable, group = NULL, legend.position = "right")
+getBoxPlot(
+  data,
+  variable,
+  group = NULL,
+  legend.position = "right",
+  legend.width = 50
+)
 }
 \arguments{
 \item{data}{a data.frame, containing the numeric variable to describe with boxplot}
@@ -16,6 +22,8 @@ group which need to be used to describe the numeric variable. Depault to NULL}
 
 \item{legend.position}{a characher vector of length one, containing the legend position.
 Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.}
+
+\item{legend.width}{a numeric vector of length one, containing the legend width. Default to 50}
 }
 \value{
 a ggplot2 plot

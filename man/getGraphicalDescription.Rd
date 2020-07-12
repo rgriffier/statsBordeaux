@@ -9,6 +9,7 @@ getGraphicalDescription(
   variable = colnames(data),
   group = NULL,
   legend.position = "right",
+  legend.width = 50,
   na.rm = TRUE
 )
 }
@@ -21,6 +22,8 @@ getGraphicalDescription(
 
 \item{legend.position}{a characher vector of length one, containing the legend position.
 Must be in 'right', 'left', 'top', 'bottom, 'none'. Default to 'right'.}
+
+\item{legend.width}{a numeric vector of length one, containing the legend width. Default to 50}
 
 \item{na.rm}{a boolean vector of length one. If TRUE, missig value of variable will be remove.
 Default to TRUE}

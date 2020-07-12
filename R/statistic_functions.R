@@ -1044,6 +1044,7 @@ mergePairedDataFrame <- function(dataA, dataB, byA, byB, nameA, nameB){
 #' @description  A convenient method to describe a full data.frame.
 #' @param data a data.frame containing the data to describe
 #' @param variables a character vector contening the name of columns to describe. Default to colnames(data).
+#' @param applicable a list of boolean vector generating based on manageNotApplicable(). Use in cas of NonApplicable data
 #' @param group a character vector of length 1. The name of the factor column to use as commparaison group. Default to NULL.
 #' @param group_str a numeric vector. The index of the levels of the group variable to use. Default to NULL.
 #' @param p_value a boolean. If TRUE, comparaison test are performed.
@@ -1070,7 +1071,7 @@ mergePairedDataFrame <- function(dataA, dataB, byA, byB, nameA, nameB){
 #' labelledData <- statsBordeaux::labellisationDataFrame(mtcars, labels)
 #' labelledData <- statsBordeaux::setLabelToVariable(labelledData, labelVariable)
 #' comparaison <- describeDataFrame(mtcars, group = "vs", p_value = TRUE)
-describeDataFrame <- function(data, variables = colnames(data), group = NULL, group_str = NULL,
+describeDataFrame <- function(data, variables = colnames(data), applicable = NULL, group = NULL, group_str = NULL,
                               p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
                               round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
 
@@ -1137,6 +1138,7 @@ describeDataFrame <- function(data, variables = colnames(data), group = NULL, gr
 
   result <- do.call("rbind", jumpDescribeDataFrame(data = data,
                                                    variable = variables,
+                                                   applicable = applicable,
                                                    group = group,
                                                    group_str = group_str,
                                                    p_value = p_value,
