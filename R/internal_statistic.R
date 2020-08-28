@@ -15,12 +15,12 @@
 #' df <- labellisationDataFrame(df, labelTable)
 #' list_subGroup <- getSubGroupFromDataFrame(df = df, variable = "X1", group = "X2")
 getSubGroupFromDataFrame <- function(df, variable, group, NA_group_AsModality = FALSE) {
-  
+
   # On vérifie que df est un data.frame
   if (!is.data.frame(df)) {
     stop("df must be a data.frame")
   }
-  
+
   # Liste de sortie
   result <- list()
   # On sauverage les attributs, en particulier l'attribut var_label
@@ -129,13 +129,13 @@ statQT <- function(data, variable, round = 3, confint = FALSE, desc = c("Mean", 
   if(length(setdiff(desc, c("Mean", "Median", "Range", "Mode"))) != 0) {
     stop(paste0("desc must be a characher vector composer with 'Mean', 'Median', 'Range' or 'Mode'"))
   }
-  
+
   ## output creation
   output <- data.frame(matrix(ncol = 4, nrow = 0))
-  
+
   ## descriptive statistic
   summary <- summary(data[, variable])
-  
+
   min <- setFormatToNumber(as.numeric(summary['Min.']), round)
   quart1st <- setFormatToNumber(as.numeric(summary['1st Qu.']), round)
   median <- setFormatToNumber(as.numeric(summary['Median']), round)
@@ -143,25 +143,25 @@ statQT <- function(data, variable, round = 3, confint = FALSE, desc = c("Mean", 
   quart3th <- setFormatToNumber(as.numeric(summary['3rd Qu.']), round)
   max <- setFormatToNumber(as.numeric(summary['Max.']), round)
   sd <- setFormatToNumber(sd(data[, variable], na.rm = TRUE), round)
-  
+
   ## current row definition
   currentRow <- nrow(output) + 1
-  
+
   ## varName
   output[currentRow, 1] <- getVarLabel(data[variable])
   currentRow <- nrow(output) + 1
-  
+
   ## sample size
   output[currentRow, 3] <- 'N (m.d.)'
   output[currentRow, 4] <- paste0(sum(!is.na(data[variable])), ' (', sum(is.na(data[variable])), ')')
   currentRow <- nrow(output) + 1
-  
+
   ## mean and sd
   if('Mean' %in% desc) {
     output[currentRow, 3] <- 'Mean (SD)'
     output[currentRow, 4] <- paste0(mean, ' (', sd, ')')
     currentRow <- nrow(output) + 1
-    
+
     ## confint
     if(confint == TRUE) {
       output[currentRow, 3] <- 'IC95% [Mean]'
@@ -174,21 +174,21 @@ statQT <- function(data, variable, round = 3, confint = FALSE, desc = c("Mean", 
       currentRow <- nrow(output) + 1
     }
   }
-  
+
   ## median and IQR
   if('Median' %in% desc){
     output[currentRow, 3] <- 'Median [Q1 ; Q3]'
     output[currentRow, 4] <- paste0(median, ' [', quart1st, ' ; ', quart3th, ']')
     currentRow <- nrow(output) + 1
   }
-  
+
   ## range
   if('Range' %in% desc){
     output[currentRow, 3] <- 'Min ; Max'
     output[currentRow, 4] <- paste0(min, ' ; ', max)
     currentRow <- nrow(output) + 1
   }
-  
+
   ## mode
   if('Mode' %in% desc & !any(grepl('\\.', as.character(data[, variable])))){
     output[currentRow, 3] <- 'Mode'
@@ -231,16 +231,16 @@ statQL <- function(data, variable, round = 3, NA_asModality = FALSE) {
   if(!is.vector(NA_asModality) | !is.logical(NA_asModality) | length(NA_asModality) !=1){
     stop("NA_asModality must be the logical vector of length 1")
   }
-  
+
   ## output creation
   output <- data.frame(matrix(ncol = 4, nrow = 0))
-  
+
   ## sample size
   size <- table(data[, variable], useNA = 'always')
   sizeWithoutNA <- table(data[, variable], useNA = 'no')
   percent <- setFormatToNumber(prop.table(table(data[, variable], useNA = 'always')) * 100, round)
   percentWithoutNA <- setFormatToNumber(prop.table(table(data[, variable], useNA = 'no')) * 100, round)
-  
+
   ## result save
   for(i in 1:length(size)){
     # initialisation
@@ -316,7 +316,7 @@ manageDataBeforePairedTest <- function(df, variable, group, id_paired){
 jumpDescribeDataFrame <- Vectorize(function(data, variable, applicable = NULL, group = NULL, group_str = NULL,
                                             p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
                                             round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
-  
+
   if(!is.null(applicable)){
     if(is.numeric(data[, variable])){
       output <- statsQT(
@@ -399,7 +399,7 @@ jumpDescribeDataFrame <- Vectorize(function(data, variable, applicable = NULL, g
 #' @import ggplot2
 #' @noRd
 checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_value = FALSE, method = 'Kolmogorov') {
-  
+
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
   }
@@ -428,12 +428,12 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
       stop("method must be a character vector of length one in 'Kolmogorov' or 'Shapiro'.")
     }
   }
-  
+
   currentData <- colnames(data[variable])
   if(p_value){
     dataStatistic <- as.data.frame(matrix(nrow = 0, ncol = 4))
     colnames(dataStatistic) <- c("Groupe", "Effectif", "Test", "p-value")
-    
+
     if(method == "Kolmogorov"){
       ## Kolmogorov-Smirnov normality test
       if(!is.null(group)){
@@ -498,24 +498,24 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
           dataStatistic[1, 4] <- "-"
         }
       }
-      
+
       if(is.null(group)){
         dataStatistic$Groupe <- NULL
       }
     }
   }
-  
+
   ## plot
   plot <- ggplot2::ggplot(data, ggplot2::aes(x = get(currentData))) +
     ggplot2::geom_histogram(alpha = 0.8, fill = "lightblue", color = "black", bins = 30) +
     ggplot2::xlab(attr(data[, variable], "var_label")) +
     ggplot2::ylab("Effectif") +
     ggplot2::theme_minimal()
-  
+
   if(!is.null(group)){
     plot <- plot + ggplot2::facet_grid(get(group) ~ .)
   }
-  
+
   if(p_value){
     table <- ggpubr::ggtexttable(dataStatistic, rows = NULL)
     paragraph <- ggpubr::ggparagraph(text = "H0 : la variable suit une loi normale.\nH1 : la variable ne suit pas une loi normale.\np-value < 0,05 : on rejette H0, la variable ne suit pas une loi normale", face = "italic", size = 11, color = "black")
@@ -538,7 +538,7 @@ getVarLabel_int <- Vectorize(function(data, variable){
   if(!is.data.frame(data)) {
     warning("data must be a data.frame.")
   }
-  
+
   varLabel <- attributes(data[, variable])$var_label
   if(is.null(varLabel)){
     varLabel <- variable
@@ -553,14 +553,14 @@ getVarLabel_int <- Vectorize(function(data, variable){
 #' @return a character vector of length one, containing the test name to perform
 #' @noRd
 getTest_numericComparaison_2groups <- function(data.as.list){
-  
+
   ## test's application condition
   allSampleSizeSup_30 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 30)
   if(!allSampleSizeSup_30){
     allSampleSizeSup_2 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 2)
   }
   allVar_notZero <- all(sapply(data.as.list, function(x) {sd(unlist(x), na.rm = TRUE)}) != 0)
-  
+
   ## test if all sample size >= 30
   if (allSampleSizeSup_30) {
     ## test if all sd <> 0
@@ -599,15 +599,15 @@ getTest_numericComparaison_2groups <- function(data.as.list){
 #' @return a character vector of length one, containing the test name to perform
 #' @noRd
 getTest_numericComparaison_moreThan2groups <- function(data.as.list){
-  
+
   ## test's application condition
   allSampleSizeSup_30 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 30)
   allSampleSizeSup_2 <- all(sapply(data.as.list, function(x) {sum(!is.na(x))}) >= 2)
-  
+
   ## test if all sample size >= 30
   if (allSampleSizeSup_30) {
     ## Homoscedasticity test
-    bartlett <- bartlett.test(sapply(data.as.list, function(x){ unlist(x)}))
+    bartlett <- bartlett.test(lapply(data.as.list, function(x){ unlist(x)}))
     if(bartlett$p.value < 0.05){
       hypothesisANOVA <- FALSE
     } else {
@@ -664,7 +664,7 @@ getTest_factorComparaison <- function(data, variable, group){
   if(!is.vector(group) || !is.character(group) || length(group) != 1 || !group %in% colnames(data)){
     stop("group must be a character vector as colname of some column in data")
   }
-  
+
   ftable <- ftable(data[, variable] ~ data[, group])
   if(length(levels(data[, variable])) > 1 & length(levels(data[, group])) > 1){
     if(all(rowSums(ftable) != 0) | all(colSums(ftable) != 0)){
