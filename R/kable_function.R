@@ -100,7 +100,7 @@ addKable <- function(data_frame, all_before = FALSE){
   ## add footer if some test
   if(length(listTest) >= 1){
     kable <- kable %>%
-      kableExtra::footnote(symbol_title = "Test: ",
+      kableExtra::footnote(symbol_title = "Tests: ",
                            symbol = names(footNote),
                            footnote_as_chunk = FALSE)
   }
@@ -108,8 +108,13 @@ addKable <- function(data_frame, all_before = FALSE){
   ## add footer if qualitative data
   if(containsQualitativeVariable){
     kable <- kable %>%
-      kableExtra::footnote(general_title = "Note: ",
-                           general = "Qualitative data are expressed as N (%)",
+      kableExtra::footnote(general_title = "Notes:\n",
+                           general = "N: sample size ; m.d.: missing data\nQualitative data are expressed as group size (%)",
+                           footnote_as_chunk = TRUE)
+  } else {
+    kable <- kable %>%
+      kableExtra::footnote(general_title = "Notes:\n",
+                           general = "N: sample size ; m.d.: missing data",
                            footnote_as_chunk = TRUE)
   }
 
