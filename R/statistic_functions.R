@@ -226,9 +226,12 @@ checkNormality <- function(data, variable = colnames(data), group = NULL, p_valu
 #' on dictionnary.
 #' @param data a data.frame containing qualitative variable witch need to be labelised.
 #' @param factorLevelsLabel a data.frame containing variable names / modality as digit / label of the modality.
-#' @param varIndex a numeric vector of length one, dontaining the index of the variable column.
+#' @param varIndex a numeric vector of length one, containing the index of the variable column.
 #' @param levelsIndex a numeric vector of length one, dontaining the index of the levels column.
-#' @param labelIndex a numeric vector of length one, dontaining the index of the labels column.
+#' @param levelsThreesholdCheck a numeric vector of length one, containing the disctinct
+#' number value threeshold to check to evaluate if all factor variable are listed in the
+#' factorLevelsLabel table
+#' @param labelIndex a numeric vector of length one, containing the index of the labels column.
 #' @return a data.frame with qualitative variable in the factorLevelsLabel convert as factor with clean label
 #' @importFrom plyr revalue
 #' @export
@@ -239,7 +242,7 @@ checkNormality <- function(data, variable = colnames(data), group = NULL, p_valu
 #'                          MODALITY = c(0, 1),
 #'                          LABEL = c("Male", "Female"))
 #' data <- setLabelToFactorLevels(data, labelTable)
-setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levelsIndex = 2, labelIndex = 3){
+setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levelsIndex = 2, labelIndex = 3, levelsThreesholdCheck = 5){
   if(!is.data.frame(data)){
     stop("data must be a data.frame")
   }
@@ -288,6 +291,16 @@ setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levels
     }
     return(currentColumn)
   })
+
+  ## check if some variable may be factor
+  lapply(seq_along(data), function(x){
+    if(!is.factor(data[, x])){
+      if(length(unique(data[, x])) <= levelsThreesholdCheck){
+        warning(paste0("Variable '", colnames(data[x]), "' is considered as numeric but may be a factor variable (", length(unique(data[, x])), ' distinct values).'), call. = FALSE)
+      }
+    }
+  })
+
   return(data)
 }
 
@@ -324,6 +337,12 @@ setLabelToVariable <- function (data, varLabel, varIndex = 1, labelIndex = 2){
   if(!is.data.frame(data)){
     stop("data must be a data.frame")
   }
+
+  # check if some variable in data are not in varLabel
+  lapply(colnames(data)[which(!colnames(data) %in% varLabel[, varIndex])], function(x){
+    warning(paste0("Variable '", x, "' is not in the table containing the variable's label."), call. = FALSE)
+  })
+
   listvarLabel <- as.character(varLabel[, varIndex])
   if(!all(listvarLabel %in% colnames(data))){
     diff <- setdiff(listvarLabel, colnames(data))

@@ -9,7 +9,8 @@ setLabelToFactorLevels(
   factorLevelsLabel,
   varIndex = 1,
   levelsIndex = 2,
-  labelIndex = 3
+  labelIndex = 3,
+  levelsThreesholdCheck = 5
 )
 }
 \arguments{
@@ -17,11 +18,15 @@ setLabelToFactorLevels(
 
 \item{factorLevelsLabel}{a data.frame containing variable names / modality as digit / label of the modality.}
 
-\item{varIndex}{a numeric vector of length one, dontaining the index of the variable column.}
+\item{varIndex}{a numeric vector of length one, containing the index of the variable column.}
 
 \item{levelsIndex}{a numeric vector of length one, dontaining the index of the levels column.}
 
-\item{labelIndex}{a numeric vector of length one, dontaining the index of the labels column.}
+\item{labelIndex}{a numeric vector of length one, containing the index of the labels column.}
+
+\item{levelsThreesholdCheck}{a numeric vector of length one, containing the disctinct
+number value threeshold to check to evaluate if all factor variable are listed in the
+factorLevelsLabel table}
 }
 \value{
 a data.frame with qualitative variable in the factorLevelsLabel convert as factor with clean label

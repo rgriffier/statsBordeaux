@@ -130,13 +130,13 @@ addKable <- function(data_frame, all_before = FALSE){
                                    extra_css = "border-bottom: 1px solid black; padding: 0px 10px 0px 10px;")
   }
 
-  kable <- gsub(pattern = '<tbody>',
-                x = kable,
-                replacement = '<tbody style="border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
-
-  kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
-                x = kable,
-                replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-top: 1px solid black;border-collapse: collapse;">')
+  # kable <- gsub(pattern = '<tbody>',
+  #               x = kable,
+  #               replacement = '<tbody style="border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
+  #
+  # kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
+  #               x = kable,
+  #               replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-top: 1px solid black;border-collapse: collapse;">')
 
   return(kable)
 }
@@ -184,8 +184,9 @@ addRegressionKable <- function(data_frame){
     kableExtra::column_spec(column = which(!colnames(table) %in% c("Variable")), extra_css = "text-align:right;") %>%
     kableExtra::row_spec(row = varIndexRow, bold = TRUE)
 
-  kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
-                x = kable,
-                replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
+  # kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
+  #               x = kable,
+  #               replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
+
   return(kable)
 }

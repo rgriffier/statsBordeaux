@@ -1,0 +1,40 @@
+body{
+  font-family: Calibri;
+  font-size: 11pt;
+}
+
+/** Change border color to black **/
+.table>thead>tr>th {
+  border-color: black;
+}
+
+
+/** Remove borders within the table body **/
+.table>tbody>tr>td {
+  border: none;
+}
+
+
+/** Add a top border to the table header row **/
+.table thead tr:first-child { 
+  border-top: 1px solid black;
+}
+
+
+/** Add a bottom border to the table body **/
+.table tbody tr:last-child {
+  border-bottom: 1px solid black;
+}
+
+
+/** Make the table header row a normal weight; not bold **/
+.table th{
+  font-weight: normal;
+}
+
+
+/** Make the caption italic and black **/
+.table caption{
+  font-style: italic;
+  color: black;
+}

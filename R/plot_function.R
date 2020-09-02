@@ -50,7 +50,7 @@ getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
   ylab <- attr(data[, variable], "var_label")
   ylab <- ifelse(!is.null(ylab), ylab, variable)
   ylab <- stringr::str_wrap(ylab, width = legend.width)
-  
+
   if(!is.null(group)){
 
     labs <- attr(data[, group], "var_label")
@@ -158,12 +158,12 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
   labs <- attr(data[, variable], "var_label")
   labs <- ifelse(!is.null(labs), labs, variable)
   labs <- stringr::str_wrap(labs, width = legend.width)
-  
+
   if(!is.null(group)){
     xlab <- attr(data[, group], "var_label")
     xlab <- ifelse(!is.null(xlab), xlab, group)
     xlab <- stringr::str_wrap(xlab, width = legend.width)
-    
+
     plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), group = get(group), na.rm = TRUE)) +
       ggplot2::geom_bar(ggplot2::aes(y = ..prop.., fill = factor(..x..)), stat="count", na.rm = TRUE) +
       ggplot2::geom_text(ggplot2::aes(label = scales::percent(..prop..), y = ..prop.. ),
@@ -183,13 +183,14 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
                      legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "blank"),
                      strip.text.x = ggplot2::element_text(face = "bold"))
   } else {
-    plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), group = 1, na.rm = TRUE)) +
-      ggplot2::geom_bar(ggplot2::aes(y = ..prop.., fill = factor(..x..)), stat = "count", na.rm = TRUE) +
-      ggplot2::geom_text(ggplot2::aes(label = scales::percent(..prop..), y = ..prop.. ),
+    plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), fill = get(variable), na.rm = TRUE)) +
+      ggplot2::geom_bar(ggplot2::aes(y = (..count..)/sum(..count..)), stat = "count", na.rm = TRUE) +
+      ggplot2::geom_text(ggplot2::aes(label = scales::percent((..count..)/sum(..count..)), y = (..count..)/sum(..count..)),
                          stat = "count", vjust = -.5, na.rm = TRUE) +
       ggplot2::theme_minimal() +
       ggplot2::ylab("Percent") +
-      ggplot2::scale_fill_discrete(labels = levels(dataPlot[, variable])) +
+      ggplot2::scale_fill_discrete(labels = levels(dataPlot[, variable]), drop = FALSE) +
+      ggplot2::scale_x_discrete(drop = FALSE) +
       ggplot2::labs(fill = labs) +
       ggplot2::theme(legend.position = legend.position,
                      legend.background = ggplot2::element_rect(fill = "gray90", size = 0.5, linetype = "blank"),

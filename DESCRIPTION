@@ -7,18 +7,18 @@ Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
 Description: Method to describe and analyse dataset and generate reporting.
 Imports:
 	devEMF,
-	dplyr,
 	flextable,
-	ggplot2,
-	kableExtra,
 	knitr,
 	magrittr,
 	officer,
 	pkgbuild,
 	processx,
+	kableExtra,
 	ggpubr,
-	plyr
+	plyr,
+	dplyr,
+	ggplot2
 License: MIT
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.0
+RoxygenNote: 7.1.1
