@@ -16,13 +16,16 @@ manageMultipleColumnVariableAndDictionnary <- function(data, labelVar, labelQL, 
 
 
 
-#' @title A conveinineg metho to check if some vector could be cast as numeric
+#' @title A conveininet method to check if some vector could be cast as numeric
 #' @description  A conveinineg metho to check if some vector could be cast as numeric
 #' @param vector a vector, which need to be cast as numeric
 #' @return a boolean vector of length 1.
 isCastableAsNumeric <- function(vector) {
   stopifnot(is.atomic(vector) || is.list(vector))
+  if(!class(vector) %in% c("numeric", "character", "integer", 'factor')){
+    return(FALSE)
+  }
   numNAs <- sum(is.na(vector))
-  numNAs_new <- suppressWarnings(sum(is.na(as.numeric(vector))))
+  numNAs_new <- suppressWarnings(sum(is.na(as.numeric(as.character(vector)))))
   return(numNAs_new == numNAs)
 }

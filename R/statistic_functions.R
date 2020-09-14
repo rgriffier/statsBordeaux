@@ -250,6 +250,89 @@ setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levels
     stop("factorLevelsLabel must be a data.frame")
   }
 
+  message("
+          @@                   @.                ,*
+          @@                   @@@@@@@.   @@     @#
+          @@                   @@    ,@    @@   #@
+          @@%%%@@/             @@@@@@@/     @@ &@(
+          @@    *@. @@@#  *@@  @@   /@@@@@@  %@@
+          @@     @(  *@@@@@@@. @@    @,  (@   @*
+          #@     @( &@     .@. @@    @&//,    @*                                                              .@@@@@@@@@@@(
+          .@.    @(  #@@@@@@@  @@    @&       @*                                                            @@*            @@(
+          @@,                *@&
+          .@#                    @%
+          @@                                                                                           .@/                     %@
+          @@             @,          @&            @#        @@      %@,                               ,@.                     (@
+          @@  ,**.       @@, /@,     @&            @#         #@.   @@                                 ,@,                    .@@
+          @@@,   .@@  /  @/   @#/@   @@((%@@       @#          .@&@@.                                   @@@@@@@@@@@@@@@@@@@@@# @@
+          @@       @@.@, @/  @@@@@@@*@&    @@    /%@(*@@&,  #@% *@                                       @&,#              .@ .@/
+          @@       @@.@, @/     /@   @&    *@ ,@%  @#  &@@@@@@@ *@                                #@@@@@@@@%                  @@
+          @@      @@. @%*@      /@   @&    *@ @@  /@# @&     #@ *@                             #@&         @@.               @%
+          @@.@@@@@.   @(.@      /@   @&    /@ .@@@.@( .(@@@@@@@ *@                           *@%            (@@@.          .@#
+                                                                                             @#              &@ %@%       ,@*
+                                                                                            @#              .@*  *@@    %@*
+                                                                        .%%#.                @@             @@@*    @@ @@(
+                                                                       @*  /@               /@%@@@@@@@@@@@(.,@*   @@@@@@@@
+                                                                        ,@,                  #@ .(   @*  &, #@       ##   @@@**,(@@&
+                                                                        %@,                   *@#           &@       .@ ,@(        .@@
+                                                                          &@*                   #@/         @%       .@ @/          /@.
+                                                                       @@/                        (@@/     @@        %* @           /@.
+                                                                        @@                            .*@@ *@@       @  @@@/      *@@@
+                                                                        @  @*                           ..*@.        @  ,@/*..*((( &@
+                                                                     #@@@@@@@@@.                           *&        (%  .@%      %@.
+                                                                     @@      .@,                            ,@       (%    @@   &@&
+                                                   &@@@@@@@@@@@@@@@@@&//////////////(&@@@@@@@@(              ,@     *&      /@ @@.
+                                                   @&                                          .(@@%         .@    .@       *#@@&.
+                                                   @@                                             @(         *&    #(        %#
+                                                   %@     .@@@                                    @*         &/    #(      /@
+                                                @@@@@    ,@  %@                      ,@# @@      &@          *&    ,@    %%
+                                                .@*#@    .@#,@(                       @# &@     /@@@@          &%   @,  %(
+                                                 @@,@.                                 @@@      @@ @@            &( .@  @.
+                                                 #@ @&*@&%@@                            .@@@@/ #@ /@,             @  #% @,
+                                                    @@ *@@@           @/    &@           @@@@( @&,@/              *@ ,@ %(
+                                                    /@                 (%@@@#                 %@.,               @@%@*@ @,
+                                                     @,                                       @&                @@*@@&*&*
+                                                      .&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@/                 @@ /@@@.@@
+                                                                      @(***%@                                .@@. @@@@@&@.
+                                                                      @#**&@@                               @@. /@# &*&/ &,
+                                                               .%%%&@@@@. *@@%%#.                        .@@,  @@   /&*&  %&.
+                                                             @@                  .@@%                   @@  *@@      @(&
+                                                          (@@(                      @@*%&&&&@@@@@@@@@@@@* @@%        .@.
+                                                      @@@# @%                        @&*,.          @%  @@           @*@
+                                                  /@@,   #@@.@@@@@@@@@@@@@&&%/**  &@*&@                             @..@
+                                               @@@  .%@@# @/&@  .@@@ *@@**. .&@ @&/@@,@/                           /& ##
+                                          .@(//@@@@#     *@ @&     %@@/   @@@   .@@ @&@@                           .@%#
+                                           /@@@@%@@,     *@ @@@@@@@@@@@@@@@@@@@@@@@@@( @*                          .@%  %*     &           (%
+                                              *@@@( #@@% *@                            @,                          /..@#    /(             @
+")
+  message("                                        &@&  *@@@@@@@@@@@@&/                  ,**#@@@@@@@@@@#/*.                   &,&  %,#%* .
+                                          ,&@@@@@@@@&*(@@/   @@@                                            .(@@@@@@@@(.     .*   /&,   / *#@(@(%@(%*
+                                   ,@@@@#.               *@@@@(  .#@@*                                                  ,%@@@@@&,&&@&(#&#
+                            /@@@@#,                        @@ &@%#@@@@@@     &@                                                  @@@@@/   #
+                     ,%@@@@*           /@.     @@      (@@, ,@@/@@  &@.#@.  @@@@.     *@@@.    .@@      /                         &    .%@@@,
+               ,@@@@%.                #@%@@@ /@*,@&   *@@@@/  %@@%  .@@@@   .#&/      @@@@#   @@.%@   *@@@@                                 .@@
+          .@@@,                       @@@@#    .@@@@.  #@@@@  @@*@* @@ %@   @@ @#    #@&@@/    */*    *@@@@
+                                        @@,@%  *@/ @@   @& @% (@.%@ %@ @@   *@ %@    &@ @@    &@(@.  @@@@@
+                                        .@,#@   @@ #@  .@* @@ .@,.@.*@.@&   ,@  @@   @@ @@   #@,@/  @@ (@
+                                        .@, @(&@@@@@@@%(//*...             .  *//(&@@@@@@@@@@@@@@*  @@.@(
+                                     *@@@@%*     @      %        .,(((((((((((,,...     /&     /.  ,&@@@@@(
+                                    #@,&/  ./#@@@@@@@@%*,.....                        ,*#%@@@@@@@&(,**   @@
+                                      @@@&.                                                          .%@@@
+                                       @&                                                              #@
+                                       .@#                                                            .@/
+                                        %@                                                            @#
+                                        ,@.  %@@&                                               /(, ,@#
+                                         @@ %@,(@   ,@@ #, *                              ..  .@. @&#@
+                                   .&@@@&&@@@/,                   @@@@@@@@@@@@       @@/(@% #(     &@@@@@@#,
+                                &@(             .,#@@@@@@@@@@@@@@@@@&&//*       .,,*(&@@@@@@@@@@(,          (@@
+                                @@                                                                          %@@
+                                   *&@@@@@@%(,                                                    ./@@@@@@#.
+                                                   ./(#&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&#(/,
+
+
+
+")
+
   ## case of duplicated in factorLevelsLabel
   factorLevelsLabel <- unique(factorLevelsLabel)
 
@@ -296,7 +379,7 @@ setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levels
   lapply(seq_along(data), function(x){
     if(!is.factor(data[, x])){
       if(length(unique(data[, x])) <= levelsThreesholdCheck){
-        warning(paste0("Variable '", colnames(data[x]), "' is considered as numeric but may be a factor variable (", length(unique(data[, x])), ' distinct values).'), call. = FALSE)
+        warning(paste0("Variable '", colnames(data[x]), "' is considered as ",  class(data[,x]), " but may be a factor variable (", length(unique(data[, x])), ' distinct values).'), call. = FALSE)
       }
     }
   })
@@ -443,13 +526,21 @@ manageNotApplicable <- function(data, notApplicableChar){
     stop("notApplicableChar must be a character vector of length 1")
   }
   ## get notApplicableChar math
-  resultNotApplicable <- lapply(data, function(currentColumn){currentColumn != notApplicableChar})
+  resultNotApplicable <- lapply(data, function(currentColumn){as.character(currentColumn) != notApplicableChar})
   resultNotApplicable <- lapply(resultNotApplicable, function(currentColumn){
     currentColumn[is.na(currentColumn)] <- TRUE
     return(currentColumn)
   })
+
   ## remove notApplicableChar math
-  data[data == notApplicableChar] <- NA
+  data[] <- lapply(data, function(currentColumn){
+    if(class(currentColumn) %in% c('integer', 'numeric', 'character')){
+      currentColumn[currentColumn == notApplicableChar] <- NA
+      return(currentColumn)
+    } else {
+      return(currentColumn)
+    }
+  })
   data[] <- lapply(data, function(currentColumn){
     if(is.factor(currentColumn)){
       return(as.factor(as.character(currentColumn)))
