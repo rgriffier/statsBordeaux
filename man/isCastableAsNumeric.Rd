@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{isCastableAsNumeric}
 \alias{isCastableAsNumeric}
-\title{A conveinineg metho to check if some vector could be cast as numeric}
+\title{A conveininet method to check if some vector could be cast as numeric}
 \usage{
 isCastableAsNumeric(vector)
 }

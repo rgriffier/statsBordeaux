@@ -6,19 +6,15 @@ Author: @R: person("Romain", "GRIFFIER", role=c("aut", "cre"), email="romain.gri
 Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
 Description: Method to describe and analyse dataset and generate reporting.
 Imports:
-	devEMF,
-	flextable,
-	knitr,
-	magrittr,
-	officer,
-	pkgbuild,
-	processx,
-	kableExtra,
-	ggpubr,
-	plyr,
+	devtools,
 	dplyr,
 	ggplot2,
+	knitr,
+	stringr,
 	binom,
+	ggpubr,
+	kableExtra,
+	plyr,
 	psych
 License: MIT
 Encoding: UTF-8

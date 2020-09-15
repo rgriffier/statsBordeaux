@@ -5,7 +5,7 @@
 #' @export
 #' @import dplyr
 #' @import knitr
-#' @import kableExtra
+#' @importFrom kableExtra footnote_marker_symbol kable kable_styling row_spec column_spec footnote add_header_above
 #' @examples
 #' data(mtcars)
 #' output <- createOutput()
@@ -153,7 +153,7 @@ addKable <- function(data_frame, all_before = FALSE){
 #' @export
 #' @import dplyr
 #' @import knitr
-#' @import kableExtra
+#' @importFrom kableExtra kable kable_styling row_spec column_spec
 addRegressionKable <- function(data_frame){
   if(!is.data.frame(data_frame) | nrow(data_frame) == 0){
     stop("data_frame must be a data.frame containing some data")

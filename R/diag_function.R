@@ -140,7 +140,7 @@ diag.perf <- function(data, goldStandard, indexTest, M_pos, T_pos, round = 3){
 #' @param diag.perf a list, result of diag.perf() function
 #' @return a kableExtra table
 #' @export
-#' @import kableExtra
+#' @importFrom kableExtra kable kable_styling column_spec
 #' @import dplyr
 #' @examples
 diag.perf.getContingencyTable <- function(diag.perf){
@@ -160,7 +160,7 @@ diag.perf.getContingencyTable <- function(diag.perf){
 #' @param diag.perf a list, result of diag.perf() function
 #' @return a kableExtra table
 #' @export
-#' @import kableExtra
+#' @importFrom kableExtra kable kable_styling
 #' @import dplyr
 #' @examples
 diag.perf.getPerformanceTable <- function(diag.perf){
@@ -239,7 +239,7 @@ diag.kappa <- function(data, test_1, test_2, round = 3){
 #' @param diag.kappa a list, result of diag.kappa() function
 #' @return a kableExtra table
 #' @export
-#' @import kableExtra
+#' @importFrom kableExtra kable kable_styling column_spec add_header_above add_indent
 #' @import dplyr
 #' @examples
 diag.kappa.getAgreeentMatrix <- function(diag.kappa){
@@ -275,7 +275,7 @@ diag.kappa.getAgreeentMatrix <- function(diag.kappa){
 #' @param diag.kappa a list, result of diag.kappa() function
 #' @return a kableExtra table
 #' @export
-#' @import kableExtra
+#' @importFrom kableExtra kable kable_styling column_spec
 #' @import dplyr
 #' @examples
 diag.kappa.getAgreeentPram <- function(diag.kappa){
