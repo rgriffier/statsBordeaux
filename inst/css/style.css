@@ -20,6 +20,10 @@ body{
   border-top: 1px solid black;
 }
 
+/** Add a bottom border to the table header row **/
+.table thead tr:last-child { 
+  border-bottom: 1px solid black;
+}
 
 /** Add a bottom border to the table body **/
 .table tbody tr:last-child {

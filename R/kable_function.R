@@ -91,7 +91,7 @@ addKable <- function(data_frame, all_before = FALSE){
     kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE,
                               bootstrap_options = c("hover", "condensed", "responsive")) %>%
     kableExtra::row_spec(row = 0, bold = TRUE, align = "center",
-                         extra_css = "border-bottom: 1px solid black; padding: 0px 10px 5px 10px;") %>%
+                         extra_css = "padding: 0px 10px 5px 10px;") %>%
     kableExtra::column_spec(column = which(!colnames(table) %in% c("Variable", "Description", "Test")),
                             extra_css = "text-align:right;") %>%
     kableExtra::row_spec(row = varRowsIndex, bold = TRUE) %>%
