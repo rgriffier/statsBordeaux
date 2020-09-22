@@ -120,8 +120,8 @@ describeMetadata <- function(data){
     metadataDescription <- data.frame(VAR = x,
                                       VAR_LABEL = varLabel,
                                       DATA_TYPE = class(data[, x]),
-                                      LEVELS_NB = ifelse(test = DATA_TYPE =='factor', yes = LEVELS_NB, no = NA),
-                                      LEVELS = ifelse(test = DATA_TYPE =='factor',
+                                      LEVELS_NB = ifelse(test = DATA_TYPE == 'factor', yes = LEVELS_NB, no = NA),
+                                      LEVELS = ifelse(test = DATA_TYPE == 'factor',
                                                       yes = LEVELS_CHAR,
                                                       no = NA),
                                       N_AVAILABLE = N_AVAILABLE,
@@ -150,7 +150,7 @@ describeMetadata <- function(data){
 #' pvalue_f
 setFormatToPvalue <- function(pvalue, round = 3){
   if(!is.vector(pvalue) | !is.numeric(pvalue)){
-    stop("pvalue must be a numeric vector")
+    stop("p-value must be a numeric vector")
   }
   if(!is.vector(round) | !is.numeric(round) | length(round) !=1){
     stop("round must be a integer vector of length 1")
@@ -162,7 +162,13 @@ setFormatToPvalue <- function(pvalue, round = 3){
     digits = round,
     na.form = "-"
   )
-  pv <- trimws(gsub('\\.', ',', pv))
+
+  if(!is.null(getOption('lang.value')) && getOption('lang.value') == 'FR'){
+    pv <- trimws(gsub('\\.', ',', pv))
+  } else {
+    pv <- trimws(pv)
+  }
+
   return(pv)
 }
 
@@ -185,7 +191,9 @@ setFormatToNumber <- function(num, round = 3){
     stop("round must be a integer vector of length 1")
   }
   num <- round(num, round)
-  num <- gsub('\\.', ',', num)
+  if(!is.null(getOption('lang.value')) && getOption('lang.value') == 'FR'){
+    num <- gsub('\\.', ',', num)
+  }
   return(num)
 }
 
@@ -249,89 +257,6 @@ setLabelToFactorLevels <- function(data, factorLevelsLabel, varIndex = 1, levels
   if(!is.data.frame(factorLevelsLabel)){
     stop("factorLevelsLabel must be a data.frame")
   }
-
-  message("
-          @@                   @.                ,*
-          @@                   @@@@@@@.   @@     @#
-          @@                   @@    ,@    @@   #@
-          @@%%%@@/             @@@@@@@/     @@ &@(
-          @@    *@. @@@#  *@@  @@   /@@@@@@  %@@
-          @@     @(  *@@@@@@@. @@    @,  (@   @*
-          #@     @( &@     .@. @@    @&//,    @*                                                              .@@@@@@@@@@@(
-          .@.    @(  #@@@@@@@  @@    @&       @*                                                            @@*            @@(
-          @@,                *@&
-          .@#                    @%
-          @@                                                                                           .@/                     %@
-          @@             @,          @&            @#        @@      %@,                               ,@.                     (@
-          @@  ,**.       @@, /@,     @&            @#         #@.   @@                                 ,@,                    .@@
-          @@@,   .@@  /  @/   @#/@   @@((%@@       @#          .@&@@.                                   @@@@@@@@@@@@@@@@@@@@@# @@
-          @@       @@.@, @/  @@@@@@@*@&    @@    /%@(*@@&,  #@% *@                                       @&,#              .@ .@/
-          @@       @@.@, @/     /@   @&    *@ ,@%  @#  &@@@@@@@ *@                                #@@@@@@@@%                  @@
-          @@      @@. @%*@      /@   @&    *@ @@  /@# @&     #@ *@                             #@&         @@.               @%
-          @@.@@@@@.   @(.@      /@   @&    /@ .@@@.@( .(@@@@@@@ *@                           *@%            (@@@.          .@#
-                                                                                             @#              &@ %@%       ,@*
-                                                                                            @#              .@*  *@@    %@*
-                                                                        .%%#.                @@             @@@*    @@ @@(
-                                                                       @*  /@               /@%@@@@@@@@@@@(.,@*   @@@@@@@@
-                                                                        ,@,                  #@ .(   @*  &, #@       ##   @@@**,(@@&
-                                                                        %@,                   *@#           &@       .@ ,@(        .@@
-                                                                          &@*                   #@/         @%       .@ @/          /@.
-                                                                       @@/                        (@@/     @@        %* @           /@.
-                                                                        @@                            .*@@ *@@       @  @@@/      *@@@
-                                                                        @  @*                           ..*@.        @  ,@/*..*((( &@
-                                                                     #@@@@@@@@@.                           *&        (%  .@%      %@.
-                                                                     @@      .@,                            ,@       (%    @@   &@&
-                                                   &@@@@@@@@@@@@@@@@@&//////////////(&@@@@@@@@(              ,@     *&      /@ @@.
-                                                   @&                                          .(@@%         .@    .@       *#@@&.
-                                                   @@                                             @(         *&    #(        %#
-                                                   %@     .@@@                                    @*         &/    #(      /@
-                                                @@@@@    ,@  %@                      ,@# @@      &@          *&    ,@    %%
-                                                .@*#@    .@#,@(                       @# &@     /@@@@          &%   @,  %(
-                                                 @@,@.                                 @@@      @@ @@            &( .@  @.
-                                                 #@ @&*@&%@@                            .@@@@/ #@ /@,             @  #% @,
-                                                    @@ *@@@           @/    &@           @@@@( @&,@/              *@ ,@ %(
-                                                    /@                 (%@@@#                 %@.,               @@%@*@ @,
-                                                     @,                                       @&                @@*@@&*&*
-                                                      .&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@/                 @@ /@@@.@@
-                                                                      @(***%@                                .@@. @@@@@&@.
-                                                                      @#**&@@                               @@. /@# &*&/ &,
-                                                               .%%%&@@@@. *@@%%#.                        .@@,  @@   /&*&  %&.
-                                                             @@                  .@@%                   @@  *@@      @(&
-                                                          (@@(                      @@*%&&&&@@@@@@@@@@@@* @@%        .@.
-                                                      @@@# @%                        @&*,.          @%  @@           @*@
-                                                  /@@,   #@@.@@@@@@@@@@@@@&&%/**  &@*&@                             @..@
-                                               @@@  .%@@# @/&@  .@@@ *@@**. .&@ @&/@@,@/                           /& ##
-                                          .@(//@@@@#     *@ @&     %@@/   @@@   .@@ @&@@                           .@%#
-                                           /@@@@%@@,     *@ @@@@@@@@@@@@@@@@@@@@@@@@@( @*                          .@%  %*     &           (%
-                                              *@@@( #@@% *@                            @,                          /..@#    /(             @
-")
-  message("                                        &@&  *@@@@@@@@@@@@&/                  ,**#@@@@@@@@@@#/*.                   &,&  %,#%* .
-                                          ,&@@@@@@@@&*(@@/   @@@                                            .(@@@@@@@@(.     .*   /&,   / *#@(@(%@(%*
-                                   ,@@@@#.               *@@@@(  .#@@*                                                  ,%@@@@@&,&&@&(#&#
-                            /@@@@#,                        @@ &@%#@@@@@@     &@                                                  @@@@@/   #
-                     ,%@@@@*           /@.     @@      (@@, ,@@/@@  &@.#@.  @@@@.     *@@@.    .@@      /                         &    .%@@@,
-               ,@@@@%.                #@%@@@ /@*,@&   *@@@@/  %@@%  .@@@@   .#&/      @@@@#   @@.%@   *@@@@                                 .@@
-          .@@@,                       @@@@#    .@@@@.  #@@@@  @@*@* @@ %@   @@ @#    #@&@@/    */*    *@@@@
-                                        @@,@%  *@/ @@   @& @% (@.%@ %@ @@   *@ %@    &@ @@    &@(@.  @@@@@
-                                        .@,#@   @@ #@  .@* @@ .@,.@.*@.@&   ,@  @@   @@ @@   #@,@/  @@ (@
-                                        .@, @(&@@@@@@@%(//*...             .  *//(&@@@@@@@@@@@@@@*  @@.@(
-                                     *@@@@%*     @      %        .,(((((((((((,,...     /&     /.  ,&@@@@@(
-                                    #@,&/  ./#@@@@@@@@%*,.....                        ,*#%@@@@@@@&(,**   @@
-                                      @@@&.                                                          .%@@@
-                                       @&                                                              #@
-                                       .@#                                                            .@/
-                                        %@                                                            @#
-                                        ,@.  %@@&                                               /(, ,@#
-                                         @@ %@,(@   ,@@ #, *                              ..  .@. @&#@
-                                   .&@@@&&@@@/,                   @@@@@@@@@@@@       @@/(@% #(     &@@@@@@#,
-                                &@(             .,#@@@@@@@@@@@@@@@@@&&//*       .,,*(&@@@@@@@@@@(,          (@@
-                                @@                                                                          %@@
-                                   *&@@@@@@%(,                                                    ./@@@@@@#.
-                                                   ./(#&@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&#(/,
-
-
-
-")
 
   ## case of duplicated in factorLevelsLabel
   factorLevelsLabel <- unique(factorLevelsLabel)
@@ -688,7 +613,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
   ## set NA as m.d. in group and use it as factor level
   if(NA_group_AsModality){
     data[, group] <- addNA(data[, group])
-    levels(data[, group])[is.na(levels(data[, group]))] <- "m.d."
+    levels(data[, group])[is.na(levels(data[, group]))] <- getMissingData_text(getOption('lang.value'))
   }
 
   # DESCRIPTION PART ------------------------------------------------------ ####
@@ -740,7 +665,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            ## t-test for inequal variances
            `t-test for inequal variances` = {
              test <- t.test(data[, variable] ~ data[, group], var.equal = FALSE)
-             internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
+             internalOutput <- cbind(internalOutput, data.frame(test = c(getInequalVarianceStudent_text(getOption('lang.value')), rep(NA, nrow(internalOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
@@ -749,7 +674,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            ## t-test for equal variances
            `t-test for equal variances` = {
              test <- t.test(data[, variable] ~ data[, group], var.equal = TRUE)
-             internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
+             internalOutput <- cbind(internalOutput, data.frame(test = c(getEqualVarianceStudent_text(getOption('lang.value')), rep(NA, nrow(internalOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
@@ -758,7 +683,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            ## Wilcoxon test
            `Wilcoxon test` = {
              test <- wilcox.test(data[, variable] ~ data[, group], correct = TRUE)
-             internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
+             internalOutput <- cbind(internalOutput, data.frame(test = c(getWilcoxon_text(getOption('lang.value')), rep(NA, nrow(internalOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
@@ -767,7 +692,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            ## Analysis of variance
            `Analysis of variance` = {
              test <- aov(data[, variable] ~ data[, group])
-             internalOutput <- cbind(internalOutput, data.frame(test = c("Analysis of variance", rep(NA, nrow(internalOutput)-1)),
+             internalOutput <- cbind(internalOutput, data.frame(test = c(getAnova_text(getOption('lang.value')), rep(NA, nrow(internalOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(summary(test)[[1]][1, 'Pr(>F)'], round),
                                                                             rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
@@ -776,7 +701,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
            ## Kruskal-Wallis test
            `Kruskal-Wallis test` = {
              test <- kruskal.test(data[, variable] ~ data[, group])
-             internalOutput <- cbind(internalOutput, data.frame(test = c(test$method, rep(NA, nrow(internalOutput)-1)),
+             internalOutput <- cbind(internalOutput, data.frame(test = c(getKruskal_text(getOption('lang.value')), rep(NA, nrow(internalOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internalOutput)-1))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
@@ -784,7 +709,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
 
            ## No test
            {
-             internalOutput <- cbind(internalOutput, data.frame(test = c(rep(test_to_use, nrow(internalOutput))),
+             internalOutput <- cbind(internalOutput, data.frame(test = c(test_to_use, rep(NA, nrow(internalOutput)-1)),
                                                                 p_value = c(rep(NA, nrow(internalOutput)))))
              colnames(internalOutput)[(ncol(internalOutput)-1):(ncol(internalOutput))] <- c("Test", "p-value")
            })
@@ -923,13 +848,13 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
   ## set NA as m.d. in variable and use it as factor level
   if(NA_asModality){
     data[, variable] <- addNA(data[, variable])
-    levels(data[, variable])[is.na(levels(data[, variable]))] <- "m.d."
+    levels(data[, variable])[is.na(levels(data[, variable]))] <- getMissingData_text(getOption('lang.value')) #"m.d."
   }
 
   ## set NA as m.d. in group and use it as factor level
   if(NA_group_AsModality){
     data[, group] <- addNA(data[, group])
-    levels(data[, group])[is.na(levels(data[, group]))] <- "m.d."
+    levels(data[, group])[is.na(levels(data[, group]))] <- getMissingData_text(getOption('lang.value')) #"m.d."
   }
 
   # DESCRIPTION PART ------------------------------------------------------ ####
@@ -976,7 +901,7 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
            ## Pearson's Chi-squared test
            `Pearson's Chi-squared test` = {
              test <- chisq.test(x = data[, variable], y = data[, group], correct = FALSE)
-             internatOutput <- cbind(internatOutput, data.frame(test = c(test$method, rep(NA, nrow(internatOutput)-1)),
+             internatOutput <- cbind(internatOutput, data.frame(test = c(getChiSquared_text(getOption('lang.value')), rep(NA, nrow(internatOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internatOutput)-1))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
@@ -985,7 +910,7 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
            ## Pearson's Chi-squared test with Yates' continuity correction
            `Pearson's Chi-squared test with Yates' continuity correction` = {
              test <- suppressWarnings(chisq.test(x = data[, variable], y = data[, group], correct = TRUE))
-             internatOutput <- cbind(internatOutput, data.frame(test = c(test$method, rep(NA, nrow(internatOutput)-1)),
+             internatOutput <- cbind(internatOutput, data.frame(test = c(getChiSquaredYates_text(getOption('lang.value')), rep(NA, nrow(internatOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internatOutput)-1))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
@@ -998,7 +923,7 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
              }, error = function(e) {
                fisher.test(x = data[, variable], y = data[, group], simulate.p.value = TRUE)
              })
-             internatOutput <- cbind(internatOutput, data.frame(test = c(test$method, rep(NA, nrow(internatOutput)-1)),
+             internatOutput <- cbind(internatOutput, data.frame(test = c(getFisher_text(getOption('lang.value')), rep(NA, nrow(internatOutput)-1)),
                                                                 p_value = c(setFormatToPvalue(test$p.value, round),
                                                                             rep(NA, nrow(internatOutput)-1))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
@@ -1006,7 +931,7 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
 
            ## No test
            {
-             internatOutput <- cbind(internatOutput, data.frame(test = c(rep(test_to_use, nrow(internatOutput))),
+             internatOutput <- cbind(internatOutput, data.frame(test = c(test_to_use, rep(NA, nrow(internatOutput)-1)),
                                                                 p_value = c(rep(NA, nrow(internatOutput)))))
              colnames(internatOutput)[(ncol(internatOutput)-1):(ncol(internatOutput))] <- c("Test", "p-value")
            })

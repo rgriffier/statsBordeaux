@@ -40,7 +40,7 @@ addKable <- function(data_frame, all_before = FALSE){
 
   # replace Variable by concat of Variable and Modality
   varRowsIndex <- which(!is.na(data_frame$Variable))
-  data_frame$Modality <- ifelse(test = !is.na(data_frame$Modality) &  data_frame$Modality == "All modalities",
+  data_frame$Modality <- ifelse(test = !is.na(data_frame$Modality) & data_frame$Modality %in% getAllModailties_text(getOption('lang.value')),
                                 yes = paste0(data_frame$Description),
                                 no = data_frame$Modality)
   data_frame$Variable <- ifelse(test = is.na(data_frame$Modality),
@@ -59,7 +59,7 @@ addKable <- function(data_frame, all_before = FALSE){
   }
 
   ## footer management
-  listTest <- unique(table$Test[!is.na(table$Test) & !table$Test %in% c("", "Sample size not large enough to perform test")])
+  listTest <- unique(table$Test[!is.na(table$Test) & !table$Test %in% c("", getSmallSample_text(getOption('lang.value')), getVariabililtyNeeded_text(getOption('lang.value')))])
   if(length(listTest) >= 1){
     footNote <- kableExtra::footnote_marker_symbol(1:length(listTest))
     names(footNote) <- listTest
@@ -91,7 +91,7 @@ addKable <- function(data_frame, all_before = FALSE){
     kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE,
                               bootstrap_options = c("hover", "condensed", "responsive")) %>%
     kableExtra::row_spec(row = 0, bold = TRUE, align = "center",
-                         extra_css = "border-bottom: 2px solid black; padding: 0px 10px 5px 10px;") %>%
+                         extra_css = "border-bottom: 1px solid black; padding: 0px 10px 5px 10px;") %>%
     kableExtra::column_spec(column = which(!colnames(table) %in% c("Variable", "Description", "Test")),
                             extra_css = "text-align:right;") %>%
     kableExtra::row_spec(row = varRowsIndex, bold = TRUE) %>%
@@ -100,7 +100,7 @@ addKable <- function(data_frame, all_before = FALSE){
   ## add footer if some test
   if(length(listTest) >= 1){
     kable <- kable %>%
-      kableExtra::footnote(symbol_title = "Tests: ",
+      kableExtra::footnote(symbol_title = paste0(getTest_text(getOption('lang.value')), "\n"),
                            symbol = names(footNote),
                            footnote_as_chunk = FALSE)
   }
@@ -108,13 +108,17 @@ addKable <- function(data_frame, all_before = FALSE){
   ## add footer if qualitative data
   if(containsQualitativeVariable){
     kable <- kable %>%
-      kableExtra::footnote(general_title = "Notes:\n",
-                           general = "N: sample size ; m.d.: missing data\nQualitative data are expressed as group size (%)",
+      kableExtra::footnote(general_title = paste0(getNote_text(getOption('lang.value')), "\n"),
+                           general = paste0(
+                             getSampleSizeNote_text(getOption('lang.value')), ' ; ',
+                             getMissingDataNote_text(getOption('lang.value')), ' ; ',
+                             getQualitativeDataNote_text(getOption('lang.value'))),
                            footnote_as_chunk = TRUE)
   } else {
     kable <- kable %>%
-      kableExtra::footnote(general_title = "Notes:\n",
-                           general = "N: sample size ; m.d.: missing data",
+      kableExtra::footnote(general_title = paste0(getNote_text(getOption('lang.value')), "\n"),
+                           general = paste0(getSampleSizeNote_text(getOption('lang.value')), ' ; ',
+                                            getMissingDataNote_text(getOption('lang.value'))),
                            footnote_as_chunk = TRUE)
   }
 

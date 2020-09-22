@@ -6,6 +6,7 @@ Author: @R: person("Romain", "GRIFFIER", role=c("aut", "cre"), email="romain.gri
 Maintainer: Romain GRIFFIER <romain.griffier@chu-bordeaux.fr>
 Description: Method to describe and analyse dataset and generate reporting.
 Imports:
+	processx,
 	devtools,
 	dplyr,
 	ggplot2,

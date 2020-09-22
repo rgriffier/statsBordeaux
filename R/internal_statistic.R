@@ -152,19 +152,19 @@ statQT <- function(data, variable, round = 3, confint = FALSE, desc = c("Mean", 
   currentRow <- nrow(output) + 1
 
   ## sample size
-  output[currentRow, 3] <- 'N (m.d.)'
+  output[currentRow, 3] <- getSampleSizeMissingData_text(getOption('lang.value')) #N (m.d.)
   output[currentRow, 4] <- paste0(sum(!is.na(data[variable])), ' (', sum(is.na(data[variable])), ')')
   currentRow <- nrow(output) + 1
 
   ## mean and sd
   if('Mean' %in% desc) {
-    output[currentRow, 3] <- 'Mean (SD)'
+    output[currentRow, 3] <- getMeanStdv_text(getOption('lang.value')) #'Mean (SD)'
     output[currentRow, 4] <- paste0(mean, ' (', sd, ')')
     currentRow <- nrow(output) + 1
 
     ## confint
     if(confint == TRUE) {
-      output[currentRow, 3] <- 'IC95% [Mean]'
+      output[currentRow, 3] <- getConfintMean_text(getOption('lang.value')) #'IC95% [Mean]'
       if(!is.na(sd(data[, variable], na.rm = TRUE)) & sd(data[, variable], na.rm = TRUE) != 0) {
         confint_mean <- setFormatToNumber(t.test(data[, variable])$conf.int, round)
         output[currentRow, 4] <- paste0('[', confint_mean[1], ' ; ', confint_mean[2], ']')
@@ -177,21 +177,21 @@ statQT <- function(data, variable, round = 3, confint = FALSE, desc = c("Mean", 
 
   ## median and IQR
   if('Median' %in% desc){
-    output[currentRow, 3] <- 'Median [Q1 ; Q3]'
+    output[currentRow, 3] <- getMedianIRQ_text(getOption('lang.value')) #'Median [Q1 ; Q3]'
     output[currentRow, 4] <- paste0(median, ' [', quart1st, ' ; ', quart3th, ']')
     currentRow <- nrow(output) + 1
   }
 
   ## range
   if('Range' %in% desc){
-    output[currentRow, 3] <- 'Min ; Max'
+    output[currentRow, 3] <- getRange_text(getOption('lang.value')) #'Min ; Max'
     output[currentRow, 4] <- paste0(min, ' ; ', max)
     currentRow <- nrow(output) + 1
   }
 
   ## mode
   if('Mode' %in% desc & !any(grepl('\\.', as.character(data[, variable])))){
-    output[currentRow, 3] <- 'Mode'
+    output[currentRow, 3] <- getMode_text(getOption('lang.value')) #'Mode'
     output[currentRow, 4] <- setFormatToNumber(getMode(data[, variable]), round)
     currentRow <- nrow(output) + 1
   }
@@ -248,31 +248,31 @@ statQL <- function(data, variable, round = 3, NA_asModality = FALSE) {
       output[i, 1] <- getVarLabel(data[variable])
       # if NA_asModality == FALSE, missing data in header
       if(NA_asModality){
-        output[i + 1, 2] <- 'All modalities'
-        output[i + 1, 3] <- 'N (m.d.)'
+        output[i + 1, 2] <- getAllModailties_text(getOption('lang.value')) #'All modalities'
+        output[i + 1, 3] <- getSampleSizeMissingData_text(getOption('lang.value')) #'N (m.d.)'
         output[i + 1, 4] <- paste0(sum(sizeWithoutNA), ' (', sum(size) - sum(sizeWithoutNA), ')')
       } else {
-        output[i + 1, 2] <- 'All modalities'
-        output[i + 1, 3] <- 'N (m.d. ; %)'
+        output[i + 1, 2] <- getAllModailties_text(getOption('lang.value')) #'All modalities'
+        output[i + 1, 3] <- getSampleSizeMissingDataPercent_text(getOption('lang.value')) #'N (m.d. ; %)'
         output[i + 1, 4] <- paste0(sum(sizeWithoutNA), ' (', sum(size) - sum(sizeWithoutNA), ' ; ', percent[length(size)], ')')
       }
     }
     ## NA_asModality == TRUE and NA current modality
     if(is.na(names(size[i])) & NA_asModality == TRUE){
-      output[i + 2, 2] <- 'm.d.'
-      output[i + 2, 3] <- 'N (%)'
+      output[i + 2, 2] <- getMissingData_text(getOption('lang.value')) #'m.d.'
+      output[i + 2, 3] <- getModailtySizePercent_text(getOption('lang.value')) #'N (%)'
       output[i + 2, 4] <- paste0(size[i], ' (', percent[i], ')')
     }
     ## NA_asModality == TRUE and current modality not NA
     else if(!is.na(names(size[i])) & NA_asModality == TRUE){
       output[i + 2, 2] <- names(size[i])
-      output[i + 2, 3] <- 'N (%)'
+      output[i + 2, 3] <- getModailtySizePercent_text(getOption('lang.value')) #'N (%)'
       output[i + 2, 4] <- paste0(size[i], ' (', percent[i], ')')
     }
     ## NA_asModality == FALSE
     else if(!is.na(names(size[i])) & NA_asModality == FALSE){
       output[i + 2, 2] <- names(size[i])
-      output[i + 2, 3] <- 'N (%)'
+      output[i + 2, 3] <- getModailtySizePercent_text(getOption('lang.value')) #'N (%)'
       output[i + 2, 4] <- paste0(size[i], ' (', percentWithoutNA[i], ')')
     }
   }
@@ -573,7 +573,7 @@ getTest_numericComparaison_2groups <- function(data.as.list){
         return("t-test for equal variances")
       }
     } else {
-      return("Variability needed to perform test")
+      return(getVariabililtyNeeded_text(getOption('lang.value')))
     }
   }
   ## test if all sample size >=2
@@ -582,12 +582,12 @@ getTest_numericComparaison_2groups <- function(data.as.list){
     if (allVar_notZero) {
       return("Wilcoxon test")
     } else {
-      return("Variability needed to perform test")
+      return(getVariabililtyNeeded_text(getOption('lang.value')))
     }
   }
   # test not possible
   else {
-    return("Sample size not large enough to perform test")
+    return(getSmallSample_text(getOption('lang.value')))
   }
 }
 
@@ -624,7 +624,7 @@ getTest_numericComparaison_moreThan2groups <- function(data.as.list){
     if (allSampleSizeSup_2) {
       return("Kruskal-Wallis test")
     } else {
-      return("Sample size not large enough to perform test")
+      return(getSmallSample_text(getOption('lang.value')))
     }
   }
 }
@@ -684,6 +684,6 @@ getTest_factorComparaison <- function(data, variable, group){
       return("Fisher's Exact Test for Count Data")
     }
   } else {
-    return("Not enought modality to perform test")
+    return(getNotEnought_text(getOption('lang.value')))
   }
 }
