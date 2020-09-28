@@ -1,23 +1,28 @@
 #' @title A convenient method to add kable into a RMarkdown document
 #' @description  A convenient method to add kable into a RMarkdown document
 #' @param data_frame a data.frame, containing the data to add
+#' @param var.width a numeric vector of length one, containing the witdh of the variable column
 #' @return a knitr::kable
 #' @export
 #' @import dplyr
 #' @import knitr
 #' @importFrom kableExtra footnote_marker_symbol kable kable_styling row_spec column_spec footnote add_header_above
+#' @importFrom stringr str_wrap
 #' @examples
 #' data(mtcars)
 #' output <- createOutput()
 #' output <- statsQT(output, mtcars, "mpg")
 #' addKable(output)
-addKable <- function(data_frame, all_before = FALSE){
+addKable <- function(data_frame, all_before = FALSE, var.width = 50){
 
   if(!is.data.frame(data_frame) | nrow(data_frame) == 0){
     stop("data_frame must be a data.frame containing some data")
   }
   if(!is.vector(all_before) | !is.logical(all_before) | length(all_before) != 1){
     stop("all_before must be a boolean vector of length one")
+  }
+  if(!is.vector(var.width) | !is.numeric(var.width) | length(var.width) != 1){
+    stop("var.width must be a numeric vector of length one")
   }
 
   ## knitr option
@@ -40,6 +45,8 @@ addKable <- function(data_frame, all_before = FALSE){
 
   # replace Variable by concat of Variable and Modality
   varRowsIndex <- which(!is.na(data_frame$Variable))
+  data_frame$Variable <- stringr::str_replace_all(string = stringr::str_wrap(data_frame$Variable, width = var.width), pattern = '\n', replacement = '<br>')
+  data_frame$Modality <- stringr::str_replace_all(string = stringr::str_wrap(data_frame$Modality, width = var.width), pattern = '\n', replacement = '<br>')
   data_frame$Modality <- ifelse(test = !is.na(data_frame$Modality) & data_frame$Modality %in% getAllModailties_text(getOption('lang.value')),
                                 yes = paste0(data_frame$Description),
                                 no = data_frame$Modality)

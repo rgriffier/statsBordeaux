@@ -335,8 +335,7 @@ for(i in 1:ncol(labelledData)){
 head(statsComparatives, n = 5)
 ```
 
-## Reporting
-### Reporting avec `rmarkdown`
+## Reporting avec `rmarkdown`
 
 Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `statsBordeaux::addKable()`. Cette dernière génère un __tableau HTML__.   
 La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `statsBordeaux::addKable()`.
@@ -344,58 +343,7 @@ La gestion des titre et des numéro de tableau se fait au niveau du document et 
 La génération de .pdf en LaTeX n'est actuellement pas prise en charge.
 
 ```{r}
-statsBordeaux::addKable(data_frame = description)
-```
-
-### Reporting avec `officier`
-
-Le reporting utilise le package `officier`.  
-Le reporting se base sur un template (document Word). Ce dernier peut contenir une page de garde et des styles. Ce sont les styles qui sont utilisées dans les différentes fonctions ci-dessous pour gérer la mise en page.  
-Les styles sont disponibles via la fonction `styles_info(doc)` dans la colonne `style_name` et dépendent du template utilisé.
-
-```{r, eval = FALSE}
-## chargement du package officier
-library(officer)
-
-## création d'un document vierge
-doc <- officer::read_docx()
-
-## ajout d'une table des matières puis d'un saut de page
-doc <- statsBordeaux::addTableOfContent(doc, title = "Table des matières", style = "Normal", level = 3)
-doc <- statsBordeaux::addBreak(doc)
-
-## ajout d'un titre et d'un sous-titre
-doc <- statsBordeaux::addTextElement(doc, title = "Statistiques descriptives", style = "heading 1")
-doc <- statsBordeaux::addTextElement(doc, title = "Statistiques descriptives du dataset mtcars ", style = "heading 2")
-## ajout d'un tableau de sortie puis d'un saut de page
-doc <- statsBordeaux::addTable(doc, table = description, title = "Description du dataset mtcars",
-                               displayTestName = FALSE, modalitySize = 2, valueSize = 1.5)
-doc <- statsBordeaux::addBreak(doc)
-
-## ajout sous-titre puis d'un tableau de sortie
-doc <- statsBordeaux::addTextElement(doc, title = "Statistiques descriptives du dataset mtcars en fonction de engine",
-                                     style = "heading 2")
-doc <- statsBordeaux::addTable(doc, table = comparaison, title = "Description du dataset mtcars en fonction de engine",
-                               displayTestName = FALSE, modalitySize = 2, valueSize = 1.5)
-## section en cours au format paysage
-doc <- statsBordeaux::setLandscape(doc, add_break = TRUE)
-
-## ajout titre puis d'un sous-titre puis d'un tableau de sortie (le tout au format paysage)
-doc <- statsBordeaux::addTextElement(doc, title = "Statistiques comparatives", style = "heading 1")
-doc <- statsBordeaux::addTextElement(doc, title = "Statistiques comparatives du dataset mtcars en fonction de engine",
-                                     style = "heading 2")
-doc <- statsBordeaux::addTable(doc, table = statsComparatives,
-                               title = "Comparaison du dataset mtcars en fonction de engine",
-                               displayTestName = TRUE, modalitySize = 2, valueSize = 1.5)
-doc <- statsBordeaux::setLandscape(doc, add_break = FALSE)
-
-## ajout d'une table des tableaux
-doc <- statsBordeaux::addTableOfTables(doc, title = "Table des tableaux", style = "Normal")
-## ajout d'une table des graphiques
-doc <- statsBordeaux::addTableOfGraphics(doc, title = "Table des graphiques", style = "Normal")
-
-## on sauvegarde le document dans le workspace
-print(doc, target = 'stat.docx')
+statsBordeaux::addKable(description)
 ```
 
 ## Fonctions avancées
@@ -470,32 +418,8 @@ labelledData <- statsBordeaux::setLabelToVariable(data = labelledData, varLabel 
 
 ##----------------
 
-## création du tableau de sortie vierge
-descriptionNonAvailable <-  statsBordeaux::createOutput()
-
-## boucle qui va traiter chaque colonne du data.frame les unes après les autres
-for(i in 1:ncol(labelledData)){
-  # cas où la colonne en cours est de type quantitative
-  if(is.numeric(labelledData[, i])){
-    descriptionNonAvailable <- statsBordeaux::statsQT(output = descriptionNonAvailable,
-                                                      data = statsBordeaux::subset_withAttributes(
-                                                        labelledData,
-                                                        applicable[[colnames(labelledData)[i]]]),
-                                                      variable = colnames(labelledData)[i])
-  }
-  # cas où la colonne en cours est de type qualitative
-  else if(is.factor(labelledData[, i])){
-    descriptionNonAvailable <- statsBordeaux::statsQL(output = descriptionNonAvailable,
-                                                      data = statsBordeaux::subset_withAttributes(
-                                                        labelledData,
-                                                        applicable[[colnames(labelledData)[i]]]),
-                                                      variable = colnames(labelledData)[i])
-  }
-  # autre cas non pris en charge
-  else {
-    print(paste0("Variable '", colnames(labelledData[i]), "' non décrite (", class(labelledData[, i]), ")"))
-  }
-}
+descriptionNonAvailable <- statsBordeaux::describeDataFrame(data = labelledData,
+                                                            applicable = applicable)
 
 descriptionNonAvailable[c(40:44, 55:57), ]
 ```

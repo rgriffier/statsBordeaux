@@ -4,10 +4,12 @@
 \alias{addKable}
 \title{A convenient method to add kable into a RMarkdown document}
 \usage{
-addKable(data_frame, all_before = FALSE)
+addKable(data_frame, all_before = FALSE, var.width = 50)
 }
 \arguments{
 \item{data_frame}{a data.frame, containing the data to add}
+
+\item{var.width}{a numeric vector of length one, containing the witdh of the variable column}
 }
 \value{
 a knitr::kable
