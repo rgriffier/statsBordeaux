@@ -15,7 +15,7 @@
 #' data(mtcars)
 #' mtcars$am <- as.factor(mtcars$am)
 #' getBoxPlot(data = mtcars, variable = "mpg", group = "am")
-getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", legend.width = 50){
+getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", legend.width = 30){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -109,7 +109,7 @@ getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' mtcars$am <- as.factor(mtcars$am)
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' getBarPlot(data = mtcars, variable = "vs", group = "am")
-getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", legend.width = 50, na.rm = TRUE){
+getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position = "right", legend.width = 30, na.rm = TRUE){
 
   if(!is.data.frame(data)){
     stop("data must be a data.frame.")
@@ -155,14 +155,26 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
     dataPlot[, variable] <- as.factor(as.character(dataPlot[, variable]))
   }
 
+  # format big label
   labs <- attr(data[, variable], "var_label")
   labs <- ifelse(!is.null(labs), labs, variable)
   labs <- stringr::str_wrap(labs, width = legend.width)
 
+  # format big modality
+  attr <- attr(dataPlot[, variable], "var_label")
+  dataPlot[variable] <- as.factor(stringr::str_wrap(as.character(dataPlot[,variable]), width = legend.width))
+  attr(dataPlot[, variable], "var_label") <- attr
+
   if(!is.null(group)){
+    # format big label
     xlab <- attr(data[, group], "var_label")
     xlab <- ifelse(!is.null(xlab), xlab, group)
     xlab <- stringr::str_wrap(xlab, width = legend.width)
+
+    # format big modality
+    attr <- attr(dataPlot[, group], "var_label")
+    dataPlot[group] <- as.factor(stringr::str_wrap(as.character(dataPlot[,group]), width = legend.width))
+    attr(dataPlot[, group], "var_label") <- attr
 
     plot <- ggplot2::ggplot(data = dataPlot, ggplot2::aes(x = get(variable), group = get(group), na.rm = TRUE)) +
       ggplot2::geom_bar(ggplot2::aes(y = ..prop.., fill = factor(..x..)), stat="count", na.rm = TRUE) +
@@ -221,8 +233,7 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' mtcars$am <- as.factor(mtcars$am)
 #' mtcars$vs <- as.factor(mtcars$vs)
 #' mtcars %>% getGraphicalDescription(group = "am")
-getGraphicalDescription <- function(data, variable = colnames(data), group = NULL,
-                                    legend.position = "right", legend.width = 50, na.rm = TRUE){
+getGraphicalDescription <- function(data, variable = colnames(data), group = NULL, legend.position = "right", legend.width = 30, na.rm = TRUE){
   listPlot <- lapply(variable, function(currentVar){
     if(is.numeric(data[, currentVar])){
       plot <- getBoxPlot(data = data,

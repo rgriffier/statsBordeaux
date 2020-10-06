@@ -9,7 +9,7 @@ getGraphicalDescription(
   variable = colnames(data),
   group = NULL,
   legend.position = "right",
-  legend.width = 50,
+  legend.width = 30,
   na.rm = TRUE
 )
 }

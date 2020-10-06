@@ -9,7 +9,7 @@ getBoxPlot(
   variable,
   group = NULL,
   legend.position = "right",
-  legend.width = 50
+  legend.width = 30
 )
 }
 \arguments{
