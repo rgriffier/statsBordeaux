@@ -47,15 +47,22 @@ getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
     stop("legend.position must be in 'right', 'left', 'top', 'bottom' or 'none'.")
   }
 
+  # format big label
   ylab <- attr(data[, variable], "var_label")
   ylab <- ifelse(!is.null(ylab), ylab, variable)
   ylab <- stringr::str_wrap(ylab, width = legend.width)
 
   if(!is.null(group)){
 
+    # format big label
     labs <- attr(data[, group], "var_label")
     labs <- ifelse(!is.null(labs), labs, group)
     labs <- stringr::str_wrap(labs, width = legend.width)
+
+    # format big modality
+    attr <- attr(dataPlot[, group], "var_label")
+    dataPlot[group] <- as.factor(stringr::str_wrap(as.character(dataPlot[,group]), width = legend.width))
+    attr(dataPlot[, group], "var_label") <- attr
 
     plot <- ggplot2::ggplot(data) +
       ggplot2::geom_boxplot(ggplot2::aes(y = get(variable), fill = get(group))) +
