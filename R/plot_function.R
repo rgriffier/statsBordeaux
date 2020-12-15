@@ -52,6 +52,7 @@ getBoxPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
   ylab <- ifelse(!is.null(ylab), ylab, variable)
   ylab <- stringr::str_wrap(ylab, width = legend.width)
 
+  dataPlot <- data
   if(!is.null(group)){
 
     # format big label
@@ -242,6 +243,9 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' mtcars %>% getGraphicalDescription(group = "am")
 getGraphicalDescription <- function(data, variable = colnames(data), group = NULL, legend.position = "right", legend.width = 30, na.rm = TRUE){
   listPlot <- lapply(variable, function(currentVar){
+    if(!is.null(group) & group == currentVar){
+      return(NULL)
+    }
     if(is.numeric(data[, currentVar])){
       plot <- getBoxPlot(data = data,
                          variable = currentVar,
