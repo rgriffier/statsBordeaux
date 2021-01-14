@@ -243,7 +243,7 @@ getBarPlot <- Vectorize(function(data, variable, group = NULL, legend.position =
 #' mtcars %>% getGraphicalDescription(group = "am")
 getGraphicalDescription <- function(data, variable = colnames(data), group = NULL, legend.position = "right", legend.width = 30, na.rm = TRUE){
   listPlot <- lapply(variable, function(currentVar){
-    if(!is.null(group) & group == currentVar){
+    if(!is.null(group) && group == currentVar){
       return(NULL)
     }
     if(is.numeric(data[, currentVar])){
