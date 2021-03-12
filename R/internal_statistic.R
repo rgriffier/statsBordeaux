@@ -536,14 +536,16 @@ checkNormalityInternal <- Vectorize(function(data, variable, group = NULL, p_val
 #' @noRd
 getVarLabel_int <- Vectorize(function(data, variable){
   if(!is.data.frame(data)) {
-    warning("data must be a data.frame.")
+    stop("data must be a data.frame.")
   }
-
   varLabel <- attributes(data[, variable])$var_label
+  if(is.null(varLabel)){
+    varLabel <- attributes(data[, variable])$label
+  }
   if(is.null(varLabel)){
     varLabel <- variable
   }
-  return(varLabel)
+  return(clearLabel(varLabel))
 }, vectorize.args = "variable", SIMPLIFY = TRUE, USE.NAMES = TRUE)
 
 

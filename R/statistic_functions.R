@@ -363,6 +363,7 @@ setLabelToVariable <- function (data, varLabel, varIndex = 1, labelIndex = 2){
     indexVarInData <- which(colnames(data) == varLabel[i, varIndex])
     if(length(indexVarInData) == 1){
       attr(data[, indexVarInData], "var_label") <- as.character(varLabel[i, labelIndex])
+      attr(data[, indexVarInData], "label") <- as.character(varLabel[i, labelIndex])
     }
   }
   return(data)
@@ -607,13 +608,19 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
       data = data,
       subset = data[, group] %in% c(levels(data[, group])[group_str], NA)
     )
-    data[, group] <- as.factor(as.character(data[, group]))
   }
 
   ## set NA as m.d. in group and use it as factor level
   if(NA_group_AsModality){
     data[, group] <- addNA(data[, group])
     levels(data[, group])[is.na(levels(data[, group]))] <- getMissingData_text(getOption('lang.value'))
+  }
+
+  ## remove unuse modality in group variable
+  if(!is.null(group)){
+    attr <- attributes(data[, group])
+    data[, group] <- as.factor(as.character(data[, group]))
+    attr(data[, group], 'var_label') <- attr$var_label
   }
 
   # DESCRIPTION PART ------------------------------------------------------ ####
@@ -719,8 +726,7 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
 
   if (!is.null(group)) {
     attr(internalOutput, 'var_group') <- group
-    attr(internalOutput, 'label_var_group') <- getVarLabel(data = data,
-                                                           variable = group)
+    attr(internalOutput, 'label_var_group') <- getVarLabel(data = data, variable = group)
     if (!is.null(group_str)) {
       if(NA_group_AsModality){
         group_str <- c(group_str, NA)
@@ -842,7 +848,6 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
       data = data,
       subset = data[, group] %in% c(levels(data[, group])[group_str], NA)
     )
-    data[, group] <- as.factor(as.character(data[, group]))
   }
 
   ## set NA as m.d. in variable and use it as factor level
@@ -855,6 +860,13 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
   if(NA_group_AsModality){
     data[, group] <- addNA(data[, group])
     levels(data[, group])[is.na(levels(data[, group]))] <- getMissingData_text(getOption('lang.value')) #"m.d."
+  }
+
+  ## remove unuse modality in group variable
+  if(!is.null(group)){
+    attr <- attributes(data[, group])
+    data[, group] <- as.factor(as.character(data[, group]))
+    attr(data[, group], 'var_label') <- attr$var_label
   }
 
   # DESCRIPTION PART ------------------------------------------------------ ####

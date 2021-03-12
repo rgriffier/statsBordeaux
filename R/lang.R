@@ -48,7 +48,7 @@ confint_int <- function(){
 
 #' @noRd
 median_int <- function(){
-  return(c('FR' = 'Médianne', 'ENG' = 'Median'))
+  return(c('FR' = 'Médiane', 'ENG' = 'Median'))
 }
 
 #' @noRd
