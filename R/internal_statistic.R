@@ -316,7 +316,6 @@ manageDataBeforePairedTest <- function(df, variable, group, id_paired){
 jumpDescribeDataFrame <- Vectorize(function(data, variable, applicable = NULL, group = NULL, group_str = NULL,
                                             p_value = FALSE, all = FALSE, desc = c("Mean", "Median", "Range"),
                                             round = 3, confint = FALSE, NA_asModality = FALSE, NA_group_AsModality = FALSE){
-
   if(!is.null(applicable)){
     if(is.numeric(data[, variable])){
       output <- statsQT(

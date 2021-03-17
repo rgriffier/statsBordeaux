@@ -617,11 +617,11 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
   }
 
   ## remove unuse modality in group variable
-  if(!is.null(group)){
-    attr <- attributes(data[, group])
-    data[, group] <- as.factor(as.character(data[, group]))
-    attr(data[, group], 'var_label') <- attr$var_label
-  }
+  # if(!is.null(group)){
+  #   attr <- attributes(data[, group])
+  #   data[, group] <- as.factor(as.character(data[, group]))
+  #   attr(data[, group], 'var_label') <- attr$var_label
+  # }
 
   # DESCRIPTION PART ------------------------------------------------------ ####
 
@@ -863,11 +863,11 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
   }
 
   ## remove unuse modality in group variable
-  if(!is.null(group)){
-    attr <- attributes(data[, group])
-    data[, group] <- as.factor(as.character(data[, group]))
-    attr(data[, group], 'var_label') <- attr$var_label
-  }
+  # if(!is.null(group)){
+  #   attr <- attributes(data[, group])
+  #   data[, group] <- as.factor(as.character(data[, group]))
+  #   attr(data[, group], 'var_label') <- attr$var_label
+  # }
 
   # DESCRIPTION PART ------------------------------------------------------ ####
 
