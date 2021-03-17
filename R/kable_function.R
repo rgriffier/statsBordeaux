@@ -95,8 +95,11 @@ addKable <- function(data_frame, all_before = FALSE, var.width = 50){
   ## get kable
   kable <- table %>%
     kableExtra::kable(booktabs = TRUE, escape = FALSE, format = "html", col.names = col.names) %>%
-    kableExtra::kable_styling(fixed_thead = TRUE, full_width = FALSE,
-                              bootstrap_options = c("hover", "condensed", "responsive")) %>%
+    kableExtra::kable_classic(full_width = FALSE,
+                              html_font = 'Cambria'
+                              # fixed_thead = TRUE,
+                              # bootstrap_options = c("hover", "condensed", "responsive")
+                              ) %>%
     kableExtra::row_spec(row = 0, bold = TRUE, align = "center",
                          extra_css = "padding: 0px 10px 5px 10px;") %>%
     kableExtra::column_spec(column = which(!colnames(table) %in% c("Variable", "Description", "Test")),
@@ -146,10 +149,10 @@ addKable <- function(data_frame, all_before = FALSE, var.width = 50){
                                    extra_css = "border-bottom: 1px solid black; padding: 0px 10px 0px 10px;")
   }
 
-  # kable <- gsub(pattern = '<tbody>',
-  #               x = kable,
-  #               replacement = '<tbody style="border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
-  #
+  kable <- gsub(pattern = '<tbody>',
+                x = kable,
+                replacement = '<tbody style="border-bottom: 1px solid black; border-top: 1px solid black;border-collapse: collapse;">')
+
   # kable <- gsub(pattern = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">',
   #               x = kable,
   #               replacement = '<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto; border-top: 1px solid black;border-collapse: collapse;">')
