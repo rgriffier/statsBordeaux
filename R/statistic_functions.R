@@ -444,7 +444,7 @@ subset_withAttributes <- function(data, subset){
 #' resultNotApplicable <- manageNotApplicable(data, "NC")
 #' data <- resultNotApplicable[[1]]
 #' resultNotApplicable <- resultNotApplicable[[2]]
-manageNotApplicable <- function(data, notApplicableChar){
+manageNotApplicable <- function(data, notApplicableChar = 'NonApp'){
   if(!is.data.frame(data)){
     stop("data must be a data.frame")
   }
@@ -526,11 +526,11 @@ createOutput <- function(ncol = 0, nrow = 0) {
 #' mtcars$am <- as.factor(mtcars$am)
 #' output <- createOutput()
 #' output <- statsQT(output = output,
-#'                   input = mtcars,
+#'                   data = mtcars,
 #'                   variable = "mpg",
 #'                   group = "am")
 #' output <- statsQT(output = output,
-#'                   input = mtcars,
+#'                   data = mtcars,
 #'                   variable = "disp",
 #'                   group = "am")
 statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE, round = 3,
@@ -763,18 +763,18 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
 #' @return a data.frame containing the description of the factor variable
 #' @export
 #' @examples
-#' data(mtcars)
-#' mtcars$am <- as.factor(mtcars$am)
-#' mtcars$vs <- as.factor(mtcars$vs)
-#' output <- createOutput()
-#' output <- statsQT(output = output,
-#'                   input = mtcars,
-#'                   variable = "mpg",
-#'                   group = "am")
-#' output <- statsQL(output = output,
-#'                   input = mtcars,
-#'                   variable = "vs",
-#'                   group = "am")
+# data(mtcars)
+# mtcars$am <- as.factor(mtcars$am)
+# mtcars$vs <- as.factor(mtcars$vs)
+# output <- createOutput()
+# output <- statsQT(output = output,
+#                   data = mtcars,
+#                   variable = "mpg",
+#                   group = "am")
+# output <- statsQL(output = output,
+#                   data = mtcars,
+#                   variable = "vs",
+#                   group = "am")
 statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asModality, round = 3,
                     p_value = FALSE, forcedTest = NULL, NA_group_AsModality = FALSE, NA_asModality = FALSE, output = NULL){
 

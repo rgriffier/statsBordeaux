@@ -9,10 +9,9 @@
 #' @importFrom kableExtra footnote_marker_symbol kable kable_styling row_spec column_spec footnote add_header_above
 #' @importFrom stringr str_wrap
 #' @examples
-#' data(mtcars)
-#' output <- createOutput()
-#' output <- statsQT(output, mtcars, "mpg")
-#' addKable(output)
+# data(mtcars)
+# output <- statsQT(data = mtcars, variable = "mpg")
+# addKable(output)
 addKable <- function(data_frame, all_before = FALSE, var.width = 50){
 
   if(!is.data.frame(data_frame) | nrow(data_frame) == 0){

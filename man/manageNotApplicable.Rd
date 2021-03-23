@@ -4,7 +4,7 @@
 \alias{manageNotApplicable}
 \title{Manage the not applicable condition into data.frame}
 \usage{
-manageNotApplicable(data, notApplicableChar)
+manageNotApplicable(data, notApplicableChar = "NonApp")
 }
 \arguments{
 \item{data}{a data.frame containing data to clean}

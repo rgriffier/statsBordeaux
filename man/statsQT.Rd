@@ -59,11 +59,11 @@ data(mtcars)
 mtcars$am <- as.factor(mtcars$am)
 output <- createOutput()
 output <- statsQT(output = output,
-                  input = mtcars,
+                  data = mtcars,
                   variable = "mpg",
                   group = "am")
 output <- statsQT(output = output,
-                  input = mtcars,
+                  data = mtcars,
                   variable = "disp",
                   group = "am")
 }

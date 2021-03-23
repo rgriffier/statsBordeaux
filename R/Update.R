@@ -6,7 +6,7 @@
 #' @import devtools
 #' @examples
 #' updateStatsBordeaux()
-updateStatsBordeaux <- function(force = FALSE){
+updatePackage <- function(force = FALSE){
   if(!is.vector(force) | !is.logical(force) | length(force) != 1){
     stop("force must be a boolean vector of length one.")
   }

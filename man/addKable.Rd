@@ -17,9 +17,3 @@ a knitr::kable
 \description{
 A convenient method to add kable into a RMarkdown document
 }
-\examples{
-data(mtcars)
-output <- createOutput()
-output <- statsQT(output, mtcars, "mpg")
-addKable(output)
-}

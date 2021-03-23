@@ -1,9 +1,8 @@
 ---
-title: "Stats bordeaux package"
+title: "statsBordeaux package"
 author: "Romain GRIFFIER"
-date: "04/03/2020"
+date: "23/03/2021"
 output: github_document
-always_allow_html: true
 ---
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.  
@@ -11,7 +10,7 @@ Ce package s'appuit :
 
 - Sur les fonctions de `base::` de R pour la partie statistique.
 - Sur `ggplot2::` pour la partie graphique.
-- Sur `rmarkdown::` et `officer::` pour le reporting.
+- Sur `rmarkdown::` pour le reporting.
 
 # Installation
 
@@ -36,6 +35,10 @@ statsBordeaux::updateStatsBordeaux()
 
 ```{r}
 library(statsBordeaux, warn.conflicts = FALSE)
+library(dplyr)
+
+## tableaux de sortie en français
+options(lang.value = 'FR')
 ```
 
 ## Chargement des données
@@ -63,10 +66,10 @@ Pour les variables qualitatives, on charge un data.frame de 3 colonnes :
 
 ```{r}
 ## création du data.frame contenant les labels des différentes modalitées des variables qualitatives
-labels <- data.frame(Variable = c("vs", "vs", "am", "am"), 
+var_QL <- data.frame(Variable = c("vs", "vs", "am", "am"), 
                      Modality = c(0, 1, 0, 1),
                      Label = c("V-shaped", "Straight", "Automatic", "Manual"))
-labels
+var_QL
 ```
 
 ## Data management
@@ -91,9 +94,9 @@ Cette fonction gère à la fois :
 
 La fonction vérifie que les variables du fichier des labels sont bien dans le data.frame des données. Le cas échant, elle retourne une erreur identifiant le ou les variables présentes dans le data.frame des labels mais absente du data.frame des données. 
 
-```{r}
+```{r warning=FALSE}
 ## association à chaque modalité des variables qualitatives du label correspondant et conversion de ces variables en factor
-labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
+labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, var_QL)
 head(labelledData)
 ```
 
@@ -104,22 +107,32 @@ Le label des variables est contenu dans un attribut `var_label`.
 
 ```{r}
 ## création du data.frame contenant le label de chaques variables
-labelVariable <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt",
-                                         "qsec", "vs", "am", "gear", "carb"),
-                            Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)",
-                                      "Gross horsepower ", "Rear axle ratio", "Weight (1000 lbs)",
-                                      "1/4 mile time", "Engine", "Transmission", "Number of forward gears",
-                                      "Number of carburetors"))
+var_label <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt",
+                                     "qsec", "vs", "am", "gear", "carb"),
+                        Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)",
+                                  "Gross horsepower ", "Rear axle ratio", "Weight (1000 lbs)",
+                                  "1/4 mile time", "Engine", "Transmission", "Number of forward gears",
+                                  "Number of carburetors"))
 
 ## labélisation des variables du data.frame
 labelledData <- statsBordeaux::setLabelToVariable(data = labelledData,
-                                                  varLabel = labelVariable)
+                                                  varLabel = var_label)
 
 ## fonction pour récupérer les labels d'un data.frame labellisé
 statsBordeaux::getVarLabel(data = labelledData)
+```
 
-## attribut stockant le label d'une variable
-nomVariable <- attributes(labelledData[, 1])$var_label
+Il est également possible de labéliser une variable avec la fonction `statsBordeaux::addLabelToVariable()`.
+
+
+```{r}
+## labélisation manuelle d'une variable créé avec dplyr
+labelledData <- labelledData %>%
+  dplyr::mutate(wt_kg = wt/0.4536) %>%
+  statsBordeaux::addLabelToVariable(wt_kg = 'Weight (1000 Kg)')
+
+## fonction pour récupérer les labels d'un data.frame labellisé
+statsBordeaux::getVarLabel(data = labelledData)
 ```
 
 ### ÉTAPE 4 : vérification de la structure finale du fichier à analyser
@@ -337,12 +350,11 @@ head(statsComparatives, n = 5)
 
 ## Reporting avec `rmarkdown`
 
-Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `statsBordeaux::addKable()`. Cette dernière génère un __tableau HTML__.   
-La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `statsBordeaux::addKable()`.
+Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `statsBordeaux::addKable()`. Cette dernière génère un __tableau HTML__. La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `statsBordeaux::addKable()`.
 
 La génération de .pdf en LaTeX n'est actuellement pas prise en charge.
 
-```{r}
+```{r, results='hide'}
 statsBordeaux::addKable(description)
 ```
 
@@ -367,59 +379,62 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg", group = "vs
 
 ### Gestion des 'non-applicables'
 
-La gestion des 'non-applicables' fait intervenir la fonction `statsBordeaux::manageNotApplicable()`.
-Cette fonction prend 2 paramètres d'entrée :
+La gestion des 'non-applicables' fait intervenir les fonctions `statsBordeaux::setNonApp()` et `statsBordeaux::manageNotApplicable()`:
 
-- `df`, un data.frame, contenant le jeu de donnée à décrire.
-- `notApplicableChar`, un vecteur de longueur 1 contenant la façon dont sont représentés les 'non-applicables' dans les données.
++ La fonction `statsBordeaux::setNonApp()` permet de taguer les données non applicables en fonction d'une condition.
++ La fonction `statsBordeaux::manageNotApplicable()` permet de gérer les tags générés à l'étape précédente.
+    * Elle prend 2 paramètres d'entrée :
+        - `df`, un data.frame, contenant le jeu de donnée à décrire.
+        - `notApplicableChar`, un vecteur de longueur 1 contenant la façon dont sont représentés les 'non-applicables' dans les données.
+    * Elle renvoie une liste de deux éléments :
+        1. Le data.frame d'entrée duquel ont été ôtés les 'non-applicable'
+        2. Une liste de vecteurs logiques :
+            - `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
+            - `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
 
-Cette fonction renvoie une liste de deux éléments :
-
-1. Le data.frame d'entrée duquel ont été ôtés les 'non-applicable'
-2. Une liste de vecteurs logiques :
-- `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
-- `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
-
-```{r}
+```{r message=FALSE, warning=FALSE}
 data(mtcars)
 
-## on créé une colonne qui contient le nombre de vitesse dans le cas d'une transmission manuelle, sinon qui contient "NonApp"
-mtcars$nSpeed <- c(5, 6, 5, "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
-                   "NonApp", "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
-                   "NonApp", "NonApp", "NonApp", 6, 6, 6, "NonApp", "NonApp",
-                   "NonApp", "NonApp", "NonApp", 5, NA, 6, 5, 6, 6, 5)
+var_QL <- data.frame(Variable = c("vs", "vs", "am", "am"),
+                     Modality = c(0, 1, 0, 1),
+                     Label = c("V-shaped", "Straight", "Automatic", "Manual"))
+
+var_label <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb"),
+                            Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)", "Gross horsepower ",
+                                      "Rear axle ratio", "Weight (1000 lbs)", "1/4 mile time", "Engine", "Transmission",
+                                      "Number of forward gears", "Number of carburetors"))
+
+## on créé une colonne qui contient le nombre de vitesse dans le cas d'une transmission manuelle
+## en cas de transmission automatique, une donée manquante est attendue, on tague alors la données comme 'NonApp'
+mtcars <- mtcars %>%
+  dplyr::mutate(
+    nSpeed = c(5, 6, 5, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 6, 6, 6, NA, NA, NA, NA, NA, 5, NA, 6, 5, 6, 6, 5)
+  ) %>%
+  setNonApp('nSpeed', condition = function(.){.$am == 0})
 
 ## on utilise la fonction manageNotApplicable() pour gérer les non-applicable,
 ## représentés ici par des 'NonApp'
-notApplicable <- statsBordeaux::manageNotApplicable(data = mtcars, notApplicableChar = "NonApp")
+applicable <- statsBordeaux::manageNotApplicable(data = mtcars)
 
 ## on récupère le data.frame sans les 'non-applicables'
-mtcars <- notApplicable[[1]]
+mtcars <- applicable[[1]]
 
 ## on récupère la liste de vecteurs logiques contenant les lignes qui doivent être analysées.
-applicable <- notApplicable[[2]]
+applicable <- applicable[[2]]
 
-## vérification que le jeu de donnée ne contient que des chiffres
-onlyDigit <- statsBordeaux::checkNotDigitInDataframe(data = mtcars)
+## labellisation automatique des variable et des modalités des variables qualitatives
+labelledData <- statsBordeaux::setLabelToFactorLevels(data = mtcars, var_QL)
+labelledData <- statsBordeaux::setLabelToVariable(data = labelledData, varLabel = var_label)
 
-## labellisation des modalitées des variables qualitatives
-# on rajoute les labels des modalités de la nouvelle variable qualitative
-labels <- rbind(labels, data.frame(Variable = c("nSpeed", "nSpeed"),
-                                   Modality = c(5, 6),
-                                   Label = c("5 vitesses", "6 vitesses")))
-# labellisation des modalitées des variables qualitatives
-labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
-
-## labélisation des variables du data.frame
-labelVariable <- rbind(labelVariable,
-                       data.frame(Variable = "nSpeed",
-                                  Label = "Nombre de vitesses (boite manuelle)"))
-labelledData <- statsBordeaux::setLabelToVariable(data = labelledData, varLabel = labelVariable)
+# labellisation manuelle de la variable créée
+labelledData <- labelledData %>%
+  dplyr::mutate(nSpeed = dplyr::recode_factor(nSpeed, "5" = "5 vitesses", "6" = "6 vitesses")) %>%
+  statsBordeaux::addLabelToVariable(nSpeed = 'Nombre de vitesses (boite manuelle')
 
 ##----------------
 
-descriptionNonAvailable <- statsBordeaux::describeDataFrame(data = labelledData,
-                                                            applicable = applicable)
+descriptionNonAvailable <- labelledData %>% 
+  statsBordeaux::describeDataFrame(applicable = applicable)
 
 descriptionNonAvailable[c(40:44, 55:57), ]
 ```

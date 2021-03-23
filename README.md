@@ -1,14 +1,14 @@
-Stats bordeaux package
+statsBordeaux package
 ================
 Romain GRIFFIER
-04/03/2020
+23/03/2021
 
 L'objectif de ce package est de regrouper des fonctions et méthodes qui permettent de décrire un jeu de données.
 Ce package s'appuit :
 
 -   Sur les fonctions de `base::` de R pour la partie statistique.
 -   Sur `ggplot2::` pour la partie graphique.
--   Sur `rmarkdown::` et `officer::` pour le reporting.
+-   Sur `rmarkdown::` pour le reporting.
 
 Installation
 ============
@@ -38,6 +38,23 @@ Chargement du package
 
 ``` r
 library(statsBordeaux, warn.conflicts = FALSE)
+library(dplyr)
+```
+
+    ## 
+    ## Attaching package: 'dplyr'
+
+    ## The following objects are masked from 'package:stats':
+    ## 
+    ##     filter, lag
+
+    ## The following objects are masked from 'package:base':
+    ## 
+    ##     intersect, setdiff, setequal, union
+
+``` r
+## tableaux de sortie en français
+options(lang.value = 'FR')
 ```
 
 Chargement des données
@@ -79,10 +96,10 @@ Pour les variables qualitatives, on charge un data.frame de 3 colonnes :
 
 ``` r
 ## création du data.frame contenant les labels des différentes modalitées des variables qualitatives
-labels <- data.frame(Variable = c("vs", "vs", "am", "am"), 
+var_QL <- data.frame(Variable = c("vs", "vs", "am", "am"), 
                      Modality = c(0, 1, 0, 1),
                      Label = c("V-shaped", "Straight", "Automatic", "Manual"))
-labels
+var_QL
 ```
 
     ##   Variable Modality     Label
@@ -117,16 +134,7 @@ La fonction vérifie que les variables du fichier des labels sont bien dans le d
 
 ``` r
 ## association à chaque modalité des variables qualitatives du label correspondant et conversion de ces variables en factor
-labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
-```
-
-    ## Warning: Variable 'cyl' is considered as numeric but may be a factor variable (3
-    ## distinct values).
-
-    ## Warning: Variable 'gear' is considered as numeric but may be a factor variable
-    ## (3 distinct values).
-
-``` r
+labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, var_QL)
 head(labelledData)
 ```
 
@@ -151,16 +159,16 @@ Il est possible d'associer à chaque variable du data.frame contenant le jeu de 
 
 ``` r
 ## création du data.frame contenant le label de chaques variables
-labelVariable <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt",
-                                         "qsec", "vs", "am", "gear", "carb"),
-                            Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)",
-                                      "Gross horsepower ", "Rear axle ratio", "Weight (1000 lbs)",
-                                      "1/4 mile time", "Engine", "Transmission", "Number of forward gears",
-                                      "Number of carburetors"))
+var_label <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt",
+                                     "qsec", "vs", "am", "gear", "carb"),
+                        Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)",
+                                  "Gross horsepower ", "Rear axle ratio", "Weight (1000 lbs)",
+                                  "1/4 mile time", "Engine", "Transmission", "Number of forward gears",
+                                  "Number of carburetors"))
 
 ## labélisation des variables du data.frame
 labelledData <- statsBordeaux::setLabelToVariable(data = labelledData,
-                                                  varLabel = labelVariable)
+                                                  varLabel = var_label)
 
 ## fonction pour récupérer les labels d'un data.frame labellisé
 statsBordeaux::getVarLabel(data = labelledData)
@@ -175,10 +183,26 @@ statsBordeaux::getVarLabel(data = labelledData)
     ##                      gear                      carb 
     ## "Number of forward gears"   "Number of carburetors"
 
+Il est également possible de labéliser une variable avec la fonction `statsBordeaux::addLabelToVariable()`.
+
 ``` r
-## attribut stockant le label d'une variable
-nomVariable <- attributes(labelledData[, 1])$var_label
+## labélisation manuelle d'une variable créé avec dplyr
+labelledData <- labelledData %>%
+  dplyr::mutate(wt_kg = wt/0.4536) %>%
+  statsBordeaux::addLabelToVariable(wt_kg = 'Weight (1000 Kg)')
+
+## fonction pour récupérer les labels d'un data.frame labellisé
+statsBordeaux::getVarLabel(data = labelledData)
 ```
+
+    ##                       mpg                       cyl                      disp 
+    ##       "Miles/(US) gallon"     "Number of cylinders"   "Displacement (cu.in.)" 
+    ##                        hp                      drat                        wt 
+    ##       "Gross horsepower "         "Rear axle ratio"       "Weight (1000 lbs)" 
+    ##                      qsec                        vs                        am 
+    ##           "1/4 mile time"                  "Engine"            "Transmission" 
+    ##                      gear                      carb                     wt_kg 
+    ## "Number of forward gears"   "Number of carburetors"        "Weight (1000 Kg)"
 
 ### ÉTAPE 4 : vérification de la structure finale du fichier à analyser
 
@@ -191,18 +215,19 @@ list_variableFormat <- statsBordeaux::describeMetadata(data = labelledData)
 list_variableFormat
 ```
 
-    ##     VAR               VAR_LABEL DATA_TYPE LEVELS_NB             LEVELS
-    ## 1   mpg       Miles/(US) gallon   numeric        NA               <NA>
-    ## 2   cyl     Number of cylinders   numeric        NA               <NA>
-    ## 3  disp   Displacement (cu.in.)   numeric        NA               <NA>
-    ## 4    hp       Gross horsepower    numeric        NA               <NA>
-    ## 5  drat         Rear axle ratio   numeric        NA               <NA>
-    ## 6    wt       Weight (1000 lbs)   numeric        NA               <NA>
-    ## 7  qsec           1/4 mile time   numeric        NA               <NA>
-    ## 8    vs                  Engine    factor         2 V-shaped, Straight
-    ## 9    am            Transmission    factor         2  Automatic, Manual
-    ## 10 gear Number of forward gears   numeric        NA               <NA>
-    ## 11 carb   Number of carburetors   numeric        NA               <NA>
+    ##      VAR               VAR_LABEL DATA_TYPE LEVELS_NB             LEVELS
+    ## 1    mpg       Miles/(US) gallon   numeric        NA               <NA>
+    ## 2    cyl     Number of cylinders   numeric        NA               <NA>
+    ## 3   disp   Displacement (cu.in.)   numeric        NA               <NA>
+    ## 4     hp       Gross horsepower    numeric        NA               <NA>
+    ## 5   drat         Rear axle ratio   numeric        NA               <NA>
+    ## 6     wt       Weight (1000 lbs)   numeric        NA               <NA>
+    ## 7   qsec           1/4 mile time   numeric        NA               <NA>
+    ## 8     vs                  Engine    factor         2 V-shaped, Straight
+    ## 9     am            Transmission    factor         2  Automatic, Manual
+    ## 10  gear Number of forward gears   numeric        NA               <NA>
+    ## 11  carb   Number of carburetors   numeric        NA               <NA>
+    ## 12 wt_kg        Weight (1000 Kg)   numeric        NA               <NA>
     ##    N_AVAILABLE PROP_AVAILABLE N_MISSING PROP_MISSING N_INF PROP_INF UNIQUE
     ## 1           32              1         0            0     0        0     25
     ## 2           32              1         0            0     0        0      3
@@ -215,6 +240,7 @@ list_variableFormat
     ## 9           32              1         0            0    NA       NA      2
     ## 10          32              1         0            0     0        0      3
     ## 11          32              1         0            0     0        0      6
+    ## 12          32              1         0            0     0        0     29
 
 Statistiques descriptives
 -------------------------
@@ -228,20 +254,7 @@ La fonction `statsBordeaux::describeDataFrame()` permet de décrire les variable
 ``` r
 # chargement de dplyr
 library(dplyr)
-```
 
-    ## 
-    ## Attaching package: 'dplyr'
-
-    ## The following objects are masked from 'package:stats':
-    ## 
-    ##     filter, lag
-
-    ## The following objects are masked from 'package:base':
-    ## 
-    ##     intersect, setdiff, setequal, union
-
-``` r
 # statistique descriptive sur l'ensemble du data.frame
 description <- labelledData %>%
   statsBordeaux::describeDataFrame()
@@ -249,16 +262,26 @@ description <- labelledData %>%
 description[c(1:5, 36:39), ]
 ```
 
-    ##             Variable       Modality      Description                  All
-    ## 1  Miles/(US) gallon           <NA>             <NA>                 <NA>
-    ## 2               <NA>           <NA>         N (m.d.)               32 (0)
-    ## 3               <NA>           <NA>        Mean (SD)       20.091 (6.027)
-    ## 4               <NA>           <NA> Median [Q1 ; Q3] 19.2 [15.425 ; 22.8]
-    ## 5               <NA>           <NA>        Min ; Max          10.4 ; 33.9
-    ## 36            Engine           <NA>             <NA>                 <NA>
-    ## 37              <NA> All modalities     N (m.d. ; %)           32 (0 ; 0)
-    ## 38              <NA>       V-shaped            N (%)           18 (56.25)
-    ## 39              <NA>       Straight            N (%)           14 (43.75)
+    ##             Variable             Modality          Description
+    ## 1  Miles/(US) gallon                 <NA>                 <NA>
+    ## 2               <NA>                 <NA>             N (d.m.)
+    ## 3               <NA>                 <NA> Moyenne (Écart-type)
+    ## 4               <NA>                 <NA>    Médiane [Q1 ; Q3]
+    ## 5               <NA>                 <NA>            Min ; Max
+    ## 36            Engine                 <NA>                 <NA>
+    ## 37              <NA> Toutes les modalités         N (d.m. ; %)
+    ## 38              <NA>             V-shaped                N (%)
+    ## 39              <NA>             Straight                N (%)
+    ##                     All
+    ## 1                  <NA>
+    ## 2                32 (0)
+    ## 3        20,091 (6,027)
+    ## 4  19,2 [15,425 ; 22,8]
+    ## 5           10,4 ; 33,9
+    ## 36                 <NA>
+    ## 37           32 (0 ; 0)
+    ## 38           18 (56,25)
+    ## 39           14 (43,75)
 
 De la même manière, il est possible de réaliser une description graphique des données avec la fonction `statsBordeaux::getGraphicalDescription()`
 
@@ -273,7 +296,7 @@ graphicDescription[[1]]
 
     ## $mpg
 
-![](README_files/figure-markdown_github/unnamed-chunk-11-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-12-1.png)
 
 ``` r
 ## Variable qualitative : BAR PLOT
@@ -282,7 +305,7 @@ graphicDescription[[8]]
 
     ## $vs
 
-![](README_files/figure-markdown_github/unnamed-chunk-11-2.png)
+![](README_files/figure-markdown_github/unnamed-chunk-12-2.png)
 
 #### Utilisateurs avancés, utilisation pas à pas
 
@@ -316,12 +339,12 @@ for(i in 1:ncol(labelledData)){
 head(description, n = 5)
 ```
 
-    ##            Variable Modality      Description                  All
-    ## 1 Miles/(US) gallon     <NA>             <NA>                 <NA>
-    ## 2              <NA>     <NA>         N (m.d.)               32 (0)
-    ## 3              <NA>     <NA>        Mean (SD)       20.091 (6.027)
-    ## 4              <NA>     <NA> Median [Q1 ; Q3] 19.2 [15.425 ; 22.8]
-    ## 5              <NA>     <NA>        Min ; Max          10.4 ; 33.9
+    ##            Variable Modality          Description                  All
+    ## 1 Miles/(US) gallon     <NA>                 <NA>                 <NA>
+    ## 2              <NA>     <NA>             N (d.m.)               32 (0)
+    ## 3              <NA>     <NA> Moyenne (Écart-type)       20,091 (6,027)
+    ## 4              <NA>     <NA>    Médiane [Q1 ; Q3] 19,2 [15,425 ; 22,8]
+    ## 5              <NA>     <NA>            Min ; Max          10,4 ; 33,9
 
 ### Statistiques descriptives en fonction d'une variable qualitative de groupe
 
@@ -338,26 +361,26 @@ comp <- labelledData %>%
 comp[c(1:5, 36:39), ]
 ```
 
-    ##             Variable       Modality      Description                  All
-    ## 1  Miles/(US) gallon           <NA>             <NA>                 <NA>
-    ## 2               <NA>           <NA>         N (m.d.)               32 (0)
-    ## 3               <NA>           <NA>        Mean (SD)       20.091 (6.027)
-    ## 4               <NA>           <NA> Median [Q1 ; Q3] 19.2 [15.425 ; 22.8]
-    ## 5               <NA>           <NA>        Min ; Max          10.4 ; 33.9
-    ## 36      Transmission           <NA>             <NA>                 <NA>
-    ## 37              <NA> All modalities     N (m.d. ; %)           32 (0 ; 0)
-    ## 38              <NA>      Automatic            N (%)          19 (59.375)
-    ## 39              <NA>         Manual            N (%)          13 (40.625)
-    ##                   V-shaped             Straight
-    ## 1                     <NA>                 <NA>
-    ## 2                   18 (0)               14 (0)
-    ## 3           16.617 (3.861)       24.557 (5.379)
-    ## 4  15.65 [14.775 ; 19.075] 22.8 [21.4 ; 29.625]
-    ## 5                10.4 ; 26          17.8 ; 33.9
-    ## 36                    <NA>                 <NA>
-    ## 37              18 (0 ; 0)           14 (0 ; 0)
-    ## 38             12 (66.667)               7 (50)
-    ## 39              6 (33.333)               7 (50)
+    ##             Variable             Modality          Description
+    ## 1  Miles/(US) gallon                 <NA>                 <NA>
+    ## 2               <NA>                 <NA>             N (d.m.)
+    ## 3               <NA>                 <NA> Moyenne (Écart-type)
+    ## 4               <NA>                 <NA>    Médiane [Q1 ; Q3]
+    ## 5               <NA>                 <NA>            Min ; Max
+    ## 36      Transmission                 <NA>                 <NA>
+    ## 37              <NA> Toutes les modalités         N (d.m. ; %)
+    ## 38              <NA>            Automatic                N (%)
+    ## 39              <NA>               Manual                N (%)
+    ##                     All                V-shaped             Straight
+    ## 1                  <NA>                    <NA>                 <NA>
+    ## 2                32 (0)                  18 (0)               14 (0)
+    ## 3        20,091 (6,027)          16,617 (3,861)       24,557 (5,379)
+    ## 4  19,2 [15,425 ; 22,8] 15,65 [14,775 ; 19,075] 22,8 [21,4 ; 29,625]
+    ## 5           10,4 ; 33,9               10,4 ; 26          17,8 ; 33,9
+    ## 36                 <NA>                    <NA>                 <NA>
+    ## 37           32 (0 ; 0)              18 (0 ; 0)           14 (0 ; 0)
+    ## 38          19 (59,375)             12 (66,667)               7 (50)
+    ## 39          13 (40,625)              6 (33,333)               7 (50)
 
 De la même manière, il est possible de réaliser une description graphique des données en fonction d'une variable qualitative de groupe en rajoutant le paramètre `group` à la fonction `statsBordeaux::getGraphicalDescription()`
 
@@ -372,16 +395,16 @@ graphicDescription[[1]]
 
     ## $mpg
 
-![](README_files/figure-markdown_github/unnamed-chunk-14-1.png)
+![](README_files/figure-markdown_github/unnamed-chunk-15-1.png)
 
 ``` r
 ## Variable qualitative : BAR PLOT
 graphicDescription[[9]]
 ```
 
-    ## $am
+    ## $gear
 
-![](README_files/figure-markdown_github/unnamed-chunk-14-2.png)
+![](README_files/figure-markdown_github/unnamed-chunk-15-2.png)
 
 #### Utilisateurs avancés, utilisation pas à pas
 
@@ -424,18 +447,18 @@ for(i in 1:ncol(labelledData)){
 head(comparaison, n = 5)
 ```
 
-    ##            Variable Modality      Description                  All
-    ## 1 Miles/(US) gallon     <NA>             <NA>                 <NA>
-    ## 2              <NA>     <NA>         N (m.d.)               32 (0)
-    ## 3              <NA>     <NA>        Mean (SD)       20.091 (6.027)
-    ## 4              <NA>     <NA> Median [Q1 ; Q3] 19.2 [15.425 ; 22.8]
-    ## 5              <NA>     <NA>        Min ; Max          10.4 ; 33.9
+    ##            Variable Modality          Description                  All
+    ## 1 Miles/(US) gallon     <NA>                 <NA>                 <NA>
+    ## 2              <NA>     <NA>             N (d.m.)               32 (0)
+    ## 3              <NA>     <NA> Moyenne (Écart-type)       20,091 (6,027)
+    ## 4              <NA>     <NA>    Médiane [Q1 ; Q3] 19,2 [15,425 ; 22,8]
+    ## 5              <NA>     <NA>            Min ; Max          10,4 ; 33,9
     ##                  V-shaped             Straight
     ## 1                    <NA>                 <NA>
     ## 2                  18 (0)               14 (0)
-    ## 3          16.617 (3.861)       24.557 (5.379)
-    ## 4 15.65 [14.775 ; 19.075] 22.8 [21.4 ; 29.625]
-    ## 5               10.4 ; 26          17.8 ; 33.9
+    ## 3          16,617 (3,861)       24,557 (5,379)
+    ## 4 15,65 [14,775 ; 19,075] 22,8 [21,4 ; 29,625]
+    ## 5               10,4 ; 26          17,8 ; 33,9
 
 Statistiques comparatives
 -------------------------
@@ -464,26 +487,26 @@ comp <- labelledData %>%
 comp[c(1:5, 36:39), ]
 ```
 
-    ##             Variable       Modality      Description                V-shaped
-    ## 1  Miles/(US) gallon           <NA>             <NA>                    <NA>
-    ## 2               <NA>           <NA>         N (m.d.)                  18 (0)
-    ## 3               <NA>           <NA>        Mean (SD)          16.617 (3.861)
-    ## 4               <NA>           <NA> Median [Q1 ; Q3] 15.65 [14.775 ; 19.075]
-    ## 5               <NA>           <NA>        Min ; Max               10.4 ; 26
-    ## 36      Transmission           <NA>             <NA>                    <NA>
-    ## 37              <NA> All modalities     N (m.d. ; %)              18 (0 ; 0)
-    ## 38              <NA>      Automatic            N (%)             12 (66.667)
-    ## 39              <NA>         Manual            N (%)              6 (33.333)
-    ##                Straight                       Test p-value
-    ## 1                  <NA>              Wilcoxon test  <0.001
-    ## 2                14 (0)                       <NA>    <NA>
-    ## 3        24.557 (5.379)                       <NA>    <NA>
-    ## 4  22.8 [21.4 ; 29.625]                       <NA>    <NA>
-    ## 5           17.8 ; 33.9                       <NA>    <NA>
-    ## 36                 <NA> Pearson's Chi-squared test   0.341
-    ## 37           14 (0 ; 0)                       <NA>    <NA>
-    ## 38               7 (50)                       <NA>    <NA>
-    ## 39               7 (50)                       <NA>    <NA>
+    ##             Variable             Modality          Description
+    ## 1  Miles/(US) gallon                 <NA>                 <NA>
+    ## 2               <NA>                 <NA>             N (d.m.)
+    ## 3               <NA>                 <NA> Moyenne (Écart-type)
+    ## 4               <NA>                 <NA>    Médiane [Q1 ; Q3]
+    ## 5               <NA>                 <NA>            Min ; Max
+    ## 36      Transmission                 <NA>                 <NA>
+    ## 37              <NA> Toutes les modalités         N (d.m. ; %)
+    ## 38              <NA>            Automatic                N (%)
+    ## 39              <NA>               Manual                N (%)
+    ##                   V-shaped             Straight             Test p-value
+    ## 1                     <NA>                 <NA> Test de Wilcoxon  <0,001
+    ## 2                   18 (0)               14 (0)             <NA>    <NA>
+    ## 3           16,617 (3,861)       24,557 (5,379)             <NA>    <NA>
+    ## 4  15,65 [14,775 ; 19,075] 22,8 [21,4 ; 29,625]             <NA>    <NA>
+    ## 5                10,4 ; 26          17,8 ; 33,9             <NA>    <NA>
+    ## 36                    <NA>                 <NA>     Test du Chi²   0,341
+    ## 37              18 (0 ; 0)           14 (0 ; 0)             <NA>    <NA>
+    ## 38             12 (66,667)               7 (50)             <NA>    <NA>
+    ## 39              6 (33,333)               7 (50)             <NA>    <NA>
 
 #### Utilisateurs avancés, utilisation pas à pas
 
@@ -526,24 +549,23 @@ for(i in 1:ncol(labelledData)){
 head(statsComparatives, n = 5)
 ```
 
-    ##            Variable Modality      Description                V-shaped
-    ## 1 Miles/(US) gallon     <NA>             <NA>                    <NA>
-    ## 2              <NA>     <NA>         N (m.d.)                  18 (0)
-    ## 3              <NA>     <NA>        Mean (SD)          16.617 (3.861)
-    ## 4              <NA>     <NA> Median [Q1 ; Q3] 15.65 [14.775 ; 19.075]
-    ## 5              <NA>     <NA>        Min ; Max               10.4 ; 26
-    ##               Straight          Test p-value
-    ## 1                 <NA> Wilcoxon test  <0.001
-    ## 2               14 (0)          <NA>    <NA>
-    ## 3       24.557 (5.379)          <NA>    <NA>
-    ## 4 22.8 [21.4 ; 29.625]          <NA>    <NA>
-    ## 5          17.8 ; 33.9          <NA>    <NA>
+    ##            Variable Modality          Description                V-shaped
+    ## 1 Miles/(US) gallon     <NA>                 <NA>                    <NA>
+    ## 2              <NA>     <NA>             N (d.m.)                  18 (0)
+    ## 3              <NA>     <NA> Moyenne (Écart-type)          16,617 (3,861)
+    ## 4              <NA>     <NA>    Médiane [Q1 ; Q3] 15,65 [14,775 ; 19,075]
+    ## 5              <NA>     <NA>            Min ; Max               10,4 ; 26
+    ##               Straight             Test p-value
+    ## 1                 <NA> Test de Wilcoxon  <0,001
+    ## 2               14 (0)             <NA>    <NA>
+    ## 3       24,557 (5,379)             <NA>    <NA>
+    ## 4 22,8 [21,4 ; 29,625]             <NA>    <NA>
+    ## 5          17,8 ; 33,9             <NA>    <NA>
 
 Reporting avec `rmarkdown`
 --------------------------
 
-Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `statsBordeaux::addKable()`. Cette dernière génère un **tableau HTML**.
-La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `statsBordeaux::addKable()`.
+Dans un projet R Markdown `Knit to HTML`, vous pouvez ajouter facilement un tableau de donnée avec la fonction `statsBordeaux::addKable()`. Cette dernière génère un **tableau HTML**. La gestion des titre et des numéro de tableau se fait au niveau du document et non dans la fonction `statsBordeaux::addKable()`.
 
 La génération de .pdf en LaTeX n'est actuellement pas prise en charge.
 
@@ -551,523 +573,6 @@ La génération de .pdf en LaTeX n'est actuellement pas prise en charge.
 statsBordeaux::addKable(description)
 ```
 
-<table class="table table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
-<thead>
-<tr>
-<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;font-weight: bold;text-align: center;padding: 0px 10px 5px 10px;">
-</th>
-<th style="text-align:left;position: sticky; top:0; background-color: #FFFFFF;font-weight: bold;text-align: center;padding: 0px 10px 5px 10px;">
-All
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Miles/(US) gallon
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-20.091 (6.027)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-19.2 \[15.425 ; 22.8\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-10.4 ; 33.9
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Number of cylinders
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-6.188 (1.786)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-6 \[4 ; 8\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-4 ; 8
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Displacement (cu.in.)
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-230.722 (123.939)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-196.3 \[120.825 ; 326\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-71.1 ; 472
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Gross horsepower
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-146.688 (68.563)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-123 \[96.5 ; 180\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-52 ; 335
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Rear axle ratio
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-3.597 (0.535)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-3.695 \[3.08 ; 3.92\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-2.76 ; 4.93
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Weight (1000 lbs)
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-3.217 (0.978)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-3.325 \[2.581 ; 3.61\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-1.513 ; 5.424
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-1/4 mile time
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-17.849 (1.787)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-17.71 \[16.892 ; 18.9\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-14.5 ; 22.9
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Engine
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d. ; %)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0 ; 0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-V-shaped
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-18 (56.25)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Straight
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-14 (43.75)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Transmission
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d. ; %)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0 ; 0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Automatic
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-19 (59.375)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Manual
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-13 (40.625)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Number of forward gears
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-3.688 (0.738)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-4 \[3 ; 4\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-3 ; 5
-</td>
-</tr>
-<tr>
-<td style="text-align:left;font-weight: bold;border:none; padding: 0px 0px;">
-Number of carburetors
-</td>
-<td style="text-align:left;text-align:right;font-weight: bold;border:none; padding: 0px 0px;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-N (m.d.)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-32 (0)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Mean (SD)
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-2.812 (1.615)
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Median \[Q1 ; Q3\]
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-2 \[2 ; 4\]
-</td>
-</tr>
-<tr>
-<td style="text-align:left;border:none; padding: 0px 0px;">
-<p style="text-indent:20px;">
-Min ; Max
-</p>
-</td>
-<td style="text-align:left;text-align:right;border:none; padding: 0px 0px;">
-1 ; 8
-</td>
-</tr>
-</tbody>
-<tfoot>
-<tr>
-<td style="padding: 0; border: 0;" colspan="100%">
-<span style="font-style: italic;">Notes:<br></span> <sup></sup> N: sample size ; m.d.: missing data ; Qualitative data are expressed as group size (%)
-</td>
-</tr>
-</tfoot>
-</table>
 Fonctions avancées
 ------------------
 
@@ -1086,7 +591,7 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg")
     ## [[1]]
     ## [[1]]$mpg
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-19-1.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-markdown_github/unnamed-chunk-20-1.png" style="display: block; margin: auto;" />
 
 ``` r
 ## évaluation graphique et avec un test de Shapiro-Wilk de la distribution de la variable 'mpg'
@@ -1096,7 +601,7 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg", p_value = T
     ## [[1]]
     ## [[1]]$mpg
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-19-2.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-markdown_github/unnamed-chunk-20-2.png" style="display: block; margin: auto;" />
 
 ``` r
 ## évaluation graphique et avec un test de Shapiro-Wilk de la distribution de la variable 'mpg' dans chacun des sous-groupe de 'vs'
@@ -1106,81 +611,76 @@ statsBordeaux::checkNormality(data = labelledData, variable = "mpg", group = "vs
     ## [[1]]
     ## [[1]]$mpg
 
-<img src="README_files/figure-markdown_github/unnamed-chunk-19-3.png" style="display: block; margin: auto;" />
+<img src="README_files/figure-markdown_github/unnamed-chunk-20-3.png" style="display: block; margin: auto;" />
 
 ### Gestion des 'non-applicables'
 
-La gestion des 'non-applicables' fait intervenir la fonction `statsBordeaux::manageNotApplicable()`. Cette fonction prend 2 paramètres d'entrée :
+La gestion des 'non-applicables' fait intervenir les fonctions `statsBordeaux::setNonApp()` et `statsBordeaux::manageNotApplicable()`:
 
--   `df`, un data.frame, contenant le jeu de donnée à décrire.
--   `notApplicableChar`, un vecteur de longueur 1 contenant la façon dont sont représentés les 'non-applicables' dans les données.
-
-Cette fonction renvoie une liste de deux éléments :
-
-1.  Le data.frame d'entrée duquel ont été ôtés les 'non-applicable'
-2.  Une liste de vecteurs logiques :
-
--   `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
--   `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
+-   La fonction `statsBordeaux::setNonApp()` permet de taguer les données non applicables en fonction d'une condition.
+-   La fonction `statsBordeaux::manageNotApplicable()` permet de gérer les tags générés à l'étape précédente.
+    -   Elle prend 2 paramètres d'entrée :
+        -   `df`, un data.frame, contenant le jeu de donnée à décrire.
+        -   `notApplicableChar`, un vecteur de longueur 1 contenant la façon dont sont représentés les 'non-applicables' dans les données.
+    -   Elle renvoie une liste de deux éléments :
+        1.  Le data.frame d'entrée duquel ont été ôtés les 'non-applicable'
+        2.  Une liste de vecteurs logiques :
+            -   `TRUE` signifie que la ligne en cours, pour la variable considérée, doit être comptabilisée.
+            -   `FALSE` signifie que la ligne en cours, pour la variable considérée, ne doit pas être comptabilitée ('non-applicable').
 
 ``` r
 data(mtcars)
 
-## on créé une colonne qui contient le nombre de vitesse dans le cas d'une transmission manuelle, sinon qui contient "NonApp"
-mtcars$nSpeed <- c(5, 6, 5, "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
-                   "NonApp", "NonApp", "NonApp", "NonApp", "NonApp", "NonApp",
-                   "NonApp", "NonApp", "NonApp", 6, 6, 6, "NonApp", "NonApp",
-                   "NonApp", "NonApp", "NonApp", 5, NA, 6, 5, 6, 6, 5)
+var_QL <- data.frame(Variable = c("vs", "vs", "am", "am"),
+                     Modality = c(0, 1, 0, 1),
+                     Label = c("V-shaped", "Straight", "Automatic", "Manual"))
+
+var_label <- data.frame(Variable = c("mpg", "cyl", "disp", "hp", "drat", "wt", "qsec", "vs", "am", "gear", "carb"),
+                            Label = c("Miles/(US) gallon", "Number of cylinders", "Displacement (cu.in.)", "Gross horsepower ",
+                                      "Rear axle ratio", "Weight (1000 lbs)", "1/4 mile time", "Engine", "Transmission",
+                                      "Number of forward gears", "Number of carburetors"))
+
+## on créé une colonne qui contient le nombre de vitesse dans le cas d'une transmission manuelle
+## en cas de transmission automatique, une donée manquante est attendue, on tague alors la données comme 'NonApp'
+mtcars <- mtcars %>%
+  dplyr::mutate(
+    nSpeed = c(5, 6, 5, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 6, 6, 6, NA, NA, NA, NA, NA, 5, NA, 6, 5, 6, 6, 5)
+  ) %>%
+  setNonApp('nSpeed', condition = function(.){.$am == 0})
 
 ## on utilise la fonction manageNotApplicable() pour gérer les non-applicable,
 ## représentés ici par des 'NonApp'
-notApplicable <- statsBordeaux::manageNotApplicable(data = mtcars, notApplicableChar = "NonApp")
+applicable <- statsBordeaux::manageNotApplicable(data = mtcars)
 
 ## on récupère le data.frame sans les 'non-applicables'
-mtcars <- notApplicable[[1]]
+mtcars <- applicable[[1]]
 
 ## on récupère la liste de vecteurs logiques contenant les lignes qui doivent être analysées.
-applicable <- notApplicable[[2]]
+applicable <- applicable[[2]]
 
-## vérification que le jeu de donnée ne contient que des chiffres
-onlyDigit <- statsBordeaux::checkNotDigitInDataframe(data = mtcars)
+## labellisation automatique des variable et des modalités des variables qualitatives
+labelledData <- statsBordeaux::setLabelToFactorLevels(data = mtcars, var_QL)
+labelledData <- statsBordeaux::setLabelToVariable(data = labelledData, varLabel = var_label)
 
-## labellisation des modalitées des variables qualitatives
-# on rajoute les labels des modalités de la nouvelle variable qualitative
-labels <- rbind(labels, data.frame(Variable = c("nSpeed", "nSpeed"),
-                                   Modality = c(5, 6),
-                                   Label = c("5 vitesses", "6 vitesses")))
-# labellisation des modalitées des variables qualitatives
-labelledData <- statsBordeaux::setLabelToFactorLevels(mtcars, labels)
-```
-
-    ## Warning: Variable 'cyl' is considered as numeric but may be a factor variable (3
-    ## distinct values).
-
-    ## Warning: Variable 'gear' is considered as numeric but may be a factor variable
-    ## (3 distinct values).
-
-``` r
-## labélisation des variables du data.frame
-labelVariable <- rbind(labelVariable,
-                       data.frame(Variable = "nSpeed",
-                                  Label = "Nombre de vitesses (boite manuelle)"))
-labelledData <- statsBordeaux::setLabelToVariable(data = labelledData, varLabel = labelVariable)
+# labellisation manuelle de la variable créée
+labelledData <- labelledData %>%
+  dplyr::mutate(nSpeed = dplyr::recode_factor(nSpeed, "5" = "5 vitesses", "6" = "6 vitesses")) %>%
+  statsBordeaux::addLabelToVariable(nSpeed = 'Nombre de vitesses (boite manuelle')
 
 ##----------------
 
-descriptionNonAvailable <- statsBordeaux::describeDataFrame(data = labelledData,
-                                                            applicable = applicable)
+descriptionNonAvailable <- labelledData %>% 
+  statsBordeaux::describeDataFrame(applicable = applicable)
 
 descriptionNonAvailable[c(40:44, 55:57), ]
 ```
 
-    ##                   Variable       Modality  Description            All
-    ## 40            Transmission           <NA>         <NA>           <NA>
-    ## 41                    <NA> All modalities N (m.d. ; %)     32 (0 ; 0)
-    ## 42                    <NA>      Automatic        N (%)    19 (59.375)
-    ## 43                    <NA>         Manual        N (%)    13 (40.625)
-    ## 44 Number of forward gears           <NA>         <NA>           <NA>
-    ## 55                    <NA> All modalities N (m.d. ; %) 12 (1 ; 7.692)
-    ## 56                    <NA>     5 vitesses        N (%)     5 (41.667)
-    ## 57                    <NA>     6 vitesses        N (%)     7 (58.333)
+    ##                   Variable             Modality  Description            All
+    ## 40            Transmission                 <NA>         <NA>           <NA>
+    ## 41                    <NA> Toutes les modalités N (d.m. ; %)     32 (0 ; 0)
+    ## 42                    <NA>            Automatic        N (%)    19 (59,375)
+    ## 43                    <NA>               Manual        N (%)    13 (40,625)
+    ## 44 Number of forward gears                 <NA>         <NA>           <NA>
+    ## 55                    <NA> Toutes les modalités N (d.m. ; %) 12 (1 ; 7,692)
+    ## 56                    <NA>           5 vitesses        N (%)     5 (41,667)
+    ## 57                    <NA>           6 vitesses        N (%)     7 (58,333)

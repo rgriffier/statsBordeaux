@@ -52,17 +52,3 @@ a data.frame containing the description of the factor variable
 A method that generate description of factor variable and perform comparative statistic test
 in case of comparaison group.
 }
-\examples{
-data(mtcars)
-mtcars$am <- as.factor(mtcars$am)
-mtcars$vs <- as.factor(mtcars$vs)
-output <- createOutput()
-output <- statsQT(output = output,
-                  input = mtcars,
-                  variable = "mpg",
-                  group = "am")
-output <- statsQL(output = output,
-                  input = mtcars,
-                  variable = "vs",
-                  group = "am")
-}

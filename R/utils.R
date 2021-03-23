@@ -162,7 +162,7 @@ saveAttributes <- function(data = .){
   if(!is.data.frame(data)){
     stop('.data must be a data.frame')
   }
-  attr(data, 'save_attributes') <- lapply(data, attributes)
+  statsBordeaux.savedAttributes <<- lapply(data, attributes)
   return(data)
 }
 
@@ -182,19 +182,20 @@ restoreAttributes <- function(data = ., listAttributes = c('label', 'var_label')
     }
   }
 
-  savedAttributes <- attr(data, 'save_attributes')
-  if(is.null(savedAttributes)){
-    message("data doesn't have saved attributes to restore")
-    return(data)
+  if(!exists('statsBordeaux.savedAttributes')){
+    stop("attributes must have been saved with saveAttributes() function")
   }
 
   sapply(colnames(data), function(currentColname){
-    currentAttr <- savedAttributes[[currentColname]]
+    currentAttr <- statsBordeaux.savedAttributes[[currentColname]]
     if(!is.null(listAttributes)){
       currentAttr <- currentAttr[names(currentAttr) %in% listAttributes]
     }
     attributes(data[, currentColname]) <<- c(attributes(data[, currentColname]), currentAttr)
   })
+
+  rm(statsBordeaux.savedAttributes, inherits = TRUE)
+
   return(data)
 }
 
