@@ -194,7 +194,7 @@ restoreAttributes <- function(data = ., listAttributes = c('label', 'var_label')
     attributes(data[, currentColname]) <<- c(attributes(data[, currentColname]), currentAttr)
   })
 
-  rm(statsBordeaux.savedAttributes, inherits = TRUE)
+  rm(statsBordeaux.savedAttributes, envir = .GlobalEnv)
 
   return(data)
 }
