@@ -608,6 +608,9 @@ statsQT <- function(data, variable, group = NULL, group_str = NULL, all = FALSE,
       data = data,
       subset = data[, group] %in% c(levels(data[, group])[group_str], NA)
     )
+    attr <- attributes(data[, group])
+    data[, group] <- as.factor(as.character(data[, group]))
+    attr(data[, group], 'var_label') <- attr$var_label
   }
 
   ## set NA as m.d. in group and use it as factor level
@@ -848,6 +851,9 @@ statsQL <- function(data, variable, group = NULL, group_str = NULL, all = NA_asM
       data = data,
       subset = data[, group] %in% c(levels(data[, group])[group_str], NA)
     )
+    attr <- attributes(data[, group])
+    data[, group] <- as.factor(as.character(data[, group]))
+    attr(data[, group], 'var_label') <- attr$var_label
   }
 
   ## set NA as m.d. in variable and use it as factor level
