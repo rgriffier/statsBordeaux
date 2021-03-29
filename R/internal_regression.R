@@ -66,9 +66,9 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
     Modality = c(NA, paste(levels(data[, independentVariable])[1], "(Ref.)"),
                  gsub(pattern = independentVariable, replacement = "", x = rownames(summaryFitData)))
     N = c(length(summaryFit$residuals), rep(NA, nrow(summaryFitData)+1))
-    Beta = setFormatToNumber(c(NA, NA, summaryFitData$Estimate))
-    IC95_Beta = c(NA, NA, paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                 setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"))
+    Beta = setFormatToNumber(c(NA, NA, summaryFitData$Estimate), round = round)
+    IC95_Beta = c(NA, NA, paste0("[", setFormatToNumber(summaryFitData$`2.5 %`,  round = round), " ; " ,
+                                 setFormatToNumber(summaryFitData$`97.5 %`,  round = round), "]"))
     p_value =  c(setFormatToPvalue(anova(fit)$'Pr(>F)'[1], round = round),
                  rep(NA, nrow(summaryFitData)+1))
 
@@ -86,9 +86,9 @@ extractDataFromUnivariableLinearModel <- function(fit, data, independentVariable
     summaryFitData <- data.frame(Variable = independentVariableName,
                                  Modality = NA,
                                  N = length(summaryFit$residuals),
-                                 Beta = setFormatToNumber(summaryFitData$Estimate),
-                                 IC95_Beta = paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                                    setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"),
+                                 Beta = setFormatToNumber(summaryFitData$Estimate, round = round),
+                                 IC95_Beta = paste0("[", setFormatToNumber(summaryFitData$`2.5 %`, round = round), " ; " ,
+                                                    setFormatToNumber(summaryFitData$`97.5 %`, round = round), "]"),
                                  p_value =  setFormatToPvalue(anova(fit)$'Pr(>F)'[1], round = round),
                                  stringsAsFactors = FALSE)
   }
@@ -152,9 +152,9 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
     Modality <- c(NA, paste(levels(data[, independentVariable])[1], "(Ref.)"),
                   gsub(pattern = independentVariable, replacement = "", x = rownames(summaryFitData)))
     N <- c(length(fit$fitted.values), rep(NA, nrow(summaryFitData)+1))
-    OR <- setFormatToNumber(c(NA, 1, summaryFitData$Estimate))
-    IC95_OR <- c(NA, NA, paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"))
+    OR <- setFormatToNumber(c(NA, 1, summaryFitData$Estimate), round = round)
+    IC95_OR <- c(NA, NA, paste0("[", setFormatToNumber(summaryFitData$`2.5 %`, round = round), " ; " ,
+                                setFormatToNumber(summaryFitData$`97.5 %`, round = round), "]"))
     p_value <-  c(setFormatToPvalue(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
                                                   length(fit$coef) - 1),
                              round = round),
@@ -174,9 +174,9 @@ extractDataFromUnivariableLogisticModel <- function(fit, data, independentVariab
     summaryFitData <- data.frame(Variable = independentVariableName,
                                  Modality = NA,
                                  N = length(fit$fitted.values),
-                                 OR = setFormatToNumber(summaryFitData$Estimate),
-                                 IC95_OR = paste0("[", setFormatToNumber(round(summaryFitData$`2.5 %`, round)), " ; " ,
-                                                  setFormatToNumber(round(summaryFitData$`97.5 %`, round)), "]"),
+                                 OR = setFormatToNumber(summaryFitData$Estimate, round = round),
+                                 IC95_OR = paste0("[", setFormatToNumber(summaryFitData$`2.5 %`, round = round), " ; " ,
+                                                  setFormatToNumber(summaryFitData$`97.5 %`, round = round), "]"),
                                  p_value =  setFormatToPvalue(pvalue = 1 - pchisq(fit$null.deviance - fit$deviance,
                                                                             length(fit$coef) - 1),
                                                        round = round),
@@ -328,7 +328,7 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
   data <- data[, c(dependentVariable, independentVariable)]
   data <- data[complete.cases(data), ]
 
-  ## case where independentVariable if factor variable
+  ## case where independentVariable is factor variable
   if(is.factor(data[, independentVariable])){
     ## need two or more levels for regression
     if(length(unique(data[, independentVariable])) > 1){
@@ -380,7 +380,7 @@ setUnivariableLinearRegression <- function(data, dependentVariable, independentV
     }
   }
 
-  ## case where independentVariable if numeric variable
+  ## case where independentVariable is numeric variable
   else if(is.numeric(data[, independentVariable])){
     ## set linear model and catch warning as Convergence issue
     fitUnivariable <- tryCatch({

@@ -32,17 +32,18 @@ setUnivariableRegression <- function(data, dependentVariable, independentVariabl
 
   ## LOGISTIC REGRESSION
   if(is.factor(data[, dependentVariable])){
-    resultFit <- setUnivariableLogisticRegression(data = data,
-                                     dependentVariable = dependentVariable,
-                                     independentVariable = independentVariable,
-                                     round = round)
+    resultFit <- setUnivariableLogisticRegression(
+      data = data,
+      dependentVariable = dependentVariable,
+      independentVariable = independentVariable,
+      round = round)
   }
   ## LINEAR REGRESSION
   else if(is.numeric(data[, dependentVariable])){
     resultFit <- setUnivariableLinearRegression(data = data,
-                                   dependentVariable = dependentVariable,
-                                   independentVariable = independentVariable,
-                                   round = round)
+                                                dependentVariable = dependentVariable,
+                                                independentVariable = independentVariable,
+                                                round = round)
 
   }
 
