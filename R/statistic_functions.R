@@ -99,7 +99,7 @@ describeMetadata <- function(data){
     # compute N_AVAILABLE, N_MISSING DATA and DATA_TYPE
     N_AVAILABLE <- sum(!is.na(data[, x]))
     N_MISSING <- sum(is.na(data[, x]))
-    DATA_TYPE <- class(data[, x])
+    DATA_TYPE <- paste0(class(data[, x]), collapse = '/')
     LEVELS_NB <- length(levels(data[, x]))
     if(LEVELS_NB <= 20){
       LEVELS_CHAR <- paste0(levels(data[, x]), collapse = ", ")
